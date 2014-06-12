@@ -96,7 +96,40 @@
                           :on-edit #(on-edit id %)}})))
             (:classes app)))))))
 
-(om/root classes-view app-state
-  {:target (gdom/getElement "classes")})
+;; (om/root classes-view app-state
+;;   {:target (gdom/getElement "classes")})
 
 ;; open http://localhost:8080
+
+(enable-console-print!)
+
+(def app-state (atom {
+                        :col1 {:col-name ["Animals"] :col-vals ["Lion" "Zebra" "Buffalo" "Antelope"]}
+                        :col2 {:col-name ["Names"] :col-vals ["Jim" "Jack" "Fred" "Marie"]}
+                        :col3 {:col-name ["Tech"] :col-vals ["Clojure" "Java" "Python" "Perl"]}
+                      }))
+
+(defn tr [dom-cell-elem rows css-class]
+  (apply dom/tr #js {:className css-class}
+         (map #(dom-cell-elem nil %) rows)))
+
+(defn rows [key-name app cols]
+  (apply map vector
+         (map #(key-name(% app)) cols)))
+
+(defn table-elem [app cols kw-row-vals dom-table-elem dom-cell-elem alt-row-css-class]
+                 (apply dom-table-elem nil
+                        (map #(tr dom-cell-elem %1 %2)
+                             (rows kw-row-vals app cols)
+                             (cycle ["" alt-row-css-class]))))
+
+(defn component-constructor []
+  (fn [app owner]
+    (let [cols [:col1 :col2 :col3]]
+      (dom/table nil
+                 (table-elem app cols :col-name dom/thead dom/th "")
+                 (table-elem app cols :col-vals dom/tbody dom/td "odd")))))
+
+(om/root (component-constructor)
+         app-state
+         {:target (. js/document (getElementById "app"))})
