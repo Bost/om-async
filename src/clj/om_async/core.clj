@@ -39,48 +39,18 @@
 ;;     (d/transact conn [[:db/add eid :class/title title]])
 ;;     (generate-response {:status :ok})))
 
-
 (defn classes []
   (let [
         ;; db (d/db conn)
         classes
-[{:class/title (str (x) " The Structure and Interpretation of Computer Programs")
-  :class/id "6001",
-  :class/professor {:db/id 17592186045426},
-  :class/students
-    #{{:db/id 17592186045428}
-      {:db/id 17592186045429}
-      {:db/id 17592186045430}
-      {:db/id 17592186045432}},
-  :db/id 17592186045422}
-;;  {:class/title "Linear Algebra",
-;;   :class/id "1806",
-;;   :class/professor {:db/id 17592186045427},
-;;   :class/students
-;;     #{{:db/id 17592186045428}
-;;       {:db/id 17592186045429}
-;;       {:db/id 17592186045431}},
-;;   :db/id 17592186045424}
-;;  {:class/title "The Structure and Interpretation of Classical Mechanics",
-;;   :class/id "6946",
-;;   :class/professor {:db/id 17592186045425},
-;;   :class/students
-;;   #{{:db/id 17592186045428}
-;;     {:db/id 17592186045430}
-;;     {:db/id 17592186045431}
-;;     {:db/id 17592186045433}},
-;;   :db/id 17592186045423}
+[
+ {
+  :col1 {:col-name ["#Animals"] :col-vals ["Lion" "Zebra" "Buffalo" "Antelope"]}
+  :col2 {:col-name ["Names"] :col-vals ["Jim" "Jack" "Fred" "Marie"]}
+  :col3 {:col-name ["Tech"] :col-vals ["Clojure" "Java" "Python" "Perl"]}
+  }
  ]
-
-;;         (vec (map #(d/touch (d/entity db (first %)))
-;;                (d/q '[:find ?class
-;;                       :where
-;;                       [?class :class/id]]
-;;                  db)))
-
         ]
-;;     (println "classes" classes)
-;;     (pr-str "pr-str classes" classes)
     (generate-response classes)))
 
 (defroutes routes

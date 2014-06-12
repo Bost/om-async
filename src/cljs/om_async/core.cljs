@@ -12,13 +12,31 @@
 
 ;; (println "Hello world! Jim")
 
+(defn tr [dom-cell-elem rows css-class]
+  (apply dom/tr #js {:className css-class}
+         (map #(dom-cell-elem nil %) rows)))
+
+(defn rows [key-name app cols]
+  (apply map vector
+         (map #(key-name(% app)) cols)))
+
+(defn table-elem
+  [app cols kw-row-vals dom-table-elem dom-cell-elem alt-row-css-class]
+  (apply dom-table-elem nil
+         (map #(tr dom-cell-elem %1 %2)
+              (rows kw-row-vals app cols)
+              (cycle ["" alt-row-css-class]))))
+
 (def ^:private meths
   {:get "GET"
    :put "PUT"
    :post "POST"
    :delete "DELETE"})
 
-(defn edn-xhr [{:keys [method url data on-complete]}]
+(defn edn-xhr
+  "XMLHttpRequest: send HTTP/HTTPS requests to a web server and load the
+  server response data back into the script"
+  [{:keys [method url data on-complete]}]
   (let [xhr (XhrIo.)]
     (events/listen xhr goog.net.EventType.COMPLETE
       (fn [e]
@@ -75,61 +93,26 @@
      (fn [res]
        (println "server response:" res))}))
 
+(defn component-constructor [app]
+  (if (= 0 (count (:classes app)))
+    (dom/div nil "Fetching data from db ...")
+    (let [app-data (nth (:classes app) 0)]
+      (let [cols [:col1 :col2 :col3]]
+        (dom/table nil
+                   (table-elem app-data cols :col-name dom/thead dom/th "")
+                   (table-elem app-data cols :col-vals dom/tbody dom/td "odd"))))))
+
 (defn classes-view [app owner]
   (reify
     om/IWillMount
-    (will-mount [_]
-      (edn-xhr
-        {:method :get
-         :url "classes"
-         :on-complete #(om/transact! app :classes (fn [_] %))}))
+    (will-mount [_] (edn-xhr
+                     {:method :get
+                      :url "classes"
+                      :on-complete #(om/transact! app :classes (fn [_] %))}))
     om/IRender
-    (render [_]
-      (dom/div #js {:id "classes"}
-        (dom/h2 nil "Classes")
-        (apply dom/ul nil
-          (map
-            (fn [class]
-              (let [id (:class/id class)]
-                (om/build editable class
-                  {:opts {:edit-key :class/title
-                          :on-edit #(on-edit id %)}})))
-            (:classes app)))))))
+    (render [_] (component-constructor app))))
 
-;; (om/root classes-view app-state
-;;   {:target (gdom/getElement "classes")})
+(om/root classes-view app-state
+  {:target (gdom/getElement "classes")})
 
 ;; open http://localhost:8080
-
-(enable-console-print!)
-
-(def app-state (atom {
-                        :col1 {:col-name ["Animals"] :col-vals ["Lion" "Zebra" "Buffalo" "Antelope"]}
-                        :col2 {:col-name ["Names"] :col-vals ["Jim" "Jack" "Fred" "Marie"]}
-                        :col3 {:col-name ["Tech"] :col-vals ["Clojure" "Java" "Python" "Perl"]}
-                      }))
-
-(defn tr [dom-cell-elem rows css-class]
-  (apply dom/tr #js {:className css-class}
-         (map #(dom-cell-elem nil %) rows)))
-
-(defn rows [key-name app cols]
-  (apply map vector
-         (map #(key-name(% app)) cols)))
-
-(defn table-elem [app cols kw-row-vals dom-table-elem dom-cell-elem alt-row-css-class]
-                 (apply dom-table-elem nil
-                        (map #(tr dom-cell-elem %1 %2)
-                             (rows kw-row-vals app cols)
-                             (cycle ["" alt-row-css-class]))))
-
-(defn component-constructor []
-  (fn [app owner]
-    (let [cols [:col1 :col2 :col3]]
-      (dom/table nil
-                 (table-elem app cols :col-name dom/thead dom/th "")
-                 (table-elem app cols :col-vals dom/tbody dom/td "odd")))))
-
-(om/root (component-constructor)
-         app-state
-         {:target (. js/document (getElementById "app"))})
