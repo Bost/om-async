@@ -97,7 +97,7 @@
   (if (= 0 (count (:classes app)))
     (dom/div nil "Fetching data from db ...")
     (let [app-data (nth (:classes app) 0)]
-      (let [cols [:col1 :col2 :col3]]
+      (let [cols [:col1 :col2 :col3 :col4 :col5]]
         (dom/table nil
                    (table-elem app-data cols :col-name dom/thead dom/th "")
                    (table-elem app-data cols :col-vals dom/tbody dom/td "odd"))))))

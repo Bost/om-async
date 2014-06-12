@@ -40,18 +40,8 @@
 ;;     (generate-response {:status :ok})))
 
 (defn classes []
-  (let [
-        ;; db (d/db conn)
-        classes
-[
- {
-  :col1 {:col-name ["#Animals"] :col-vals ["Lion" "Zebra" "Buffalo" "Antelope"]}
-  :col2 {:col-name ["Names"] :col-vals ["Jim" "Jack" "Fred" "Marie"]}
-  :col3 {:col-name ["Tech"] :col-vals ["Clojure" "Java" "Python" "Perl"]}
-  }
- ]
-        ]
-    (generate-response classes)))
+  (let [data (db/data)]
+    (generate-response data)))
 
 (defroutes routes
   (GET "/" [] (index))
