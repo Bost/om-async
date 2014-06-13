@@ -102,15 +102,17 @@
      (fn [res]
        (println "server response:" res))}))
 
-(defn component-constructor [app]
-  (if (= 0 (count (:classes app)))
-    (dom/div nil "Fetching data from db ...")
-    (let [app-data (nth (:classes app) 0)]
-      (let [cols [0 1 2 3;:col2 :col3 :col4 :col5
-                  ]]
-        (dom/table nil
-                   (table-elem app-data cols :col-name dom/thead dom/th "")
-                   (table-elem app-data cols :col-vals dom/tbody dom/td "odd"))))))
+(defn table [data cols]
+  (dom/table nil
+             (table-elem data cols :col-name dom/thead dom/th "")
+             (table-elem data cols :col-vals dom/tbody dom/td "odd")))
+
+(defn component-constructor [app cols]
+  ;; TODO get rid of 'if'
+  (apply dom/div nil
+         (if (= 0 (count (:classes app)))
+           "Fetching data db ..."
+           (map #(table % cols) (:classes app)))))
 
 (defn classes-view [app owner]
   (reify
@@ -120,7 +122,9 @@
                       :url "classes"
                       :on-complete #(om/transact! app :classes (fn [_] %))}))
     om/IRender
-    (render [_] (component-constructor app))))
+    (render [_] (component-constructor app
+                                       [0 1 ] ;:col2 :col3 :col4 :col5
+                                       ))))
 
 (om/root classes-view app-state
   {:target (gdom/getElement "classes")})
