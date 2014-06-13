@@ -1,4 +1,4 @@
-(ns om-async.core
+(ns om-async.client
   (:require [cljs.reader :as reader]
             [goog.events :as events]
             [goog.dom :as gdom]
@@ -123,7 +123,7 @@
                       :on-complete #(om/transact! app :classes (fn [_] %))}))
     om/IRender
     (render [_] (component-constructor app
-                                       [0 1 ] ;:col2 :col3 :col4 :col5
+                                       [0] ;:col2 :col3 :col4 :col5
                                        ))))
 
 (om/root classes-view app-state

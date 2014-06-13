@@ -1,4 +1,4 @@
-(ns om-async.core
+(ns om-async.server
   (:require [ring.util.response :refer [file-response]]
             [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.edn :refer [wrap-edn-params]]
