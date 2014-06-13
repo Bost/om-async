@@ -1,4 +1,4 @@
-(ns
+(ns om-async.db
   (:require [clojure.java.jdbc :as sql]))
 
 (def db {:classname "com.mysql.jdbc.Driver"
