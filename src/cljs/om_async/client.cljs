@@ -126,8 +126,9 @@
                      {:method :put
                       ;; :url "classes"
                       :url "fetch"
-                      :data {:select-rows-from ["employees" "departments"]}
+;;                       :data {:select-rows-from ["employees" "departments"]}
 ;;                       :data {:show-tables-from ["employees"]}
+                      :data {:show-tables-with-data-from ["employees"]}
                       :on-complete #(om/transact! app :classes (fn [_] %))}))
     om/IRender
     (render [_] (component-constructor app

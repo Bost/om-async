@@ -52,23 +52,34 @@
 
 (defn select-rows-from [table]
   (sql/query db
-             [(str "select * from " table " limit 2")]))
+             [(str "select * from " table " limit 1")]))
 
 (def t ["employees" "departments"])
 
 (defn show-tables-from [db-name]
+  (println "Fetching data...")
   (sql/query db
              [(str "SHOW TABLES FROM " db-name)]))
-
-;; (result (eval (read-string "(om-async.db/select-rows-from \"employees\")")))
+(def show-tables-from-memo (memoize show-tables-from))
 
 (def fetch-fns
-  {:show-tables-from show-tables-from
-   :select-rows-from select-rows-from})
+  {:show-tables-from show-tables-from-memo
+   :select-rows-from select-rows-from
+   :show-tables-with-data-from show-tables-with-data-from
+   })
+
+(defn fetch-data [fetch-fn params]
+  (into []
+        (map #(result (fetch-fn %)) params)))
+
+(defn show-tables-with-data-from [db-name]
+  (let [list-tables (map first (table-vals (show-tables-from-memo db-name)))
+        tables (into [] list-tables)
+        tables t]
+    (fetch-data show-tables-from tables)))
 
 (defn fetch [edn-params]
   (let [kw-fetch-fn (nth (keys edn-params) 0)
         fetch-fn (kw-fetch-fn fetch-fns)
         params (kw-fetch-fn edn-params)]
-    (into []
-          (map #(result (fetch-fn %)) params)) ))
+    (fetch-data fetch-fn params)))
