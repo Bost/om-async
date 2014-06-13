@@ -103,6 +103,8 @@
      (fn [res]
        (println "server response:" res))}))
 
+;; (on-edit "my-id" "my-title")
+
 (defn table [data cols]
   (dom/table nil
              (table-elem data cols :col-name dom/thead dom/th "")
@@ -121,8 +123,11 @@
   (reify
     om/IWillMount
     (will-mount [_] (edn-xhr
-                     {:method :get
-                      :url "classes"
+                     {:method :put
+                      ;; :url "classes"
+                      :url "fetch"
+                      :data {:select-rows-from ["employees" "departments"]}
+;;                       :data {:show-tables-from ["employees"]}
                       :on-complete #(om/transact! app :classes (fn [_] %))}))
     om/IRender
     (render [_] (component-constructor app

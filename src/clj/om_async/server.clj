@@ -14,11 +14,12 @@
 
 (defn generate-response [data & [status]]
 ;;   (println "(pr-str data)" (pr-str data))
-  {:status (or status 200)
+  {:status (or status 200) ;; Status code: 200 'OK (The request was fulfilled)'
    :headers {"Content-Type" "application/edn"}
    :body (pr-str data)})
 
-;; (defn update-class [id params]
+(defn update-class [id params]
+  (println "server.clj: update-class: " id params)
 ;;   (let [db    (d/db conn)
 ;;         title (:class/title params)
 ;;         eid   (ffirst
@@ -28,19 +29,29 @@
 ;;                        [?class :class/id ?id]]
 ;;                   db id))]
 ;;     (d/transact conn [[:db/add eid :class/title title]])
-;;     (generate-response {:status :ok})))
+    (generate-response {:status :ok})
+  )
 
 (defn classes []
-  (let [data (db/data)]
+  (println "server.clj: this fn shouldn't be invoked!" )
+  (let [data (db/fetch nil)]
+    (generate-response data)))
+
+(defn fetch [edn-params]
+;;   (println "server.clj: " edn-params)
+  (let [data (db/fetch edn-params)]
     (generate-response data)))
 
 (defroutes routes
   (GET "/" [] (index))
   (GET "/classes" [] (classes))
+  (PUT "/fetch"
+       {params :params edn-params :edn-params}
+       (fetch edn-params))
+
   (PUT "/class/:id/update"
        {params :params edn-params :edn-params}
-;;        (update-class (:id params) edn-params)
-       )
+       (update-class (:id params) edn-params))
   (route/files "/" {:root "resources/public"}))
 
 (def app

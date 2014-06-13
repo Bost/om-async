@@ -1,4 +1,4 @@
-(ns om-async.db
+(ns
   (:require [clojure.java.jdbc :as sql]))
 
 (def db {:classname "com.mysql.jdbc.Driver"
@@ -50,18 +50,25 @@
                 all-cols
                 table-vals))))
 
-(defn select-from [table]
+(defn select-rows-from [table]
   (sql/query db
              [(str "select * from " table " limit 2")]))
 
 (def t ["employees" "departments"])
 
-(defn tables-from [db-name]
+(defn show-tables-from [db-name]
   (sql/query db
              [(str "SHOW TABLES FROM " db-name)]))
 
-(defn data []
-;;   (into [] (map #(result (select-from %)) t))
-    (into [] (map #(result (;;select-from
-                            tables-from
-                            %)) ["employees"])))
+;; (result (eval (read-string "(om-async.db/select-rows-from \"employees\")")))
+
+(def fetch-fns
+  {:show-tables-from show-tables-from
+   :select-rows-from select-rows-from})
+
+(defn fetch [edn-params]
+  (let [kw-fetch-fn (nth (keys edn-params) 0)
+        fetch-fn (kw-fetch-fn fetch-fns)
+        params (kw-fetch-fn edn-params)]
+    (into []
+          (map #(result (fetch-fn %)) params)) ))
