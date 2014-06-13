@@ -16,7 +16,8 @@
   (apply dom/tr #js {:className css-class}
          (map #(dom-cell-elem nil %) rows)))
 
-;; TODO only one defition of create-key
+;; TODO only one defition of create-key;
+;; or alternatively send info to server how to name keywords
 (defn create-key [i]
   (keyword (str "col" i)))
 
@@ -107,6 +108,8 @@
              (table-elem data cols :col-name dom/thead dom/th "")
              (table-elem data cols :col-vals dom/tbody dom/td "odd")))
 
+;; TODO do not crash when too many columns reqested;
+;; or intelligently display only available columns
 (defn component-constructor [app cols]
   ;; TODO get rid of 'if'
   (apply dom/div nil
