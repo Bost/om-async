@@ -6,12 +6,12 @@
 
   :jvm-opts ^:replace ["-Xmx1g" "-server"]
 
-  :dependencies [[org.clojure/clojure "1.5.1"]
-                 [org.clojure/clojurescript "0.0-2173"]
-                 [ring/ring "1.2.1"]
-                 [org.clojure/core.async "0.1.267.0-0d7780-alpha"]
-                 [om "0.5.3"]
-                 [compojure "1.1.6"]
+  :dependencies [[org.clojure/clojure "1.6.0"]
+                 [org.clojure/clojurescript "0.0-2227"]
+                 [ring/ring "1.3.0"]
+                 [org.clojure/core.async "0.1.303.0-886421-alpha"]
+                 [om "0.6.4"]
+                 [compojure "1.1.8"]
                  [fogus/ring-edn "0.2.0"]
                  ;; [com.datomic/datomic-free "0.9.4699"]
 
@@ -19,7 +19,7 @@
                  [mysql/mysql-connector-java "5.1.25"]
                  ]
 
-  :plugins [[lein-cljsbuild "1.0.2"]]
+  :plugins [[lein-cljsbuild "1.0.3"]]
 
   :source-paths ["src/clj" "src/cljs"]
   :resource-paths ["resources"]
