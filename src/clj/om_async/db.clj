@@ -7,18 +7,11 @@
          :user "root"
          :password "bost"})
 
-
-(def t ["employees" "departments"])
-
 (defn create-key [i]
   (keyword (str "col" i)))
 
 (defn create-item [v i]
   {(create-key i)v})
-
-(defn select-from [table]
-  (sql/query db
-             [(str "select * from " table " limit 4")]))
 
 (defn table-cols [raw-data]
   (let [vx (into [] raw-data)
@@ -57,21 +50,18 @@
                 all-cols
                 table-vals))))
 
+(defn select-from [table]
+  (sql/query db
+             [(str "select * from " table " limit 2")]))
+
+(def t ["employees" "departments"])
+
+(defn tables-from [db-name]
+  (sql/query db
+             [(str "SHOW TABLES FROM " db-name)]))
+
 (defn data []
-  (let [r
-    [
-     (result (select-from (nth t 0)))
-     (result (select-from (nth t 1)))
-     ]]
-;;     (println r)
-    r))
-
-;; [{:col5 {:col-name [emp_no], :col-vals [10001 10002 10003 10004]},
-;;   :col4 {:col-name [birth_date], :col-vals [1953-09-02 1964-06-02 1959-12-03 1954-05-01]},
-;;   :col3 {:col-name [first_name], :col-vals [Georgi Bezalel Parto Chirstian]},
-;;   :col2 {:col-name [last_name], :col-vals [Facello Simmel Bamford Koblick]},
-;;   :col1 {:col-name [gender], :col-vals [M F M M]},
-;;   :col0 {:col-name [hire_date], :col-vals [1986-06-26 1985-11-21 1986-08-28 1986-12-01]}}
-
-;;  {:col1 {:col-name [dept_no], :col-vals [d009 d005 d002 d003]},
-;;   :col0 {:col-name [dept_name], :col-vals [Customer Service Development Finance Human Resources]}}]
+;;   (into [] (map #(result (select-from %)) t))
+    (into [] (map #(result (;;select-from
+                            tables-from
+                            %)) ["employees"])))
