@@ -9,18 +9,9 @@
             [om-async.db :as db]
             ))
 
-(defn x []
-  (:gender (nth
-            (into [] (db/print-users))
-            1)))
-
-;;(x)
-
-;; (def uri "datomic:free://localhost:4334/om_async")
-;; (def conn (d/connect uri))
-
 (defn index []
   (file-response "public/html/index.html" {:root "resources"}))
+
 (defn generate-response [data & [status]]
 ;;   (println "(pr-str data)" (pr-str data))
   {:status (or status 200)
@@ -47,8 +38,9 @@
   (GET "/" [] (index))
   (GET "/classes" [] (classes))
   (PUT "/class/:id/update"
-    {params :params edn-params :edn-params}
-    (update-class (:id params) edn-params))
+       {params :params edn-params :edn-params}
+;;        (update-class (:id params) edn-params)
+       )
   (route/files "/" {:root "resources/public"}))
 
 (def app

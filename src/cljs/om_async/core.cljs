@@ -16,9 +16,17 @@
   (apply dom/tr #js {:className css-class}
          (map #(dom-cell-elem nil %) rows)))
 
+;; TODO only one defition of create-key
+(defn create-key [i]
+  (keyword (str "col" i)))
+
+(defn create-key-vector [indexes]
+  (into [] (map #(create-key %) indexes)))
+
 (defn rows [key-name app cols]
   (apply map vector
-         (map #(key-name(% app)) cols)))
+         (map #(key-name (% app))
+              (create-key-vector cols))))
 
 (defn table-elem
   [app cols kw-row-vals dom-table-elem dom-cell-elem alt-row-css-class]
@@ -49,6 +57,7 @@
   (atom {:classes []}))
 
 (defn display [show]
+  ;; TODO get rid of 'if'
   (if show
     #js {}
     #js {:display "none"}))
@@ -97,7 +106,8 @@
   (if (= 0 (count (:classes app)))
     (dom/div nil "Fetching data from db ...")
     (let [app-data (nth (:classes app) 0)]
-      (let [cols [:col1 :col2 :col3 :col4 :col5]]
+      (let [cols [0 1 2 3;:col2 :col3 :col4 :col5
+                  ]]
         (dom/table nil
                    (table-elem app-data cols :col-name dom/thead dom/th "")
                    (table-elem app-data cols :col-vals dom/tbody dom/td "odd"))))))
