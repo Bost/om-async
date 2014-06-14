@@ -10,5 +10,9 @@ pom.xml
 .nrepl-port
 resources/public/js
 
+# utils.clj and utils.cljs are generated from utils.cljx
+utils.clj
+utils.cljs
+
 # editor backup files
 *~

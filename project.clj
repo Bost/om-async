@@ -19,10 +19,22 @@
                  [mysql/mysql-connector-java "5.1.25"]
                  ]
 
-  :plugins [[lein-cljsbuild "1.0.3"]]
+  :plugins [[lein-cljsbuild "1.0.3"]
+            [com.keminglabs/cljx "0.4.0"]
+            ]
 
   :source-paths ["src/clj" "src/cljs"]
   :resource-paths ["resources"]
+
+  :cljx {:builds [{:source-paths ["src/cljx"]
+                   ;; :output-path "target/classes"
+                   :output-path "src/clj"
+                   :rules :clj}
+
+                  {:source-paths ["src/cljx"]
+                   ;; :output-path "target/classes"
+                   :output-path "src/cljs"
+                   :rules :cljs}]}
 
   :cljsbuild {
     :builds [{:id "dev"

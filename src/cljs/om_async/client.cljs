@@ -3,7 +3,9 @@
             [goog.events :as events]
             [goog.dom :as gdom]
             [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true])
+            [om.dom :as dom :include-macros true]
+            [om-async.utils :as utils]
+            )
   (:import [goog.net XhrIo]
            goog.net.EventType
            [goog.events EventType]))
@@ -16,13 +18,8 @@
   (apply dom/tr #js {:className css-class}
          (map #(dom-cell-elem nil %) rows)))
 
-;; TODO only one defition of create-key;
-;; or alternatively send info to server how to name keywords
-(defn create-key [i]
-  (keyword (str "col" i)))
-
 (defn create-key-vector [indexes]
-  (into [] (map #(create-key %) indexes)))
+  (into [] (map #(utils/column-keyword %) indexes)))
 
 (defn rows [key-name app cols]
   (apply map vector

@@ -1,5 +1,7 @@
 (ns om-async.db
-  (:require [clojure.java.jdbc :as sql]))
+  (:require [clojure.java.jdbc :as sql]
+            [om-async.utils :as utils]
+            ))
 
 (def db {:classname "com.mysql.jdbc.Driver"
          :subprotocol "mysql"
@@ -8,11 +10,8 @@
          :password "bost"})
 
 ;; TODO put data to a hash-map {:table0 data0 :table1 data1 ...}
-(defn create-key [i]
-  (keyword (str "col" i)))
-
 (defn create-item [v i]
-  {(create-key i)v})
+  {(utils/column-keyword i) v})
 
 (defn table-cols [raw-data]
   (let [vx (into [] raw-data)
@@ -46,7 +45,7 @@
                indexes (range 0 (count all-cols))
                table-vals (map #(nth-from all-vals %) indexes)]
            (map (fn [i c v]
-                  {(create-key i) {:col-name c :col-vals v}})
+                  {(utils/column-keyword i) {:col-name c :col-vals v}})
                 indexes
                 all-cols
                 table-vals))))
