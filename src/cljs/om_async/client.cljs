@@ -127,6 +127,7 @@
                       ;; :url "classes"
                       :url "fetch"
 ;;                       :data {:select-rows-from ["employees" "departments"]}
+;;                       :data {:select-rows-from ["departments"]}
 ;;                       :data {:show-tables-from ["employees"]}
                       :data {:show-tables-with-data-from ["employees"]}
                       :on-complete #(om/transact! app :classes (fn [_] %))}))
@@ -138,4 +139,4 @@
 (om/root classes-view app-state
   {:target (gdom/getElement "classes")})
 
-;; open http://localhost:8080
+;; open http://localhost:8080/
