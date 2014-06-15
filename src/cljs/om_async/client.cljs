@@ -98,23 +98,44 @@
      :data {:class/title title}
      :on-complete
      (fn [res]
-       (println "server response:" res))}))
+       (println (str "client.cljs: server response: " res)))}))
 
 ;; (on-edit "my-id" "my-title")
 
 (defn table [data cols]
+  (println (str "client.cjs: table: " (pr-str data)))
   (dom/table nil
              (table-elem data cols :col-name dom/thead dom/th "")
              (table-elem data cols :col-vals dom/tbody dom/td "odd")))
+
+;; "dbase-data: data from/for multiple tables; table-index: table index to display"
+(defn table-data [dbase-data table-index]
+  (println (str "client.cljs: table-data: dbase-data: " (pr-str dbase-data)))
+  (let [table-kw (utils/table-keyword table-index)
+        ret-val (table-kw dbase-data)]
+    (println (str "client.cljs: table-data: table-kw: " table-kw))
+    (println (str "client.cljs: table-data: ret-val: " (pr-str ret-val)))
+    ret-val))
+
+;; (println (pr-str [1 2 3 4]))
 
 ;; TODO do not crash when too many columns reqested;
 ;; or intelligently display only available columns
 (defn component-constructor [app cols]
   ;; TODO get rid of 'if'
   (apply dom/div nil
-         (if (= 0 (count (:classes app)))
-           "Fetching data db ..."
-           (map #(table % cols) (:classes app)))))
+         (let [content (identity
+                        ;;first ;; dealing with multiple dbases
+                        (:classes app))]
+           (println (str "client.cljs: component-constructor: content: " (pr-str content)))
+           (if (= 0 (count content))
+             "Fetching data db ..."
+             (let [table-data-idx
+                   ;;(table-data content 0)
+                   content
+                   all-cols (into [] (range (count table-data-idx)))]
+               (println (str "client.cljs: all-cols: " all-cols))
+               (map #(table % cols) table-data-idx))))))
 
 (defn classes-view [app owner]
   (reify
@@ -124,9 +145,9 @@
                       ;; :url "classes"
                       :url "fetch"
 ;;                       :data {:select-rows-from ["employees" "departments"]}
-;;                       :data {:select-rows-from ["departments"]}
+                      :data {:select-rows-from ["departments"]}
 ;;                       :data {:show-tables-from ["employees"]}
-                      :data {:show-tables-with-data-from ["employees"]}
+;;                       :data {:show-tables-with-data-from ["employees"]}
                       :on-complete #(om/transact! app :classes (fn [_] %))}))
     om/IRender
     (render [_] (component-constructor app

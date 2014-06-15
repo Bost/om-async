@@ -9,7 +9,6 @@
          :user "root"
          :password "bost"})
 
-;; TODO put data to a hash-map {:table0 data0 :table1 data1 ...}
 (defn create-item [v i]
   {(utils/column-keyword i) v})
 
@@ -38,17 +37,22 @@
 (defn nth-from [all-vals i]
   (into [] (map #(nth % i) all-vals)))
 
+(defn format-columns [index column column-vals]
+  {(utils/column-keyword index)
+   {:col-name column :col-vals column-vals}})
+
 (defn result [raw-data]
-  (apply merge
-         (let [all-vals (table-vals raw-data)
-               all-cols (table-cols raw-data)
-               indexes (range 0 (count all-cols))
-               table-vals (map #(nth-from all-vals %) indexes)]
-           (map (fn [i c v]
-                  {(utils/column-keyword i) {:col-name c :col-vals v}})
-                indexes
-                all-cols
-                table-vals))))
+  (let [table-kw (utils/table-keyword 0)]
+    {table-kw
+     (apply merge
+            (let [all-vals (table-vals raw-data)
+                  all-cols (table-cols raw-data)
+                  indexes (range 0 (count all-cols))
+                  table-vals (map #(nth-from all-vals %) indexes)]
+              (map #(format-columns %1 %2 %3)
+                   indexes
+                   all-cols
+                   table-vals)))}))
 
 (def e "employees")
 (def d "departments")
@@ -56,45 +60,39 @@
 
 ;;;;;;;;;;;
 (defn select-rows-from [table]
-  (sql/query db
-             [(str "select * from " table " limit 1")]))
+  (let [sql-cmd (str "select * from " table " limit 1")]
+    (println (str "db.clj; select-rows-from: " sql-cmd))
+    (sql/query db [sql-cmd])))
 
 (defn select-rows-from-processor [table]
-  ;; (println (str "select-rows-from-processor: (result (select-rows-from \"" table "\"))"))
+  ;; (println (str "db.clj; select-rows-from-processor: (result (select-rows-from \"" table "\"))"))
   (result (select-rows-from table)))
 
-
-(map select-rows-from-processor t)
-
-(
- {:col1 {:col-name ["gender"], :col-vals ["M"]},
-  :col0 {:col-name ["hire_date"], :col-vals ["1986-06-26"]}}
-
- {:col1 {:col-name ["dept_no"], :col-vals ["d009"]},
-  :col0 {:col-name ["dept_name"], :col-vals ["Customer Service"]}}
- )
+(select-rows-from-processor d)
 ;;;;;;;;;;;
 
 
 ;;;;;;;;;;;
 (defn show-tables-from [db-name]
-  (println (str "Fetching data from dbase: " db-name))
-  (sql/query db
-             [(str "SHOW TABLES FROM " db-name)]))
+  (println (str "db.clj; show-tables-from: Fetching data from dbase: " db-name))
+  (let [sql-cmd (str "SHOW TABLES FROM " db-name)]
+    (println (str "db.clj; show-tables-from: " sql-cmd))
+    (sql/query db [sql-cmd])))
+
 (def show-tables-from-memo (memoize show-tables-from))
 
 (defn show-tables-from-processor [db-name]
-  ;; (println (str "show-tables-from-processor: (" (name 'show-tables-from-memo) " \"" db-name"\")"))
+  ;; (println (str "db.clj; show-tables-from-processor: (" (name 'show-tables-from-memo) " \"" db-name"\")"))
   (result
    (show-tables-from-memo db-name)))
 ;;;;;;;;;;;
 
 ;;;;;;;;;;;
 (defn show-tables-with-data-from-processor [db-name]
-  ;; (println (str "show-tables-with-data-from-processor: (" (name 'show-tables-from-memo) " " db-name")"))
+  ;; (println (str "db.clj; show-tables-with-data-from-processor: (" (name 'show-tables-from-memo) " " db-name")"))
   (let [list-tables (map first (table-vals (show-tables-from-memo db-name)))
         tables (into [] list-tables)]
-    ;; (println (str "(map " (name 'select-rows-from-processor) " " tables ")"))
+    ;; (println (str "db.clj; (map " (name 'select-rows-from-processor) " " tables ")"))
     (map select-rows-from-processor tables)))
 ;;;;;;;;;;;
 
@@ -115,6 +113,13 @@
         fetch-fn (kw-fetch-fn fetch-fns)
         manipulator-fn (kw-fetch-fn manipulator-fns)
         params (kw-fetch-fn edn-params)]
-        ;; (println (str "fetch: (dispatch " fetch-fn " " params ")"))
-        ;; (println (str "fetch: kw-fetch-fn: " kw-fetch-fn))
-    (manipulator-fn (map #(fetch-fn %) params))))
+    ;; (println (str "db.clj; fetch: (dispatch " fetch-fn " " params ")"))
+    ;; (println (str "db.clj; fetch: kw-fetch-fn: " kw-fetch-fn))
+    ;;     (manipulator-fn (map #(fetch-fn %) params))
+    [
+;;      {:table0
+      {:col1 {:col-name ["dept_no"], :col-vals ["d009"]},
+       :col0 {:col-name ["dept_name"], :col-vals ["Customer Service"]}}
+;;       }
+     ]
+    ))
