@@ -1,6 +1,7 @@
 (ns om-async.db
   (:require [clojure.java.jdbc :as sql]
             [om-async.utils :as utils]
+            ;; [taoensso.timbre :as logger]
             ))
 
 (def db {:classname "com.mysql.jdbc.Driver"
@@ -60,12 +61,14 @@
 
 ;;;;;;;;;;;
 (defn select-rows-from [table]
-  (let [sql-cmd (str "select * from " table " limit 1")]
+  (let [sql-cmd (str "select * from " table " limit 2")]
     (println (str "db.clj; select-rows-from: " sql-cmd))
-    (sql/query db [sql-cmd])))
+    (let [r (sql/query db [sql-cmd])]
+      ;; (println (str "db.clj; r: " r))
+      r)))
 
 (defn select-rows-from-processor [table]
-  ;; (println (str "db.clj; select-rows-from-processor: (result (select-rows-from \"" table "\"))"))
+  ;; (println (str "select-rows-from-processor: (result (select-rows-from \"" table "\"))"))
   (result (select-rows-from table)))
 
 (select-rows-from-processor d)
@@ -74,22 +77,24 @@
 
 ;;;;;;;;;;;
 (defn show-tables-from [db-name]
-  (println (str "db.clj; show-tables-from: Fetching data from dbase: " db-name))
+  ;; (println (str "show-tables-from: Fetching data from dbase: " db-name))
   (let [sql-cmd (str "SHOW TABLES FROM " db-name)]
     (println (str "db.clj; show-tables-from: " sql-cmd))
-    (sql/query db [sql-cmd])))
+    (let [r (sql/query db [sql-cmd])]
+      ;; (println (str "db.clj; r: " r))
+      r)))
 
 (def show-tables-from-memo (memoize show-tables-from))
 
 (defn show-tables-from-processor [db-name]
-  ;; (println (str "db.clj; show-tables-from-processor: (" (name 'show-tables-from-memo) " \"" db-name"\")"))
+  ;; (println (str "show-tables-from-processor: (" (name 'show-tables-from-memo) " \"" db-name"\")"))
   (result
    (show-tables-from-memo db-name)))
 ;;;;;;;;;;;
 
 ;;;;;;;;;;;
 (defn show-tables-with-data-from-processor [db-name]
-  ;; (println (str "db.clj; show-tables-with-data-from-processor: (" (name 'show-tables-from-memo) " " db-name")"))
+  ;; (println (str "show-tables-with-data-from-processor: (" (name 'show-tables-from-memo) " " db-name")"))
   (let [list-tables (map first (table-vals (show-tables-from-memo db-name)))
         tables (into [] list-tables)]
     ;; (println (str "db.clj; (map " (name 'select-rows-from-processor) " " tables ")"))
@@ -113,13 +118,8 @@
         fetch-fn (kw-fetch-fn fetch-fns)
         manipulator-fn (kw-fetch-fn manipulator-fns)
         params (kw-fetch-fn edn-params)]
-    ;; (println (str "db.clj; fetch: (dispatch " fetch-fn " " params ")"))
-    ;; (println (str "db.clj; fetch: kw-fetch-fn: " kw-fetch-fn))
-    ;;     (manipulator-fn (map #(fetch-fn %) params))
-    [
-;;      {:table0
-      {:col1 {:col-name ["dept_no"], :col-vals ["d009"]},
-       :col0 {:col-name ["dept_name"], :col-vals ["Customer Service"]}}
-;;       }
-     ]
-    ))
+    ;; (println (str "fetch: (dispatch " fetch-fn " " params ")"))
+    ;; (println (str "fetch: kw-fetch-fn: " kw-fetch-fn))
+        (let [data (manipulator-fn (map #(fetch-fn %) params))]
+          ;; (println "data: " data)
+          data)))

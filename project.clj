@@ -7,7 +7,7 @@
   :jvm-opts ^:replace ["-Xmx1g" "-server"]
 
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-2227"]
+                 [org.clojure/clojurescript "0.0-2234"]
                  [ring/ring "1.3.0"]
                  [org.clojure/core.async "0.1.303.0-886421-alpha"]
                  [om "0.6.4"]
@@ -17,6 +17,13 @@
 
                  [org.clojure/java.jdbc "0.3.3"]
                  [mysql/mysql-connector-java "5.1.25"]
+
+                 ;; logging
+                 [com.taoensso/timbre "3.2.1"]
+
+                 ;; [org.clojure/tools.logging "0.3.0"]
+                 ;; [org.slf4j/slf4j-log4j12 "1.7.7"]
+
                  ]
 
   :plugins [[lein-cljsbuild "1.0.3"]

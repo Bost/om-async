@@ -98,44 +98,45 @@
      :data {:class/title title}
      :on-complete
      (fn [res]
-       (println (str "client.cljs: server response: " res)))}))
+       (println (str "client.cljs; server response: " res)))}))
 
 ;; (on-edit "my-id" "my-title")
 
-(defn table [data cols]
-  (println (str "client.cjs: table: " (pr-str data)))
+(defn construct-table [data cols]
+  ;; (println (str "client.cjs; construct-table: " (pr-str data)))
   (dom/table nil
              (table-elem data cols :col-name dom/thead dom/th "")
              (table-elem data cols :col-vals dom/tbody dom/td "odd")))
 
-;; "dbase-data: data from/for multiple tables; table-index: table index to display"
-(defn table-data [dbase-data table-index]
-  (println (str "client.cljs: table-data: dbase-data: " (pr-str dbase-data)))
-  (let [table-kw (utils/table-keyword table-index)
-        ret-val (table-kw dbase-data)]
-    (println (str "client.cljs: table-data: table-kw: " table-kw))
-    (println (str "client.cljs: table-data: ret-val: " (pr-str ret-val)))
-    ret-val))
-
-;; (println (pr-str [1 2 3 4]))
+(defn get-data [kw parent-data]
+  ;; (println (str "client.cljs; get-data: parent-data: " (pr-str parent-data)))
+  (let [child-data (map kw parent-data)]
+    ;; (println (str "client.cljs; get-data: kw: " kw))
+    ;; (println (str "client.cljs; get-data: child-data: " (pr-str child-data)))
+    (into [] child-data)))
 
 ;; TODO do not crash when too many columns reqested;
 ;; or intelligently display only available columns
-(defn component-constructor [app cols]
+(defn construct-component [app]
   ;; TODO get rid of 'if'
+  ;; (println (str "client.cljs; construct-component: app: " (pr-str app)))
   (apply dom/div nil
-         (let [content (identity
-                        ;;first ;; dealing with multiple dbases
-                        (:classes app))]
-           (println (str "client.cljs: component-constructor: content: " (pr-str content)))
-           (if (= 0 (count content))
-             "Fetching data db ..."
-             (let [table-data-idx
-                   ;;(table-data content 0)
-                   content
-                   all-cols (into [] (range (count table-data-idx)))]
-               (println (str "client.cljs: all-cols: " all-cols))
-               (map #(table % cols) table-data-idx))))))
+         (let [db-data (:classes app)]
+           ;; (println (str "client.cljs; component-constructor: db-data: " (pr-str db-data)))
+           (if (= 0 (count db-data))
+             "Fetching data from the dbase... "
+             (let [tables (get-data (utils/table-keyword 0) db-data)
+                   tables-count (count tables)]
+               ;; (println (str "client.cljs; tables-count: " tables-count))
+               ;; (println (str "client.cljs; tables: " tables))
+               (let [count-columns (map count tables)]
+                 ;; (println (str "client.cljs; count-columns: " count-columns))
+                 (map #(construct-table
+                        %1
+                        ;; TODO filter this to hide some columns
+                        (into [] (range %2)))
+                      tables
+                      count-columns)))))))
 
 (defn classes-view [app owner]
   (reify
@@ -145,14 +146,12 @@
                       ;; :url "classes"
                       :url "fetch"
 ;;                       :data {:select-rows-from ["employees" "departments"]}
-                      :data {:select-rows-from ["departments"]}
+;;                       :data {:select-rows-from ["departments"]}
 ;;                       :data {:show-tables-from ["employees"]}
-;;                       :data {:show-tables-with-data-from ["employees"]}
+                      :data {:show-tables-with-data-from ["employees"]}
                       :on-complete #(om/transact! app :classes (fn [_] %))}))
     om/IRender
-    (render [_] (component-constructor app
-                                       [0] ;:col2 :col3 :col4 :col5
-                                       ))))
+    (render [_] (construct-component app))))
 
 (om/root classes-view app-state
   {:target (gdom/getElement "classes")})
