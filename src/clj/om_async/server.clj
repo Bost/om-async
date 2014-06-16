@@ -33,11 +33,6 @@
     (generate-response {:status :ok})
   )
 
-(defn classes []
-  (logger/info "classes: this fn shouldn't be invoked!" )
-  (let [data (db/fetch nil)]
-    (generate-response data)))
-
 (defn fetch [edn-params]
   ;; (logger/info "edn-params: " edn-params)
   (let [data (db/fetch edn-params)]
@@ -45,7 +40,6 @@
 
 (defroutes routes
   (GET "/" [] (index))
-  (GET "/classes" [] (classes))
   (PUT "/fetch"
        {params :params edn-params :edn-params}
        (fetch edn-params))

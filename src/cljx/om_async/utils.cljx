@@ -11,3 +11,6 @@
 (defn table-keyword [key-index]
   (create-keyword "table" key-index))
 
+(defn dbase-keyword [key-index]
+  (create-keyword "dbase" key-index))
+

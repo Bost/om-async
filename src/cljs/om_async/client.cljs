@@ -13,6 +13,7 @@
 (enable-console-print!)
 
 ;; (println "Hello world! Jim")
+(def kw-dbase0 (utils/dbase-keyword 0))
 
 (defn tr [dom-cell-elem rows css-class]
   (apply dom/tr #js {:className css-class}
@@ -52,7 +53,7 @@
         #js {"Content-Type" "application/edn"}))))
 
 (def app-state
-  (atom {:classes []}))
+  (atom {kw-dbase0 []}))
 
 (defn display [show]
   ;; TODO get rid of 'if'
@@ -121,7 +122,7 @@
   ;; TODO get rid of 'if'
   ;; (println (str "client.cljs; construct-component: app: " (pr-str app)))
   (apply dom/div nil
-         (let [db-data (:classes app)]
+         (let [db-data (kw-dbase0 app)]
            ;; (println (str "client.cljs; component-constructor: db-data: " (pr-str db-data)))
            (if (= 0 (count db-data))
              "Fetching data from the dbase... "
@@ -138,22 +139,21 @@
                       tables
                       count-columns)))))))
 
-(defn classes-view [app owner]
+(defn view [app owner]
   (reify
     om/IWillMount
     (will-mount [_] (edn-xhr
                      {:method :put
-                      ;; :url "classes"
                       :url "fetch"
 ;;                       :data {:select-rows-from ["employees" "departments"]}
 ;;                       :data {:select-rows-from ["departments"]}
 ;;                       :data {:show-tables-from ["employees"]}
                       :data {:show-tables-with-data-from ["employees"]}
-                      :on-complete #(om/transact! app :classes (fn [_] %))}))
+                      :on-complete #(om/transact! app kw-dbase0 (fn [_] %))}))
     om/IRender
     (render [_] (construct-component app))))
 
-(om/root classes-view app-state
-  {:target (gdom/getElement "classes")})
+(om/root view app-state
+  {:target (gdom/getElement "dbase0")})
 
 ;; open http://localhost:8080/
