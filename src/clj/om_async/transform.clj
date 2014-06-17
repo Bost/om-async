@@ -51,9 +51,32 @@
                    all-cols
                    table-vals)))}))
 
-(def fetch-fns {:select-rows-from           db/select-rows-from-processor
-                :show-tables-from           db/show-tables-from-processor
-                :show-tables-with-data-from db/show-tables-with-data-from-processor
+
+;; every process-* function must call a function from the db-namespace
+(defn process-sql [sql-fn obj]
+  ;; (println (str "process-sql: (result (sql-fn \"" table "\"))"))
+  (result (sql-fn obj)))
+
+(defn process-select-rows-from [table]
+  ;; (println (str "process-select-rows-from: (process-sql db/sql-select-rows-from \"" table "\"))")
+  (process-sql db/sql-select-rows-from table))
+
+(defn process-show-tables-from [db-name]
+  ;; (println (str "process-show-tables-from: (process-sql db/sql-show-tables-from \"" db-name"\")"))
+  (process-sql db/sql-show-tables-from db-name))
+
+(defn process-show-tables-with-data-from [db-name]
+  ;; (println (str "process-show-tables-with-data-from: (" (name 'show-tables-from) " " db-name")"))
+  (let [list-tables (map first (table-vals (db/show-tables-from db-name)))
+        tables (into [] list-tables)]
+    ;; (println (str "db.clj; (map " (name 'process-select-rows-from) " " tables ")"))
+    (map process-select-rows-from tables)))
+
+
+
+(def fetch-fns {:select-rows-from           process-select-rows-from
+                :show-tables-from           process-show-tables-from
+                :show-tables-with-data-from process-show-tables-with-data-from
                 })
 
 (def manipulator-fns {:select-rows-from            (fn [p] (into [] p)) ;; working with multiple tables
