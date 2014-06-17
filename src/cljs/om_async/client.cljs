@@ -12,7 +12,6 @@
 
 (enable-console-print!)
 
-;; (println "Hello world! Jim")
 (def kw-dbase0 (utils/dbase-keyword 0))
 
 (defn tr [dom-cell-elem rows css-class]
@@ -153,7 +152,6 @@
     om/IRender
     (render [_] (construct-component app))))
 
-(om/root view app-state
-  {:target (gdom/getElement "dbase0")})
+(om/root view app-state {:target (gdom/getElement "dbase0")})
 
-;; open http://localhost:8080/
+;; eval this file and open browser with http://localhost:8080/

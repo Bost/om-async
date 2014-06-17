@@ -6,9 +6,11 @@
             [compojure.route :as route]
             [compojure.handler :as handler]
             ;; [datomic.api :as d]
-            [om-async.db :as db]
-            [taoensso.timbre :as logger]
+            [om-async.transform :as trans]
+            ;; [taoensso.timbre :as logger]
             ))
+
+;; Functions for Ring here. TODO consider moving them to a ring.cljs
 
 (defn index []
   (file-response "public/html/index.html" {:root "resources"}))
@@ -30,19 +32,15 @@
 ;;                        [?class :class/id ?id]]
 ;;                   db id))]
 ;;     (d/transact conn [[:db/add eid :class/title title]])
-    (generate-response {:status :ok})
-  )
-
-(defn fetch [edn-params]
-  ;; (logger/info "edn-params: " edn-params)
-  (let [data (db/fetch edn-params)]
-    (generate-response data)))
+    (generate-response {:status :ok}))
 
 (defroutes routes
   (GET "/" [] (index))
   (PUT "/fetch"
        {params :params edn-params :edn-params}
-       (fetch edn-params))
+       ;; (logger/info "edn-params: " edn-params)
+       (let [data (trans/fetch edn-params)]
+         (generate-response data)))
 
   (PUT "/class/:id/update"
        {params :params edn-params :edn-params}
