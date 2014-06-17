@@ -54,8 +54,7 @@
 (def app-state
   (atom {kw-dbase0 []}))
 
-(defn display [show]
-  ;; TODO get rid of 'if'
+(defn display [show] ;; TODO get rid of 'if'
   (if show
     #js {}
     #js {:display "none"}))
@@ -115,8 +114,6 @@
     ;; (println (str "client.cljs; get-data: child-data: " (pr-str child-data)))
     (into [] child-data)))
 
-;; TODO do not crash when too many columns reqested;
-;; or intelligently display only available columns
 (defn construct-component [app]
   ;; TODO get rid of 'if'
   ;; (println (str "client.cljs; construct-component: app: " (pr-str app)))
