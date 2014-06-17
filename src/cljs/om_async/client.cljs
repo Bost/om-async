@@ -10,9 +10,11 @@
            goog.net.EventType
            [goog.events EventType]))
 
+(def src "client.cljs; ")
+
 (enable-console-print!)
 
-(def kw-dbase0 (utils/dbase-keyword 0))
+(def kw-dbase0 (utils/dbase-data-keyword 0))
 
 (defn tr [dom-cell-elem rows css-class]
   (apply dom/tr #js {:className css-class}
@@ -97,37 +99,37 @@
      :data {:class/title title}
      :on-complete
      (fn [res]
-       (println (str "client.cljs; server response: " res)))}))
+       (println (str src "server response: " res)))}))
 
 ;; (on-edit "my-id" "my-title")
 
 (defn construct-table [data cols]
-  ;; (println (str "client.cjs; construct-table: " (pr-str data)))
+  ;; (println (str src "construct-table: " (pr-str data)))
   (dom/table nil
              (table-elem data cols :col-name dom/thead dom/th "")
              (table-elem data cols :col-vals dom/tbody dom/td "odd")))
 
 (defn get-data [kw parent-data]
-  ;; (println (str "client.cljs; get-data: parent-data: " (pr-str parent-data)))
+  ;; (println (str src "get-data: parent-data: " (pr-str parent-data)))
   (let [child-data (map kw parent-data)]
-    ;; (println (str "client.cljs; get-data: kw: " kw))
-    ;; (println (str "client.cljs; get-data: child-data: " (pr-str child-data)))
+    ;; (println (str src "get-data: kw: " kw))
+    ;; (println (str src "get-data: child-data: " (pr-str child-data)))
     (into [] child-data)))
 
 (defn construct-component [app]
   ;; TODO get rid of 'if'
-  ;; (println (str "client.cljs; construct-component: app: " (pr-str app)))
+  (println (str src "construct-component: app: " (pr-str app)))
   (apply dom/div nil
          (let [db-data (kw-dbase0 app)]
-           ;; (println (str "client.cljs; component-constructor: db-data: " (pr-str db-data)))
+           ;; (println (str src "component-constructor: db-data: " (pr-str db-data)))
            (if (= 0 (count db-data))
              "Fetching data from the dbase... "
-             (let [tables (get-data (utils/table-keyword 0) db-data)
+             (let [tables (get-data (utils/table-data-keyword 0) db-data)
                    tables-count (count tables)]
-               ;; (println (str "client.cljs; tables-count: " tables-count))
-               ;; (println (str "client.cljs; tables: " tables))
+               ;; (println (str src "tables-count: " tables-count))
+               ;; (println (str src "tables: " tables))
                (let [count-columns (map count tables)]
-                 ;; (println (str "client.cljs; count-columns: " count-columns))
+                 ;; (println (str src "count-columns: " count-columns))
                  (map #(construct-table
                         %1
                         ;; TODO filter this to hide some columns

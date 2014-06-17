@@ -8,9 +8,16 @@
 (defn column-keyword [key-index]
   (create-keyword "col" key-index))
 
-(defn table-keyword [key-index]
-  (create-keyword "table" key-index))
+(defn table-data-keyword [key-index]
+  (create-keyword "table-data" key-index))
 
-(defn dbase-keyword [key-index]
-  (create-keyword "dbase" key-index))
+(defn table-name-keyword [key-index]
+  (create-keyword "table-name" key-index))
+
+(defn dbase-data-keyword [key-index]
+  (create-keyword "dbase-data" key-index))
+
+(defn dbase-name-keyword [key-index]
+  (create-keyword "dbase-name" key-index))
+
 

@@ -6,6 +6,8 @@
 
 ;; Transformation layer between Ring and DB access functions here.
 
+(def src "transform.clj; ")
+
 (defn create-item [v i]
   {(utils/column-keyword i) v})
 
@@ -38,12 +40,14 @@
   {(utils/column-keyword index)
    {:col-name column :col-vals column-vals}})
 
-(defn result [raw-data]
-  (let [table-kw (utils/table-keyword 0)]
-    {table-kw
+(defn encode-table [tdata tname idx]
+  (let [tname-kw (utils/table-name-keyword idx)
+        tdata-kw (utils/table-data-keyword idx)]
+    {tname-kw tname
+     tdata-kw
      (apply merge
-            (let [all-vals (table-vals raw-data)
-                  all-cols (table-cols raw-data)
+            (let [all-vals (table-vals tdata)
+                  all-cols (table-cols tdata)
                   indexes (range 0 (count all-cols))
                   table-vals (map #(nth-from all-vals %) indexes)]
               (map #(format-columns %1 %2 %3)
@@ -53,24 +57,28 @@
 
 
 ;; every process-* function must call a function from the db-namespace
-(defn process-sql [sql-fn obj]
-  ;; (println (str "process-sql: (result (sql-fn \"" table "\"))"))
-  (result (sql-fn obj)))
+(defn process-sql [sql-fn obj idx]
+  ;; (println (str src "process-sql: (result (sql-fn \"" table "\"))"))
+  (encode-table (sql-fn obj) obj idx))
 
 (defn process-select-rows-from [table]
-  ;; (println (str "process-select-rows-from: (process-sql db/sql-select-rows-from \"" table "\"))")
-  (process-sql db/sql-select-rows-from table))
+  ;; (println (str src "process-select-rows-from: (process-sql db/sql-select-rows-from \"" table "\"))")
+  (process-sql db/sql-select-rows-from table 0))
 
-(defn process-show-tables-from [db-name]
-  ;; (println (str "process-show-tables-from: (process-sql db/sql-show-tables-from \"" db-name"\")"))
-  (process-sql db/sql-show-tables-from db-name))
+(defn process-show-tables-from [db-name idx]
+  ;; (println (str src "process-show-tables-from: (process-sql db/sql-show-tables-from \"" db-name"\")"))
+  (process-sql db/sql-show-tables-from db-name ))
 
 (defn process-show-tables-with-data-from [db-name]
-  ;; (println (str "process-show-tables-with-data-from: (" (name 'show-tables-from) " " db-name")"))
+  ;; (println (str src "process-show-tables-with-data-from: (" (name 'show-tables-from) " " db-name")"))
   (let [list-tables (map first (table-vals (db/show-tables-from db-name)))
-        tables (into [] list-tables)]
-    ;; (println (str "db.clj; (map " (name 'process-select-rows-from) " " tables ")"))
-    (map process-select-rows-from tables)))
+        tables (into [] list-tables)
+        count-tables (count tables)]
+    ;; (println (str src "(map " (name 'process-select-rows-from) " " tables ")"))
+    (println (str src "count-tables" count-tables))
+    (map #(process-select-rows-from %1 %2)
+         tables
+         (into [] (range count-tables)))))
 
 
 
@@ -91,8 +99,8 @@
         fetch-fn (kw-fetch-fn fetch-fns)
         manipulator-fn (kw-fetch-fn manipulator-fns)
         params (kw-fetch-fn edn-params)]
-    ;; (println (str "fetch: (dispatch " fetch-fn " " params ")"))
-    ;; (println (str "fetch: kw-fetch-fn: " kw-fetch-fn))
+    ;; (println (str src "fetch: (dispatch " fetch-fn " " params ")"))
+    ;; (println (str src "fetch: kw-fetch-fn: " kw-fetch-fn))
         (let [data (manipulator-fn (map #(fetch-fn %) params))]
-          ;; (println "data: " data)
+          (println (str src "data: " data))
           data)))
