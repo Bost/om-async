@@ -126,21 +126,24 @@
 (defn create-table [tname tdata]
   (let [cnt-columns (count tdata)]
     (create-table-for-columns
-     tname tdata (into [] (range cnt-columns)))))
+     tname
+     tdata
+     (into [] (range cnt-columns))  ;; this can be filtered
+     )))
 
 (defn construct-component [app]
   ;; TODO get rid of 'if'
   ;; (logger/info (str src "construct-component: app: " (pr-str app)))
   (apply dom/div nil
-         (let [db-data (kw-dbase0 app)
-               cnt-tables (count db-data)]
-           ;; (logger/info (str src "component-constructor: db-data: " (pr-str db-data)))
+         (let [tables (kw-dbase0 app)
+               cnt-tables (count tables)]
+           ;; (logger/info (str src "component-constructor: tables: " (pr-str tables)))
            ;; (logger/info (str src "cnt-tables: " cnt-tables))
            (if (= 0 cnt-tables)
              "Fetching data from the dbase... "
              (map #(create-table
-                    (get-data (utils/table-name-keyword %) db-data)
-                    (get-data (utils/table-data-keyword %) db-data))
+                    (get-data (utils/table-name-keyword %) tables)
+                    (get-data (utils/table-data-keyword %) tables))
                   (into [] (range cnt-tables)))))))
 
 
