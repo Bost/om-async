@@ -7,22 +7,24 @@
             [compojure.handler :as handler]
             ;; [datomic.api :as d]
             [om-async.transform :as trans]
-            ;; [taoensso.timbre :as logger]
+            [om-async.logger :as logger]
             ))
 
 ;; Functions for Ring here. TODO consider moving them to a ring.cljs
+
+(def src "server.clj; ")
 
 (defn index []
   (file-response "public/html/index.html" {:root "resources"}))
 
 (defn generate-response [data & [status]]
-  ;; (logger/info "(pr-str data)" (pr-str data))
+  ;; (logger/info (str src "(pr-str data)" (pr-str data)))
   {:status (or status 200) ;; Status code: 200 'OK (The request was fulfilled)'
    :headers {"Content-Type" "application/edn"}
    :body (pr-str data)})
 
 (defn update-class [id params]
-  (logger/info "update-class: " id params)
+  (logger/info (str src "update-class: " id params))
 ;;   (let [db    (d/db conn)
 ;;         title (:class/title params)
 ;;         eid   (ffirst

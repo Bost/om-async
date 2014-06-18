@@ -13,6 +13,8 @@ resources/public/js
 # utils.clj and utils.cljs are generated from utils.cljx
 utils.clj
 utils.cljs
+logger.clj
+logger.cljs
 
 # editor backup files
 *~

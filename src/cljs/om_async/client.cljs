@@ -5,6 +5,7 @@
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [om-async.utils :as utils]
+            [om-async.logger :as logger]
             )
   (:import [goog.net XhrIo]
            goog.net.EventType
@@ -14,7 +15,10 @@
 
 (enable-console-print!)
 
-(def kw-dbase0 (utils/dbase-data-keyword 0))
+(def kw-dbase0
+  :app-data
+  ;;(utils/dbase-data-keyword 0)
+  )
 
 (defn tr [dom-cell-elem rows css-class]
   (apply dom/tr #js {:className css-class}
@@ -23,16 +27,16 @@
 (defn create-key-vector [indexes]
   (into [] (map #(utils/column-keyword %) indexes)))
 
-(defn rows [key-name app cols]
+(defn rows [key-name app col-indexes]
   (apply map vector
          (map #(key-name (% app))
-              (create-key-vector cols))))
+              (create-key-vector col-indexes))))
 
 (defn table-elem
-  [app cols kw-row-vals dom-table-elem dom-cell-elem alt-row-css-class]
+  [app col-indexes kw-row-vals dom-table-elem dom-cell-elem alt-row-css-class]
   (apply dom-table-elem nil
          (map #(tr dom-cell-elem %1 %2)
-              (rows kw-row-vals app cols)
+              (rows kw-row-vals app col-indexes)
               (cycle ["" alt-row-css-class]))))
 
 (def ^:private meths
@@ -99,43 +103,46 @@
      :data {:class/title title}
      :on-complete
      (fn [res]
-       (println (str src "server response: " res)))}))
+       (logger/info (str src "server response: " res)))}))
 
 ;; (on-edit "my-id" "my-title")
 
-(defn construct-table [data cols]
-  ;; (println (str src "construct-table: " (pr-str data)))
-  (dom/table nil
-             (table-elem data cols :col-name dom/thead dom/th "")
-             (table-elem data cols :col-vals dom/tbody dom/td "odd")))
+(defn create-table-for-columns [table-name data col-indexes]
+;;   (logger/info (str src "create-table-for-columns: data: " data))
+;;   (logger/info (str src "create-table-for-columns: col-indexes: " col-indexes))
+  (dom/div nil
+           table-name
+           (dom/table nil
+                      (table-elem data col-indexes :col-name dom/thead dom/th "")
+                      (table-elem data col-indexes :col-vals dom/tbody dom/td "odd"))))
 
 (defn get-data [kw parent-data]
-  ;; (println (str src "get-data: parent-data: " (pr-str parent-data)))
-  (let [child-data (map kw parent-data)]
-    ;; (println (str src "get-data: kw: " kw))
-    ;; (println (str src "get-data: child-data: " (pr-str child-data)))
-    (into [] child-data)))
+  ;; (logger/info (str src "get-data: parent-data: " (pr-str parent-data)))
+  (let [child-data (remove nil? (map kw parent-data))]
+    ;; (logger/info (str src "get-data: kw: " kw))
+    ;; (logger/info (str src "get-data: child-data: " (pr-str child-data)))
+    (first child-data)))
+
+(defn create-table [tname tdata]
+  (let [cnt-columns (count tdata)]
+    (create-table-for-columns
+     tname tdata (into [] (range cnt-columns)))))
 
 (defn construct-component [app]
   ;; TODO get rid of 'if'
-  (println (str src "construct-component: app: " (pr-str app)))
+  ;; (logger/info (str src "construct-component: app: " (pr-str app)))
   (apply dom/div nil
-         (let [db-data (kw-dbase0 app)]
-           ;; (println (str src "component-constructor: db-data: " (pr-str db-data)))
-           (if (= 0 (count db-data))
+         (let [db-data (kw-dbase0 app)
+               cnt-tables (count db-data)]
+           ;; (logger/info (str src "component-constructor: db-data: " (pr-str db-data)))
+           ;; (logger/info (str src "cnt-tables: " cnt-tables))
+           (if (= 0 cnt-tables)
              "Fetching data from the dbase... "
-             (let [tables (get-data (utils/table-data-keyword 0) db-data)
-                   tables-count (count tables)]
-               ;; (println (str src "tables-count: " tables-count))
-               ;; (println (str src "tables: " tables))
-               (let [count-columns (map count tables)]
-                 ;; (println (str src "count-columns: " count-columns))
-                 (map #(construct-table
-                        %1
-                        ;; TODO filter this to hide some columns
-                        (into [] (range %2)))
-                      tables
-                      count-columns)))))))
+             (map #(create-table
+                    (get-data (utils/table-name-keyword %) db-data)
+                    (get-data (utils/table-data-keyword %) db-data))
+                  (into [] (range cnt-tables)))))))
+
 
 (defn view [app owner]
   (reify
