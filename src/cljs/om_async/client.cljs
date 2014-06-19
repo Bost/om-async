@@ -20,11 +20,11 @@
 (defn onClick [dbase table column value]
   (fn [e]
     (let [idx 0
-          data {
-                (utils/dbase-name-kw idx) dbase
+          data {(utils/dbase-name-kw idx) dbase
                 (utils/table-name-kw idx) table
                 (utils/column-val-kw idx) column
-                (utils/kw-val "" idx) value
+                (utils/kw-val  "" ;; no prefix
+                               idx) value
                 }]
       ;; (logger/info (str src "data: " data))
       (edn-xhr
@@ -33,8 +33,7 @@
         :data {:request data}
         :on-complete
         (fn [res]
-          (logger/info (str src "Server response:" res)))})
-      )))
+          (logger/info (str src "Server response:" res)))}))))
 
 (defn tr
   "Display table row. dom-cell-elem cound be dom/td or dom/th"
