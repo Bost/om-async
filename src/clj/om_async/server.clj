@@ -10,7 +10,7 @@
             [om-async.logger :as logger]
             ))
 
-;; Functions for Ring here. TODO consider moving them to a ring.cljs
+;; Functions for Ring here. TODO consider moving them to ring.cljs
 
 (def src "server.clj; ")
 

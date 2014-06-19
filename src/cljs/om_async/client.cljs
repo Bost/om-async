@@ -120,13 +120,16 @@
     ;; (logger/info (str src "get-data: child-data: " (pr-str child-data)))
     (first child-data)))
 
+(defn column-filter? [elem-idx]
+  true) ;; true means no element is filtered out
+
+(defn table-filter? [elem-idx]
+  true) ;; true means no element is filtered out
+
 (defn create-table [tname tdata]
-  (let [cnt-columns (count tdata)]
-    (create-table-for-columns
-     tname
-     tdata
-     (into [] (range cnt-columns))  ;; this can be filtered
-     )))
+  (let [all-cols (into [] (range (count tdata)))
+        displayed-cols (into [] (filter column-filter? all-cols))]
+    (create-table-for-columns tname tdata displayed-cols)))
 
 (defn construct-component [app]
   ;; TODO get rid of 'if'
@@ -138,11 +141,12 @@
            ;; (logger/info (str src "cnt-tables: " cnt-tables))
            (if (= 0 cnt-tables)
              "Fetching data from the dbase... "
-             (map #(create-table
-                    (get-data (utils/table-name-kw %) tables)
-                    (get-data (utils/table-val-kw %) tables))
-                  (into [] (range cnt-tables)))))))
-
+             (let [all-tables (into [] (range cnt-tables))
+                   displayed-tables (into [] (filter table-filter? all-tables))]
+               (map #(create-table
+                      (get-data (utils/table-name-kw %) tables)
+                      (get-data (utils/table-val-kw %) tables))
+                    displayed-tables))))))
 
 (defn view [app owner]
   (reify
