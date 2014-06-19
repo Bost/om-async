@@ -15,25 +15,41 @@
 
 (enable-console-print!)
 
-(def dbaseVal0 (utils/dbase-val-kw 0))
+(def dbaseVal0 (utils/kw :dbase :val 0))
 
-(defn onClick [dbase table column value]
+(def ^:private http-req-methods
+  {:get "GET"
+   :put "PUT"
+   :post "POST"
+   :delete "DELETE"})
+
+(defn edn-xhr
+  "XMLHttpRequest: send HTTP/HTTPS requests to a web server and load the
+  server response data back into the script"
+  [{:keys [method url data on-complete]}]
+  (let [xhr (XhrIo.)]
+    (events/listen xhr goog.net.EventType.COMPLETE
+      (fn [e]
+        (on-complete (reader/read-string (.getResponseText xhr)))))
+    (. xhr
+      (send url (http-req-methods method) (when data (pr-str data))
+        #js {"Content-Type" "application/edn"}))))
+
+(defn onClick [dbase table column row-value]
   (fn [e]
     (let [idx 0
-          data {(utils/dbase-name-kw idx) dbase
-                (utils/table-name-kw idx) table
-                (utils/column-val-kw idx) column
-                (utils/kw-val  "" ;; no prefix
-                               idx) value
-                }]
+          data {(utils/kw :dbase :name idx) dbase
+                (utils/kw :table :name idx) table
+                (utils/kw :col :name idx) column
+                (utils/kw :row :val idx) row-value}]
       ;; (logger/info (str src "data: " data))
       (edn-xhr
        {:method :put
         :url (str "select/id0")
         :data {:request data}
         :on-complete
-        (fn [res]
-          (logger/info (str src "Server response:" res)))}))))
+        (fn [response]
+          (logger/info (str src "Server response: " response)))}))))
 
 (defn tr
   "Display table row. dom-cell-elem cound be dom/td or dom/th"
@@ -49,7 +65,7 @@
               )))
 
 (defn create-key-vector [indexes]
-  (into [] (map #(utils/column-val-kw %) indexes)))
+  (into [] (map #(utils/kw :col :val %) indexes)))
 
 (defn rows [kw app col-indexes]
   (apply map vector
@@ -67,26 +83,8 @@
                    dom-cell-elem %2 %3)
               ;; TODO do (cycle [nil nil ...]) when processing table header
               (cycle (rows :col-name app col-indexes))
-              (rows kw        app col-indexes)
+              (rows kw app col-indexes)
               (cycle ["" alt-row-css-class]))))
-
-(def ^:private meths
-  {:get "GET"
-   :put "PUT"
-   :post "POST"
-   :delete "DELETE"})
-
-(defn edn-xhr
-  "XMLHttpRequest: send HTTP/HTTPS requests to a web server and load the
-  server response data back into the script"
-  [{:keys [method url data on-complete]}]
-  (let [xhr (XhrIo.)]
-    (events/listen xhr goog.net.EventType.COMPLETE
-      (fn [e]
-        (on-complete (reader/read-string (.getResponseText xhr)))))
-    (. xhr
-      (send url (meths method) (when data (pr-str data))
-        #js {"Content-Type" "application/edn"}))))
 
 (def app-state
   (atom {dbaseVal0 []}))
@@ -127,7 +125,6 @@
             "Edit"))))))
 
 ;; (on-edit "my-id" "my-title")
-
 (defn create-table-for-columns [dbase db-table data col-indexes]
   ;; (logger/info (str src "create-table-for-columns: data: " data))
   ;; (logger/info (str src "create-table-for-columns: col-indexes: " col-indexes))
@@ -173,8 +170,8 @@
                    displayed-tables (into [] (filter table-filter? all-tables))]
                (map #(create-table
                       dbase
-                      (get-data (utils/table-name-kw %) tables)
-                      (get-data (utils/table-val-kw %) tables))
+                      (get-data (utils/kw :table :name %) tables)
+                      (get-data (utils/kw :table :val %) tables))
                     displayed-tables))))))
 
 (defn view [app owner]

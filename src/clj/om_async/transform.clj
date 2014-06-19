@@ -33,13 +33,13 @@
 (defn nth-from [all-vals i]
   (into [] (map #(nth % i) all-vals)))
 
-(defn format-columns [index column column-vals]
-  {(utils/column-val-kw index)
+(defn format-columns [idx column column-vals]
+  {(utils/kw :col :val idx)
    {:col-name column :col-vals column-vals}})
 
 (defn encode-table [tdata tname idx]
-  (let [tname-kw (utils/table-name-kw idx)
-        tdata-kw (utils/table-val-kw idx)]
+  (let [tname-kw (utils/kw :table :name idx)
+        tdata-kw (utils/kw :table :val idx)]
     {tname-kw tname
      tdata-kw
      (apply merge
