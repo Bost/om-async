@@ -17,19 +17,20 @@
 
 (def dbaseVal0 (utils/dbase-val-kw 0))
 
-(defn add [s]
-  (if (nil? s)
-    ""
-    (str "." s)))
-
 (defn onClick [dbase table column value]
   (fn [e]
-    (let [s (str dbase (add table) (add column) ": " value)]
-      (logger/info (str "onClick: " s "; e: " (pr-str e)))
+    (let [idx 0
+          data {
+                (utils/dbase-name-kw idx) dbase
+                (utils/table-name-kw idx) table
+                (utils/column-val-kw idx) column
+                (utils/kw-val "" idx) value
+                }]
+      ;; (logger/info (str src "data: " data))
       (edn-xhr
        {:method :put
         :url (str "select/id0")
-        :data {:request s}
+        :data {:request data}
         :on-complete
         (fn [res]
           (logger/info (str src "Server response:" res)))})
