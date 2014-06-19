@@ -1,15 +1,14 @@
-/**************************************************
- * Data Tables and Cascading Style Sheets Gallery *
- *  http://icant.co.uk/csstablegallery/index.php  *
- *  --------------------------------------------  *
- * Author: Taimar Teetlok > http://taimar.pri.ee/ *
- **************************************************/
-
 table {
 	width: 100%;
 	color: #212424;
 	margin: 0 0 1em 0;
-	font: 80%/150% "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Lucida, Helvetica, sans-serif;
+	font: 80%/150%
+    "Lucida Grande",
+    "Lucida Sans Unicode",
+    "Lucida Sans",
+    Lucida,
+    Helvetica,
+    sans-serif;
 }
 table, tr, th, td {
 	padding: 0;
@@ -34,13 +33,21 @@ caption:hover {
 
 /* HEADER */
 
+th {
+  font-weight: bold;
+/*   font-weight: normal; */
+}
+
 thead {
-	background: #524123;
+/*  background: #3A5ECA; */
+	background: #4169E1;
+/*  background: #6586E7; */
 }
 thead tr th {
-	padding: 1em 0;
+	padding: .4em 0;
 	text-align: center;
 	color: #FAF7D4;
+	border: 1px solid #A5D768;
 	border-bottom: 3px solid #A5D768;
 }
 
