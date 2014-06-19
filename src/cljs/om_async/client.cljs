@@ -17,9 +17,19 @@
 
 (def dbaseVal0 (utils/dbase-val-kw 0))
 
-(defn tr [dom-cell-elem rows css-class]
+
+(defn onClick [elem-val]
+  (fn [e] (logger/info
+           ;; TODO display dbase-name, table-name, column-name
+           (str "onClick: " elem-val))))
+
+(defn tr
+  "Display table row. dom-cell-elem cound be dom/td or dom/th"
+  [dom-cell-elem row-vals css-class]
   (apply dom/tr #js {:className css-class}
-         (map #(dom-cell-elem nil %) rows)))
+         (map #(dom-cell-elem
+                #js {:onClick (onClick %)}
+                %) row-vals)))
 
 (defn create-key-vector [indexes]
   (into [] (map #(utils/column-val-kw %) indexes)))
