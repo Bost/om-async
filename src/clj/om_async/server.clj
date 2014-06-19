@@ -23,8 +23,8 @@
    :headers {"Content-Type" "application/edn"}
    :body (pr-str data)})
 
-(defn update-class [id params]
-  (logger/info (str src "update-class: " id params))
+(defn select [id params]
+  (logger/info (str src "select: id: " id "; params: " params))
 ;;   (let [db    (d/db conn)
 ;;         title (:class/title params)
 ;;         eid   (ffirst
@@ -44,9 +44,10 @@
        (let [data (trans/fetch edn-params)]
          (generate-response data)))
 
-  (PUT "/class/:id/update"
+  (PUT "/select/:id"
        {params :params edn-params :edn-params}
-       (update-class (:id params) edn-params))
+       (select (:id params) edn-params))
+
   (route/files "/" {:root "resources/public"}))
 
 (def app

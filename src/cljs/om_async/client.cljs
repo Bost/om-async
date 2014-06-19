@@ -23,10 +23,17 @@
     (str "." s)))
 
 (defn onClick [dbase table column value]
-  (fn [e] (logger/info
-           (str "onClick: " dbase (add table) (add column) ": " value "; "
-                ;; (pr-str e)
-                ))))
+  (fn [e]
+    (let [s (str dbase (add table) (add column) ": " value)]
+      (logger/info (str "onClick: " s "; e: " (pr-str e)))
+      (edn-xhr
+       {:method :put
+        :url (str "select/id0")
+        :data {:request s}
+        :on-complete
+        (fn [res]
+          (logger/info (str src "Server response:" res)))})
+      )))
 
 (defn tr
   "Display table row. dom-cell-elem cound be dom/td or dom/th"
@@ -118,15 +125,6 @@
             #js {:style (display (not editing))
                  :onClick #(om/set-state! owner :editing true)}
             "Edit"))))))
-
-(defn on-edit [id title]
-  (edn-xhr
-    {:method :put
-     :url (str "class/" id "/update")
-     :data {:class/title title}
-     :on-complete
-     (fn [res]
-       (logger/info (str src "server response: " res)))}))
 
 ;; (on-edit "my-id" "my-title")
 
