@@ -105,8 +105,8 @@
 ;; (on-edit "my-id" "my-title")
 
 (defn create-table-for-columns [table-name data col-indexes]
-;;   (logger/info (str src "create-table-for-columns: data: " data))
-;;   (logger/info (str src "create-table-for-columns: col-indexes: " col-indexes))
+  ;; (logger/info (str src "create-table-for-columns: data: " data))
+  ;; (logger/info (str src "create-table-for-columns: col-indexes: " col-indexes))
   (dom/div nil
            table-name
            (dom/table nil
@@ -162,6 +162,7 @@
     om/IRender
     (render [_] (construct-component app))))
 
-(om/root view app-state {:target (gdom/getElement "dbase0")})
+(om/root view app-state {:target (gdom/getElement
+                                  "dbase0")}) ;; dbase0 is in index.html
 
 ;; eval this file and open browser with http://localhost:8080/

@@ -109,5 +109,5 @@
     ;; (logger/info (str src "fetch: (manipulator-fn " fetch-fn " " params ")"))
     ;; (logger/info (str src "fetch: kw-fetch-fn: " kw-fetch-fn))
         (let [data (manipulator-fn (map #(fetch-fn %) params))]
-          (logger/info (str src "fetch: data: " data))
+          ;; (logger/info (str src "fetch: data: " data))
           data)))
