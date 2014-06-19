@@ -8,9 +8,6 @@
 
 (def src "transform.clj; ")
 
-(defn create-item [v i]
-  {(utils/column-keyword i) v})
-
 (defn table-cols [raw-data]
   (let [vx (into [] raw-data)
         ;; since the table structure is the same operate only on the first row
@@ -37,12 +34,12 @@
   (into [] (map #(nth % i) all-vals)))
 
 (defn format-columns [index column column-vals]
-  {(utils/column-keyword index)
+  {(utils/column-val-kw index)
    {:col-name column :col-vals column-vals}})
 
 (defn encode-table [tdata tname idx]
-  (let [tname-kw (utils/table-name-keyword idx)
-        tdata-kw (utils/table-data-keyword idx)]
+  (let [tname-kw (utils/table-name-kw idx)
+        tdata-kw (utils/table-val-kw idx)]
     {tname-kw tname
      tdata-kw
      (apply merge
@@ -112,5 +109,5 @@
     ;; (logger/info (str src "fetch: (manipulator-fn " fetch-fn " " params ")"))
     ;; (logger/info (str src "fetch: kw-fetch-fn: " kw-fetch-fn))
         (let [data (manipulator-fn (map #(fetch-fn %) params))]
-          ;; (logger/info (str src "fetch: data: " data))
+          (logger/info (str src "fetch: data: " data))
           data)))

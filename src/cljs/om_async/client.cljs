@@ -15,17 +15,14 @@
 
 (enable-console-print!)
 
-(def kw-dbase0
-  :app-data
-  ;;(utils/dbase-data-keyword 0)
-  )
+(def dbaseVal0 (utils/dbase-val-kw 0))
 
 (defn tr [dom-cell-elem rows css-class]
   (apply dom/tr #js {:className css-class}
          (map #(dom-cell-elem nil %) rows)))
 
 (defn create-key-vector [indexes]
-  (into [] (map #(utils/column-keyword %) indexes)))
+  (into [] (map #(utils/column-val-kw %) indexes)))
 
 (defn rows [key-name app col-indexes]
   (apply map vector
@@ -58,7 +55,7 @@
         #js {"Content-Type" "application/edn"}))))
 
 (def app-state
-  (atom {kw-dbase0 []}))
+  (atom {dbaseVal0 []}))
 
 (defn display [show] ;; TODO get rid of 'if'
   (if show
@@ -135,15 +132,15 @@
   ;; TODO get rid of 'if'
   ;; (logger/info (str src "construct-component: app: " (pr-str app)))
   (apply dom/div nil
-         (let [tables (kw-dbase0 app)
+         (let [tables (dbaseVal0 app)
                cnt-tables (count tables)]
            ;; (logger/info (str src "component-constructor: tables: " (pr-str tables)))
            ;; (logger/info (str src "cnt-tables: " cnt-tables))
            (if (= 0 cnt-tables)
              "Fetching data from the dbase... "
              (map #(create-table
-                    (get-data (utils/table-name-keyword %) tables)
-                    (get-data (utils/table-data-keyword %) tables))
+                    (get-data (utils/table-name-kw %) tables)
+                    (get-data (utils/table-val-kw %) tables))
                   (into [] (range cnt-tables)))))))
 
 
@@ -157,7 +154,7 @@
 ;;                       :data {:select-rows-from ["departments"]}
 ;;                       :data {:show-tables-from ["employees"]}
                       :data {:show-tables-with-data-from ["employees"]}
-                      :on-complete #(om/transact! app kw-dbase0 (fn [_] %))}))
+                      :on-complete #(om/transact! app dbaseVal0 (fn [_] %))}))
     om/IRender
     (render [_] (construct-component app))))
 

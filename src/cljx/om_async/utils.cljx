@@ -1,37 +1,36 @@
 (ns om-async.utils)
 
-;; TODO unify *-name and *-data keyword creation
+;; TODO unify *-name and *-val keyword creation
 
-(defn create-keyword [key-name key-index]
-  (keyword (str key-name key-index)))
+(defn kw [prefix modifier idx]
+  (keyword (str prefix modifier idx)))
 
-(defn column-keyword [key-index]
-  (create-keyword "col" key-index))
+(defn kw-name [prefix idx]
+  (kw prefix "Name" idx))
 
-
-
-(defn column-name-keyword [key-index]
-  (create-keyword "col-name" key-index))
-
-(defn column-data-keyword [key-index]
-  (create-keyword "col-data" key-index))
+(defn kw-val [prefix idx]
+  (kw prefix "Val" idx))
 
 
 
+(defn column-name-kw [idx]
+  (kw-name "col" idx))
 
-(defn table-data-keyword [key-index]
-  (create-keyword "table-data" key-index))
-
-(defn table-name-keyword [key-index]
-  (create-keyword "table-name" key-index))
-
+(defn column-val-kw [idx]
+  (kw-val "col" idx))
 
 
 
-(defn dbase-data-keyword [key-index]
-  (create-keyword "dbase-data" key-index))
+(defn table-name-kw [idx]
+  (kw-name "table" idx))
 
-(defn dbase-name-keyword [key-index]
-  (create-keyword "dbase-name" key-index))
+(defn table-val-kw [idx]
+  (kw-val "table" idx))
 
 
+
+(defn dbase-name-kw [idx]
+  (kw-name "dbase" idx))
+
+(defn dbase-val-kw [idx]
+  (kw-val "dbase" idx))
