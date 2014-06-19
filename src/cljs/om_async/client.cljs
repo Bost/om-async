@@ -58,10 +58,10 @@
   (apply dom-table-elem nil
          (map #(tr dbase table %1
                    dom-cell-elem %2 %3)
+              ;; TODO do (cycle [nil nil ...]) when processing table header
               (cycle (rows :col-name app col-indexes))
               (rows kw        app col-indexes)
-              (cycle ["" alt-row-css-class])
-              )))
+              (cycle ["" alt-row-css-class]))))
 
 (def ^:private meths
   {:get "GET"
