@@ -75,18 +75,10 @@
         tables (into [] list-tables)
         count-tables (count tables)]
     ;; (logger/info (str src "(map " (name 'process-select-rows-from) " " tables ")"))
-;;     (logger/info (str src "count-tables: " count-tables))
+    ;; (logger/info (str src "count-tables: " count-tables))
     (map #(process-select-rows-from %1 %2)
          tables
          (into [] (range count-tables)))))
-
-;; ({:table-name0 "departments", :table-data0 {:col0 {:col-name ["dept_name"], :col-vals ["Customer Service" "Development"]}, :col1 {:col-name ["dept_no"], :col-vals ["d009" "d005"]}}}
-;;  {:table-name1 "dept_emp", :table-data1 {:col0 {:col-name ["to_date"], :col-vals ["9999-01-01" "9999-01-01"]}, :col1 {:col-name ["from_date"], :col-vals ["1986-06-26" "1996-08-03"]}, :col2 {:col-name ["dept_no"], :col-vals ["d005" "d007"]}, :col3 {:col-name ["emp_no"], :col-vals ["10001" "10002"]}}}
-;;  {:table-name2 "dept_manager", :table-data2 {:col0 {:col-name ["to_date"], :col-vals ["1991-10-01" "9999-01-01"]}, :col1 {:col-name ["from_date"], :col-vals ["1985-01-01" "1991-10-01"]}, :col2 {:col-name ["emp_no"], :col-vals ["110022" "110039"]}, :col3 {:col-name ["dept_no"], :col-vals ["d001" "d001"]}}}
-;;  {:table-name3 "employees", :table-data3 {:col0 {:col-name ["hire_date"], :col-vals ["1986-06-26" "1985-11-21"]}, :col1 {:col-name ["gender"], :col-vals ["M" "F"]}, :col2 {:col-name ["last_name"], :col-vals ["Facello" "Simmel"]}, :col3 {:col-name ["first_name"], :col-vals ["Georgi" "Bezalel"]}, :col4 {:col-name ["birth_date"], :col-vals ["1953-09-02" "1964-06-02"]}, :col5 {:col-name ["emp_no"], :col-vals ["10001" "10002"]}}}
-;;  {:table-name4 "salaries", :table-data4 {:col0 {:col-name ["to_date"], :col-vals ["1987-06-26" "1988-06-25"]}, :col1 {:col-name ["from_date"], :col-vals ["1986-06-26" "1987-06-26"]}, :col2 {:col-name ["salary"], :col-vals ["60117" "62102"]}, :col3 {:col-name ["emp_no"], :col-vals ["10001" "10001"]}}}
-;;  {:table-name5 "titles", :table-data5 {:col0 {:col-name ["to_date"], :col-vals ["9999-01-01" "9999-01-01"]}, :col1 {:col-name ["from_date"], :col-vals ["1986-06-26" "1996-08-03"]}, :col2 {:col-name ["title"], :col-vals ["Senior Engineer" "Staff"]}, :col3 {:col-name ["emp_no"], :col-vals ["10001" "10002"]}}}
-;; )
 
 (def fetch-fns {:select-rows-from           process-select-rows-from
                 :show-tables-from           process-show-tables-from
