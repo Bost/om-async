@@ -18,6 +18,9 @@
                  [org.clojure/java.jdbc "0.3.3"]
                  [mysql/mysql-connector-java "5.1.25"]
 
+
+                 [korma "0.3.2"] ;; sql for clojure
+
                  ;; logging
                  [com.taoensso/timbre "3.2.1"]
 

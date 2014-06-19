@@ -4,8 +4,8 @@
             [goog.dom :as gdom]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [om-async.utils :as utils]
-            [om-async.logger :as logger]
+            [om-async.utils :as u]
+            [om-async.logger :as l]
             )
   (:import [goog.net XhrIo]
            goog.net.EventType
@@ -15,7 +15,7 @@
 
 (enable-console-print!)
 
-(def dbaseVal0 (utils/kw :dbase :val 0))
+(def dbaseVal0 (u/kw :dbase :val 0))
 
 (def ^:private http-req-methods
   {:get "GET"
@@ -38,24 +38,24 @@
 (defn onClick [dbase table column row-value]
   (fn [e]
     (let [idx 0
-          data {(utils/kw :dbase :name idx) dbase
-                (utils/kw :table :name idx) table
-                (utils/kw :col :name idx) column
-                (utils/kw :row :val idx) row-value}]
-      ;; (logger/info (str src "data: " data))
+          data {(u/kw :dbase :name idx) dbase
+                (u/kw :table :name idx) table
+                (u/kw :col :name idx) column
+                (u/kw :row :val idx) row-value}]
+      ;; (l/info (str src "data: " data))
       (edn-xhr
        {:method :put
         :url (str "select/id0")
         :data {:request data}
         :on-complete
         (fn [response]
-          (logger/info (str src "Server response: " response)))}))))
+          (l/info (str src "Server response: " response)))}))))
 
 (defn tr
   "Display table row. dom-cell-elem cound be dom/td or dom/th"
   [dbase table column-vals
    dom-cell-elem row-vals css-class]
-;;   (logger/info (str src "tr: column-vals: " column-vals))
+;;   (l/info (str src "tr: column-vals: " column-vals))
   (apply dom/tr #js {:className css-class}
          (map #(dom-cell-elem
                 #js {:onClick (onClick dbase table %1 %2)}
@@ -65,7 +65,7 @@
               )))
 
 (defn create-key-vector [indexes]
-  (into [] (map #(utils/kw :col :val %) indexes)))
+  (into [] (map #(u/kw :col :val %) indexes)))
 
 (defn rows [kw app col-indexes]
   (apply map vector
@@ -75,9 +75,9 @@
 (defn table-elem
   [dbase table
    app col-indexes kw dom-table-elem dom-cell-elem alt-row-css-class]
-;;   (logger/info (str src "table-elem: (def app " (pr-str app) ")"))
-;;   (logger/info (str src "table-elem: (rows :col-name app " col-indexes ")"))
-;;   (logger/info (str src "table-elem: (rows " kw " app " col-indexes ")"))
+;;   (l/info (str src "table-elem: (def app " (pr-str app) ")"))
+;;   (l/info (str src "table-elem: (rows :col-name app " col-indexes ")"))
+;;   (l/info (str src "table-elem: (rows " kw " app " col-indexes ")"))
   (apply dom-table-elem nil
          (map #(tr dbase table %1
                    dom-cell-elem %2 %3)
@@ -126,8 +126,8 @@
 
 ;; (on-edit "my-id" "my-title")
 (defn create-table-for-columns [dbase db-table data col-indexes]
-  ;; (logger/info (str src "create-table-for-columns: data: " data))
-  ;; (logger/info (str src "create-table-for-columns: col-indexes: " col-indexes))
+  ;; (l/info (str src "create-table-for-columns: data: " data))
+  ;; (l/info (str src "create-table-for-columns: col-indexes: " col-indexes))
   (dom/div nil
            db-table
            (dom/table nil
@@ -137,10 +137,10 @@
                                   data col-indexes :col-vals dom/tbody dom/td "odd"))))
 
 (defn get-data [kw parent-data]
-  ;; (logger/info (str src "get-data: parent-data: " (pr-str parent-data)))
+  ;; (l/info (str src "get-data: parent-data: " (pr-str parent-data)))
   (let [child-data (remove nil? (map kw parent-data))]
-    ;; (logger/info (str src "get-data: kw: " kw))
-    ;; (logger/info (str src "get-data: child-data: " (pr-str child-data)))
+    ;; (l/info (str src "get-data: kw: " kw))
+    ;; (l/info (str src "get-data: child-data: " (pr-str child-data)))
     (first child-data)))
 
 (defn column-filter? [elem-idx]
@@ -158,20 +158,22 @@
 
 (defn construct-component [app dbase]
   ;; TODO get rid of 'if'
-  ;; (logger/info (str src "construct-component: app: " (pr-str app)))
+  ;; (l/info (str src "construct-component: app: " (pr-str app)))
   (apply dom/div nil
          (let [tables (dbaseVal0 app)
                cnt-tables (count tables)]
-           ;; (logger/info (str src "component-constructor: tables: " (pr-str tables)))
-           ;; (logger/info (str src "cnt-tables: " cnt-tables))
+           ;; (l/info (str src "component-constructor: tables: " (pr-str tables)))
+           ;; (l/info (str src "cnt-tables: " cnt-tables))
            (if (= 0 cnt-tables)
-             (str "Fetching data from dbase: " dbase)
+             (let [msg (str "Fetching data from dbase: " dbase)]
+               (l/info msg)
+               msg)
              (let [all-tables (into [] (range cnt-tables))
                    displayed-tables (into [] (filter table-filter? all-tables))]
                (map #(create-table
                       dbase
-                      (get-data (utils/kw :table :name %) tables)
-                      (get-data (utils/kw :table :val %) tables))
+                      (get-data (u/kw :table :name %) tables)
+                      (get-data (u/kw :table :val %) tables))
                     displayed-tables))))))
 
 (defn view [app owner]

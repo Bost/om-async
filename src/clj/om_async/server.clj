@@ -7,7 +7,7 @@
             [compojure.handler :as handler]
             ;; [datomic.api :as d]
             [om-async.transform :as trans]
-            [om-async.logger :as logger]
+            [om-async.logger :as l]
             ))
 
 ;; Functions for Ring here. TODO consider moving them to ring.cljs
@@ -18,13 +18,13 @@
   (file-response "public/html/index.html" {:root "resources"}))
 
 (defn generate-response [data & [status]]
-  ;; (logger/info (str src "(pr-str data)" (pr-str data)))
+  ;; (l/info (str src "(pr-str data)" (pr-str data)))
   {:status (or status 200) ;; Status code: 200 'OK (The request was fulfilled)'
    :headers {"Content-Type" "application/edn"}
    :body (pr-str data)})
 
 (defn select [id params]
-  (logger/info (str src "select: id: " id "; params: " params))
+  (l/info (str src "select: id: " id "; params: " params))
 ;;   (let [db    (d/db conn)
 ;;         title (:class/title params)
 ;;         eid   (ffirst
@@ -40,7 +40,7 @@
   (GET "/" [] (index))
   (PUT "/fetch"
        {params :params edn-params :edn-params}
-       ;; (logger/info "edn-params: " edn-params)
+       ;; (l/info "edn-params: " edn-params)
        (let [data (trans/fetch edn-params)]
          (generate-response data)))
 

@@ -1,7 +1,7 @@
 (ns om-async.transform
-  (:require [om-async.utils :as utils]
+  (:require [om-async.utils :as u]
             [om-async.db :as db]
-            [om-async.logger :as logger]
+            [om-async.logger :as l]
             ))
 
 ;; Transformation layer between Ring and DB access functions here.
@@ -20,62 +20,54 @@
         vvn (into [] (map (fn [v] [v]) nv))]
     vvn))
 
-(defn table-vals [raw-data]
-  (let [data (into [] raw-data)
-        out-data
-        (into [] (map (fn [v]
-                        ;; TODO convert only dates to strings
-                        (into [] (map str
-                                      (into [] (vals v)))))
-                      data))]
-    out-data))
+(defn table-vals [data]
+  (into []
+        (map (fn [v]
+               ;; TODO convert only dates to strings
+               (into [] (map str
+                             (into [] (vals v)))))
+             data)))
 
 (defn nth-from [all-vals i]
   (into [] (map #(nth % i) all-vals)))
 
 (defn format-columns [idx column column-vals]
-  {(utils/kw :col :val idx)
+  {(u/kw :col :val idx)
    {:col-name column :col-vals column-vals}})
 
 (defn encode-table [tdata tname idx]
-  (let [tname-kw (utils/kw :table :name idx)
-        tdata-kw (utils/kw :table :val idx)]
-    {tname-kw tname
-     tdata-kw
-     (apply merge
-            (let [all-vals (table-vals tdata)
-                  all-cols (table-cols tdata)
-                  indexes (range 0 (count all-cols))
-                  table-vals (map #(nth-from all-vals %) indexes)]
-              (map #(format-columns %1 %2 %3)
-                   indexes
-                   all-cols
-                   table-vals)))}))
-
-(def e "employees")
-(def d "departments")
-(def t ["employees" "departments"])
+  {(u/kw :table :name idx) tname
+   (u/kw :table :val idx)
+   (apply merge
+          (let [all-vals (table-vals tdata)
+                all-cols (table-cols tdata)
+                indexes (range (count all-cols))
+                table-vals (map #(nth-from all-vals %) indexes)]
+            (map #(format-columns %1 %2 %3)
+                 indexes
+                 all-cols
+                 table-vals)))})
 
 ;; every process-* function must call a function from the db-namespace
 (defn process-sql [sql-fn obj idx]
-  ;; (logger/info (str src "process-sql: (result (sql-fn \"" table "\"))"))
+  ;; (l/info (str src "process-sql: (result (sql-fn \"" table "\"))"))
   (encode-table (sql-fn obj) obj idx))
 
 (defn process-select-rows-from [table table-idx]
-  ;; (logger/info (str src "process-select-rows-from: (process-sql db/sql-select-rows-from \"" table "\" " table-idx "))"))
+  ;; (l/info (str src "process-select-rows-from: (process-sql db/sql-select-rows-from \"" table "\" " table-idx "))"))
   (process-sql db/sql-select-rows-from table table-idx))
 
-(defn process-show-tables-from [db-name idx]
-  ;; (logger/info (str src "process-show-tables-from: (process-sql db/sql-show-tables-from \"" db-name"\")"))
-  (process-sql db/sql-show-tables-from db-name ))
+(defn process-show-tables-from [db-name]
+  ;; (l/info (str src "process-show-tables-from: (process-sql db/sql-show-tables-from \"" db-name"\")"))
+  (process-sql db/sql-show-tables-from db-name 0))
 
 (defn process-show-tables-with-data-from [db-name]
-  ;; (logger/info (str src "process-show-tables-with-data-from: (" (name 'show-tables-from) " " db-name")"))
+  ;; (l/info (str src "process-show-tables-with-data-from: (" (name 'show-tables-from) " " db-name")"))
   (let [list-tables (map first (table-vals (db/show-tables-from db-name)))
         tables (into [] list-tables)
         count-tables (count tables)]
-    ;; (logger/info (str src "(map " (name 'process-select-rows-from) " " tables ")"))
-    ;; (logger/info (str src "count-tables: " count-tables))
+    ;; (l/info (str src "(map " (name 'process-select-rows-from) " " tables ")"))
+    ;; (l/info (str src "count-tables: " count-tables))
     (map #(process-select-rows-from %1 %2)
          tables
          (into [] (range count-tables)))))
@@ -98,8 +90,8 @@
         fetch-fn (kw-fetch-fn fetch-fns)
         manipulator-fn (kw-fetch-fn manipulator-fns)
         params (kw-fetch-fn edn-params)]
-    ;; (logger/info (str src "fetch: (manipulator-fn " fetch-fn " " params ")"))
-    ;; (logger/info (str src "fetch: kw-fetch-fn: " kw-fetch-fn))
+    ;; (l/info (str src "fetch: (manipulator-fn " fetch-fn " " params ")"))
+    ;; (l/info (str src "fetch: kw-fetch-fn: " kw-fetch-fn))
         (let [data (manipulator-fn (map #(fetch-fn %) params))]
-          ;; (logger/info (str src "fetch: data: " data))
+          ;; (l/info (str src "fetch: data: " data))
           data)))

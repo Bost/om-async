@@ -5,3 +5,8 @@
 
 (defn kw [prefix modifier idx]
   (keyword (str (prefix prefixes) (modifier modifiers) idx)))
+
+(def e "employees")
+(def d "departments")
+(def s "salaries")
+(def t ["employees" "departments"])
