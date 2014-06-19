@@ -17,34 +17,51 @@
 
 (def dbaseVal0 (utils/dbase-val-kw 0))
 
+(defn add [s]
+  (if (nil? s)
+    ""
+    (str "." s)))
 
-(defn onClick [elem-val]
+(defn onClick [dbase table column value]
   (fn [e] (logger/info
-           ;; TODO display dbase-name, table-name, column-name
-           (str "onClick: " elem-val))))
+           (str "onClick: " dbase (add table) (add column) ": " value "; "
+                ;; (pr-str e)
+                ))))
 
 (defn tr
   "Display table row. dom-cell-elem cound be dom/td or dom/th"
-  [dom-cell-elem row-vals css-class]
+  [dbase table column-vals
+   dom-cell-elem row-vals css-class]
+;;   (logger/info (str src "tr: column-vals: " column-vals))
   (apply dom/tr #js {:className css-class}
          (map #(dom-cell-elem
-                #js {:onClick (onClick %)}
-                %) row-vals)))
+                #js {:onClick (onClick dbase table %1 %2)}
+                %2)
+              column-vals
+              row-vals
+              )))
 
 (defn create-key-vector [indexes]
   (into [] (map #(utils/column-val-kw %) indexes)))
 
-(defn rows [key-name app col-indexes]
+(defn rows [kw app col-indexes]
   (apply map vector
-         (map #(key-name (% app))
+         (map #(kw (% app))
               (create-key-vector col-indexes))))
 
 (defn table-elem
-  [app col-indexes kw-row-vals dom-table-elem dom-cell-elem alt-row-css-class]
+  [dbase table
+   app col-indexes kw dom-table-elem dom-cell-elem alt-row-css-class]
+;;   (logger/info (str src "table-elem: (def app " (pr-str app) ")"))
+;;   (logger/info (str src "table-elem: (rows :col-name app " col-indexes ")"))
+;;   (logger/info (str src "table-elem: (rows " kw " app " col-indexes ")"))
   (apply dom-table-elem nil
-         (map #(tr dom-cell-elem %1 %2)
-              (rows kw-row-vals app col-indexes)
-              (cycle ["" alt-row-css-class]))))
+         (map #(tr dbase table %1
+                   dom-cell-elem %2 %3)
+              (cycle (rows :col-name app col-indexes))
+              (rows kw        app col-indexes)
+              (cycle ["" alt-row-css-class])
+              )))
 
 (def ^:private meths
   {:get "GET"
@@ -82,8 +99,7 @@
 (defn editable [data owner {:keys [edit-key on-edit] :as opts}]
   (reify
     om/IInitState
-    (init-state [_]
-      {:editing false})
+    (init-state [_] {:editing false})
     om/IRenderState
     (render-state [_ {:keys [editing]}]
       (let [text (get data edit-key)]
@@ -114,14 +130,16 @@
 
 ;; (on-edit "my-id" "my-title")
 
-(defn create-table-for-columns [table-name data col-indexes]
+(defn create-table-for-columns [dbase db-table data col-indexes]
   ;; (logger/info (str src "create-table-for-columns: data: " data))
   ;; (logger/info (str src "create-table-for-columns: col-indexes: " col-indexes))
   (dom/div nil
-           table-name
+           db-table
            (dom/table nil
-                      (table-elem data col-indexes :col-name dom/thead dom/th "")
-                      (table-elem data col-indexes :col-vals dom/tbody dom/td "odd"))))
+                      (table-elem dbase db-table
+                                  data col-indexes :col-name dom/thead dom/th "")
+                      (table-elem dbase db-table
+                                  data col-indexes :col-vals dom/tbody dom/td "odd"))))
 
 (defn get-data [kw parent-data]
   ;; (logger/info (str src "get-data: parent-data: " (pr-str parent-data)))
@@ -136,12 +154,14 @@
 (defn table-filter? [elem-idx]
   true) ;; true means no element is filtered out
 
-(defn create-table [tname tdata]
+(defn create-table [dbase db-table
+                    tdata]
   (let [all-cols (into [] (range (count tdata)))
         displayed-cols (into [] (filter column-filter? all-cols))]
-    (create-table-for-columns tname tdata displayed-cols)))
+    (create-table-for-columns dbase db-table
+                              tdata displayed-cols)))
 
-(defn construct-component [app]
+(defn construct-component [app dbase]
   ;; TODO get rid of 'if'
   ;; (logger/info (str src "construct-component: app: " (pr-str app)))
   (apply dom/div nil
@@ -150,27 +170,29 @@
            ;; (logger/info (str src "component-constructor: tables: " (pr-str tables)))
            ;; (logger/info (str src "cnt-tables: " cnt-tables))
            (if (= 0 cnt-tables)
-             "Fetching data from the dbase... "
+             (str "Fetching data from dbase: " dbase)
              (let [all-tables (into [] (range cnt-tables))
                    displayed-tables (into [] (filter table-filter? all-tables))]
                (map #(create-table
+                      dbase
                       (get-data (utils/table-name-kw %) tables)
                       (get-data (utils/table-val-kw %) tables))
                     displayed-tables))))))
 
 (defn view [app owner]
-  (reify
-    om/IWillMount
-    (will-mount [_] (edn-xhr
-                     {:method :put
-                      :url "fetch"
-;;                       :data {:select-rows-from ["employees" "departments"]}
-;;                       :data {:select-rows-from ["departments"]}
-;;                       :data {:show-tables-from ["employees"]}
-                      :data {:show-tables-with-data-from ["employees"]}
-                      :on-complete #(om/transact! app dbaseVal0 (fn [_] %))}))
-    om/IRender
-    (render [_] (construct-component app))))
+  (let [dbase "employees"]
+    (reify
+      om/IWillMount
+      (will-mount [_] (edn-xhr
+                       {:method :put
+                        :url "fetch"
+;;                         :data {:select-rows-from ["employees" "departments"]}
+;;                         :data {:select-rows-from ["departments"]}
+;;                         :data {:show-tables-from ["employees"]}
+                        :data {:show-tables-with-data-from [dbase]}
+                        :on-complete #(om/transact! app dbaseVal0 (fn [_] %))}))
+      om/IRender
+      (render [_] (construct-component app dbase)))))
 
 (om/root view app-state {:target (gdom/getElement
                                   "dbase0")}) ;; dbase0 is in index.html
