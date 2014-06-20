@@ -12,35 +12,30 @@
 
 ;; Functions for Ring here. TODO consider moving them to ring.cljs
 
-(def src "server.clj; ")
+(def src "server.clj")
 
 (defn index []
   (file-response "public/html/index.html" {:root "resources"}))
 
 (defn generate-response [data & [status]]
-  ;; (l/info (str src "(pr-str data)" (pr-str data)))
+;;   (l/info src "generate-response" (str "(pr-str data): " (pr-str data)))
   {:status (or status 200) ;; Status code: 200 'OK (The request was fulfilled)'
    :headers {"Content-Type" "application/edn"}
-   :body (pr-str data)})
+   :body (pr-str data)
+   }
+  )
 
 (defn select [id params]
-  (l/info (str src "select: id: " id "; params: " params))
-;;   (let [db    (d/db conn)
-;;         title (:class/title params)
-;;         eid   (ffirst
-;;                 (d/q '[:find ?class
-;;                        :in $ ?id
-;;                        :where
-;;                        [?class :class/id ?id]]
-;;                   db id))]
-;;     (d/transact conn [[:db/add eid :class/title title]])
-    (generate-response {:status :ok}))
+  ;; (l/info src "select" (str "id: " id "; params: " params))
+  (let [data (trans/request params)]
+    ;; (l/info src "select" (str "data: " data))
+    (generate-response (merge data {:status :ok}))))
 
+(merge {:a 1} {:b 2})
 (defroutes routes
   (GET "/" [] (index))
   (PUT "/fetch"
        {params :params edn-params :edn-params}
-       ;; (l/info "edn-params: " edn-params)
        (let [data (trans/fetch edn-params)]
          (generate-response data)))
 

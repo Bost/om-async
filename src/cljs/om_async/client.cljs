@@ -11,7 +11,7 @@
            goog.net.EventType
            [goog.events EventType]))
 
-(def src "client.cljs; ")
+(def src "client.cljs")
 
 (enable-console-print!)
 
@@ -49,7 +49,7 @@
         :data {:request data}
         :on-complete
         (fn [response]
-          (l/info (str src "Server response: " response)))}))))
+          (l/info src "onClick" (str "Server response: " response)))}))))
 
 (defn tr
   "Display table row. dom-cell-elem cound be dom/td or dom/th"
@@ -166,7 +166,7 @@
            ;; (l/info (str src "cnt-tables: " cnt-tables))
            (if (= 0 cnt-tables)
              (let [msg (str "Fetching data from dbase: " dbase)]
-               (l/info msg)
+               (l/info src "construct-component" msg)
                msg)
              (let [all-tables (into [] (range cnt-tables))
                    displayed-tables (into [] (filter table-filter? all-tables))]
@@ -177,7 +177,7 @@
                     displayed-tables))))))
 
 (defn view [app owner]
-  (let [dbase "employees"]
+  (let [dbase (name :employees)] ;; (name :kw) => "kw"
     (reify
       om/IWillMount
       (will-mount [_] (edn-xhr

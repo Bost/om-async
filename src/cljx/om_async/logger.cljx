@@ -3,5 +3,5 @@
   ;; (:require [taoensso.timbre :as logger])
   )
 
-(defn info [msg]
-  (println msg))
+(defn info [file fn-name msg]
+  (println (str file "; " fn-name "; " msg)))
