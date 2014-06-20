@@ -56,7 +56,7 @@
     ;; (l/info src fn-name (str "data: " data))
     data))
 
-;; every process-* function must call a function from the dbasespace
+;; every process-* function must call a function from om-async.db
 (defn process-sql [sql-fn dbase obj idx]
   (encode-table (sql-fn dbase obj) obj idx))
 
@@ -75,21 +75,17 @@
          tables
          (into [] (range count-tables)))))
 
-(defn process-sql-s [sql-fn obj idx]
-  ;; (l/info src "process-sql-s" (str "obj: " obj))
-  (let [table ((u/kw :table :name idx) obj)]
-    ;; (l/info src "process-sql-s" (str "table: " table))
-    (encode-table (sql-fn obj idx) table idx)))
-
-(defn process-s [params idx]
-  (let [data (process-sql-s db/s params idx)]
-    ;;(l/info src "process-s" (str "data: " data))
+(defn process-request [params idx]
+  (let [table ((u/kw :table :name idx) params)
+        data (encode-table (db/s params idx) table idx)]
+    ;; (l/info src "process-s" (str "table: " table))
+    ;; (l/info src "process-s" (str "data: " data))
     data))
 
 (def fetch-fns {:select-rows-from           process-select-rows-from
                 :show-tables-from           process-show-tables-from
                 :show-tables-with-data-from process-show-tables-with-data-from
-                :request                    process-s
+                :request                    process-request
                 })
 
 (def manipulator-fns {:select-rows-from            (fn [p] (into [] p)) ;; working with multiple tables
@@ -126,16 +122,13 @@
           params (kw-fetch-fn edn-params)
           val-params (into [] (vals params))
           ]
-
       ;; (l/info src fn-name (str "kw-fetch-fn: " kw-fetch-fn))
       ;; (l/info src fn-name (str "fetch-fn: " fetch-fn))
       ;; (l/info src fn-name (str "manipulator-fn: " manipulator-fn))
       ;; (l/info src fn-name (str "params: " params))
       ;; (l/info src fn-name (str "val-params: " val-params))
-
       (let [f0 (fetch-fn params 0)] ;; onClick sends just 1 value
         ;; (l/info src fn-name (str "f0: " f0))
         (let [data (manipulator-fn f0)]
           ;; (l/info src fn-name (str "data: " data))
-          data
-          )))))
+          data)))))

@@ -14,32 +14,28 @@
 
 (def src "server.clj")
 
-(defn index []
-  (file-response "public/html/index.html" {:root "resources"}))
-
-(defn generate-response [data & [status]]
-  ;; (l/info src "generate-response" (str "(pr-str data): " (pr-str data)))
+(defn response [data & [status]]
+  ;; (l/info src "response" (str "(pr-str data): " (pr-str data)))
   {:status (or status 200) ;; Status code: 200 'OK (The request was fulfilled)'
    :headers {"Content-Type" "application/edn"}
    :body (pr-str data)})
 
-(defn select [id params]
-  ;; (l/info src "select" (str "id: " id "; params: " params))
-  (let [data (trans/request params)]
-    ;; (l/info src "select" (str "data: " data))
-    (generate-response (merge data {:status :ok}))))
-
-(merge {:a 1} {:b 2})
 (defroutes routes
-  (GET "/" [] (index))
+  (GET "/"
+       []
+       (file-response "public/html/index.html" {:root "resources"}))
+
   (PUT "/fetch"
        {params :params edn-params :edn-params}
        (let [data (trans/fetch edn-params)]
-         (generate-response data)))
+         (response data)))
 
   (PUT "/select/:id"
        {params :params edn-params :edn-params}
-       (select (:id params) edn-params))
+       ;; (l/info src "PUT/select" (str "id: " (:id params)))
+       (let [data (trans/request edn-params)]
+         ;; (l/info src "PUT/select" (str "data: " data))
+         (response (merge data {:status :ok}))))
 
   (route/files "/" {:root "resources/public"}))
 
