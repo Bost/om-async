@@ -48,27 +48,27 @@
                  all-cols
                  table-vals)))})
 
-;; every process-* function must call a function from the db-namespace
-(defn process-sql [sql-fn obj idx]
+;; every process-* function must call a function from the dbasespace
+(defn process-sql [sql-fn dbase obj idx]
   ;; (l/info (str src "process-sql: (result (sql-fn \"" table "\"))"))
-  (encode-table (sql-fn obj) obj idx))
+  (encode-table (sql-fn dbase obj) obj idx))
 
-(defn process-select-rows-from [table table-idx]
+(defn process-select-rows-from [dbase table table-idx]
   ;; (l/info (str src "process-select-rows-from: (process-sql db/sql-select-rows-from \"" table "\" " table-idx "))"))
-  (process-sql db/sql-select-rows-from table table-idx))
+  (process-sql db/sql-select-rows-from dbase table table-idx))
 
-(defn process-show-tables-from [db-name]
-  ;; (l/info (str src "process-show-tables-from: (process-sql db/sql-show-tables-from \"" db-name"\")"))
-  (process-sql db/sql-show-tables-from db-name 0))
+(defn process-show-tables-from [dbase]
+  ;; (l/info (str src "process-show-tables-from: (process-sql db/sql-show-tables-from \"" dbase"\")"))
+  (process-sql db/sql-show-tables-from dbase 0))
 
-(defn process-show-tables-with-data-from [db-name]
-  ;; (l/info (str src "process-show-tables-with-data-from: (" (name 'show-tables-from) " " db-name")"))
-  (let [list-tables (map first (table-vals (db/show-tables-from db-name)))
+(defn process-show-tables-with-data-from [dbase]
+  ;; (l/info (str src "process-show-tables-with-data-from: (" (name 'show-tables-from) " " dbase")"))
+  (let [list-tables (map first (table-vals (db/show-tables-from dbase)))
         tables (into [] list-tables)
         count-tables (count tables)]
     ;; (l/info (str src "(map " (name 'process-select-rows-from) " " tables ")"))
     ;; (l/info (str src "count-tables: " count-tables))
-    (map #(process-select-rows-from %1 %2)
+    (map #(process-select-rows-from dbase %1 %2)
          tables
          (into [] (range count-tables)))))
 
