@@ -64,25 +64,25 @@
               row-vals
               )))
 
-(defn create-key-vector [indexes]
-  (into [] (map #(u/kw :col :val %) indexes)))
+(defn key-vector [indexes]
+  (into [] (map #(u/kw :col nil %) indexes)))
 
 (defn rows [kw app col-indexes]
   (apply map vector
          (map #(kw (% app))
-              (create-key-vector col-indexes))))
+              (key-vector col-indexes))))
 
 (defn table-elem
   [dbase table
    app col-indexes kw dom-table-elem dom-cell-elem alt-row-css-class]
   ;; (l/info (str src "table-elem: (def app " (pr-str app) ")"))
-  ;; (l/info (str src "table-elem: (rows :col-name app " col-indexes ")"))
-  '' (l/info (str src "table-elem: (rows " kw " app " col-indexes ")"))
+  ;; (l/info (str src "table-elem: (rows :name app " col-indexes ")"))
+  ;; (l/info (str src "table-elem: (rows " kw " app " col-indexes ")"))
   (apply dom-table-elem nil
          (map #(tr dbase table %1
                    dom-cell-elem %2 %3)
               ;; TODO do (cycle [nil nil ...]) when processing table header
-              (cycle (rows :col-name app col-indexes))
+              (cycle (rows :name app col-indexes))
               (rows kw app col-indexes)
               (cycle ["" alt-row-css-class]))))
 
@@ -132,22 +132,22 @@
            db-table
            (dom/table nil
                       (table-elem dbase db-table
-                                  data col-indexes :col-name dom/thead dom/th "")
+                                  data col-indexes :name dom/thead dom/th "")
                       (table-elem dbase db-table
-                                  data col-indexes :col-vals dom/tbody dom/td "odd"))))
+                                  data col-indexes :vals dom/tbody dom/td "odd"))))
 
 (defn get-data [kw parent-data]
-  ;; (l/info (str src "get-data: parent-data: " (pr-str parent-data)))
+  ;; (l/info src "get-data" (str "parent-data: " (pr-str parent-data)))
   (let [child-data (remove nil? (map kw parent-data))]
-    ;; (l/info (str src "get-data: kw: " kw))
-    ;; (l/info (str src "get-data: child-data: " (pr-str child-data)))
+    ;; (l/info src "get-data" (str " kw: " kw))
+    ;; (l/info src "get-data" (str "child-data: " (pr-str child-data)))
     (first child-data)))
 
 (defn column-filter? [elem-idx]
-  true) ;; true means no element is filtered out
+  true) ;; no element is filtered out
 
 (defn table-filter? [elem-idx]
-  true) ;; true means no element is filtered out
+  true) ;; no element is filtered out
 
 (defn create-table [dbase db-table
                     tdata]
@@ -158,12 +158,12 @@
 
 (defn construct-component [app dbase]
   ;; TODO get rid of 'if'
-  ;; (l/info (str src "construct-component: app: " (pr-str app)))
+  ;; (l/info  src "component-constructor" (str "app: " (pr-str app)))
   (apply dom/div nil
          (let [tables (dbaseVal0 app)
                cnt-tables (count tables)]
-           ;; (l/info (str src "component-constructor: tables: " (pr-str tables)))
-           ;; (l/info (str src "cnt-tables: " cnt-tables))
+           ;; (l/info  src "component-constructor" (str "tables: " (pr-str tables)))
+           ;; (l/info  src "component-constructor" (str "cnt-tables: " cnt-tables))
            (if (= 0 cnt-tables)
              (let [msg (str "Fetching data from dbase: " dbase)]
                (l/info src "construct-component" msg)
@@ -194,4 +194,4 @@
 (om/root view app-state {:target (gdom/getElement
                                   "dbase0")}) ;; dbase0 is in index.html
 
-;; eval this file and open browser with http://localhost:8080/
+;; eval server.clj, client.cljs, open browser with http://localhost:8080

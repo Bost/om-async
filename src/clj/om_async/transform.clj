@@ -32,17 +32,17 @@
   (into [] (map #(nth % i) all-vals)))
 
 (defn format-columns [idx column column-vals]
-  {(u/kw :col :val idx)
-   {:col-name column :col-vals column-vals}})
+  {(u/kw :col nil idx)
+   {:name column :vals column-vals}})
 
-(defn encode-table [tdata tname idx]
+(defn encode-table [table data idx]
   (let [fn-name "encode-table"
         data
-        {(u/kw :table :name idx) tname
+        {(u/kw :table :name idx) table
          (u/kw :table :val idx)
          (apply merge
-                (let [all-vals (table-vals tdata)
-                      all-cols (table-cols tdata)
+                (let [all-vals (table-vals data)
+                      all-cols (table-cols data)
                       indexes (range (count all-cols))
                       table-vals (map #(nth-from all-vals %) indexes)]
                   (map #(format-columns %1 %2 %3)
@@ -50,15 +50,15 @@
                        all-cols
                        table-vals)))}
         ]
-    ;; (l/info src fn-name (str "tdata: " tdata))
-    ;; (l/info src fn-name (str "tname: " tname))
+    ;; (l/info src fn-name (str "data: " data))
+    ;; (l/info src fn-name (str "table: " table))
     ;; (l/info src fn-name (str "idx: " idx))
     ;; (l/info src fn-name (str "data: " data))
     data))
 
 ;; every process-* function must call a function from om-async.db
 (defn process-sql [sql-fn dbase obj idx]
-  (encode-table (sql-fn dbase obj) obj idx))
+  (encode-table obj (sql-fn dbase obj) idx))
 
 (defn process-select-rows-from [dbase table table-idx]
   (process-sql db/sql-select-rows-from dbase table table-idx))
@@ -77,9 +77,9 @@
 
 (defn process-request [params idx]
   (let [table ((u/kw :table :name idx) params)
-        data (encode-table (db/s params idx) table idx)]
-    ;; (l/info src "process-s" (str "table: " table))
-    ;; (l/info src "process-s" (str "data: " data))
+        data (encode-table table (db/s params idx) idx)]
+    ;; (l/info src "process-request" (str "table: " table))
+    ;; (l/info src "process-request" (str "data: " data))
     data))
 
 (def fetch-fns {:select-rows-from           process-select-rows-from

@@ -5,7 +5,9 @@
 (def modifiers {:name "N" :val "V"})
 
 (defn kw [prefix modifier idx]
-  (keyword (str (prefix prefixes) (modifier modifiers) idx)))
+  (keyword (str (prefix prefixes)
+                (if (nil? modifier) nil (modifier modifiers))
+                idx)))
 
 (def e "employees")
 (def d "departments")
