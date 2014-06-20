@@ -18,12 +18,10 @@
   (file-response "public/html/index.html" {:root "resources"}))
 
 (defn generate-response [data & [status]]
-;;   (l/info src "generate-response" (str "(pr-str data): " (pr-str data)))
+  ;; (l/info src "generate-response" (str "(pr-str data): " (pr-str data)))
   {:status (or status 200) ;; Status code: 200 'OK (The request was fulfilled)'
    :headers {"Content-Type" "application/edn"}
-   :body (pr-str data)
-   }
-  )
+   :body (pr-str data)})
 
 (defn select [id params]
   ;; (l/info src "select" (str "id: " id "; params: " params))

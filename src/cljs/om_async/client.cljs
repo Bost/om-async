@@ -55,7 +55,7 @@
   "Display table row. dom-cell-elem cound be dom/td or dom/th"
   [dbase table column-vals
    dom-cell-elem row-vals css-class]
-;;   (l/info (str src "tr: column-vals: " column-vals))
+  ;; (l/info (str src "tr: column-vals: " column-vals))
   (apply dom/tr #js {:className css-class}
          (map #(dom-cell-elem
                 #js {:onClick (onClick dbase table %1 %2)}
@@ -75,9 +75,9 @@
 (defn table-elem
   [dbase table
    app col-indexes kw dom-table-elem dom-cell-elem alt-row-css-class]
-;;   (l/info (str src "table-elem: (def app " (pr-str app) ")"))
-;;   (l/info (str src "table-elem: (rows :col-name app " col-indexes ")"))
-;;   (l/info (str src "table-elem: (rows " kw " app " col-indexes ")"))
+  ;; (l/info (str src "table-elem: (def app " (pr-str app) ")"))
+  ;; (l/info (str src "table-elem: (rows :col-name app " col-indexes ")"))
+  '' (l/info (str src "table-elem: (rows " kw " app " col-indexes ")"))
   (apply dom-table-elem nil
          (map #(tr dbase table %1
                    dom-cell-elem %2 %3)

@@ -104,15 +104,15 @@
 
 (defn fetch [edn-params]
   (let [fn-name "fetch"]
-  (let [kw-fetch-fn (nth (keys edn-params) 0)
-        fetch-fn (kw-fetch-fn fetch-fns)
-        manipulator-fn (kw-fetch-fn manipulator-fns)
-        params (kw-fetch-fn edn-params)
-        ]
-      (l/info src fn-name (str "kw-fetch-fn: " kw-fetch-fn))
-      (l/info src fn-name (str "fetch-fn: " fetch-fn))
-      (l/info src fn-name (str "manipulator-fn: " manipulator-fn))
-      (l/info src fn-name (str "params: " params))
+    (let [kw-fetch-fn (nth (keys edn-params) 0)
+          fetch-fn (kw-fetch-fn fetch-fns)
+          manipulator-fn (kw-fetch-fn manipulator-fns)
+          params (kw-fetch-fn edn-params)
+          ]
+      ;; (l/info src fn-name (str "kw-fetch-fn: " kw-fetch-fn))
+      ;; (l/info src fn-name (str "fetch-fn: " fetch-fn))
+      ;; (l/info src fn-name (str "manipulator-fn: " manipulator-fn))
+      ;; (l/info src fn-name (str "params: " params))
       (let [data (manipulator-fn (map #(fetch-fn %) params))]
         ;; (l/info src fn-name (str "data: " data))
         data))))
