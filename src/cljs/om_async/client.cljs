@@ -42,7 +42,7 @@
                 (u/kw :table :name idx) table
                 (u/kw :col :name idx) column
                 (u/kw :row :val idx) row-value}]
-      ;; (l/info (str src "data: " data))
+      (l/info src "onClick" (str "data: " data))
       (edn-xhr
        {:method :put
         :url (str "select/id0")

@@ -38,13 +38,37 @@
 
 ;; (sql-show-tables-from u/e)
 
+(declare salaries titles departments dept_emp  dept_manager employees salaries titles)
+
+(defentity departments)
+(defentity dept_emp)
+(defentity dept_manager)
+(defentity employees
+        (has-many salaries)
+        (has-many titles)
+        (has-many dept_manager)
+        (has-many dept_emp))
+
 (defn s [params idx]
-  (let [dbase ((u/kw :dbase :name idx) params)
+  (let [fn-name "s"
+        dbase ((u/kw :dbase :name idx) params)
         table ((u/kw :table :name idx) params)
         col ((u/kw :col :name idx) params)
-        row-val ((u/kw :row :name idx) params)
+        row-val ((u/kw :row :val idx) params)
+        ;; "Customer Service"
+        ;; "Development"
         ]
-  (defdb db (mysql (db-connect dbase)))
-  (select table
-          (where {col [like (str "%" row-val "%")]})
-          (limit 2))))
+    (defdb db (mysql (db-connect dbase)))
+;;     (l/info src fn-name (str "params: " params))
+;;     (l/info src fn-name (str "table: " table))
+;;     (l/info src fn-name (str "col: " col))
+;;     (l/info src fn-name (str "row-val: " row-val))
+;;     (l/info src fn-name (str "kw-row-val: " (u/kw :row :val idx)))
+    (select table
+            ;; (where {col [like (str "%" row-val "%")]})
+            (where {(keyword col) row-val})
+            (limit 2))))
+
+(s {:dbaseN0 "employees", :tableN0 "departments",
+    :colN0 "dept_name", :rowV0 "Development"} 0)
+

@@ -50,10 +50,9 @@
                        all-cols
                        table-vals)))}
         ]
-    ;; (l/info src fn-name (str "data: " data))
     ;; (l/info src fn-name (str "table: " table))
-    ;; (l/info src fn-name (str "idx: " idx))
     ;; (l/info src fn-name (str "data: " data))
+    ;; (l/info src fn-name (str "idx: " idx))
     data))
 
 ;; every process-* function must call a function from om-async.db

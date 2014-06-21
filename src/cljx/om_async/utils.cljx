@@ -9,7 +9,12 @@
                 (if (nil? modifier) nil (modifier modifiers))
                 idx)))
 
-(def e "employees")
-(def d "departments")
-(def s "salaries")
+(def d  "departments")
+(def e  "employees")
+(def s  "salaries")
+(def de "dept_emp")
+(def dm "dept_manager")
+(def t  "titles")
+
+
 (def t ["employees" "departments"])
