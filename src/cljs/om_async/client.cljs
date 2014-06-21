@@ -4,6 +4,7 @@
             [goog.dom :as gdom]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
+            [cljs.core.async :refer [put! chan <!]]
             [om-async.utils :as u]
             [om-async.logger :as l]
             )
@@ -87,7 +88,9 @@
               (cycle ["" alt-row-css-class]))))
 
 (def app-state
-  (atom {dbaseVal0 []}))
+  (atom {dbaseVal0 []
+         :toggle [{:color "blue"}]
+         }))
 
 (defn display [show] ;; TODO get rid of 'if'
   (if show
@@ -156,7 +159,8 @@
     (create-table-for-columns dbase db-table
                               tdata displayed-cols)))
 
-(defn construct-component [app dbase]
+(defn construct-component [app owner]
+  (let [dbase (name :employees)] ;; (name :kw) => "kw"
   ;; TODO get rid of 'if'
   ;; (l/info  src "component-constructor" (str "app: " (pr-str app)))
   (apply dom/div nil
@@ -174,11 +178,41 @@
                       dbase
                       (get-data (u/kw :table :name %) tables)
                       (get-data (u/kw :table :val %) tables))
-                    displayed-tables))))))
+                    displayed-tables)))))))
+
+(defn cc [toggle owner]
+  (reify
+    om/IRenderState
+    (render-state [this state]
+                  (dom/div nil "empty")
+;;                   (construct-component app dbase)
+                  )))
+
+
+;; (defn color [app owner]
+;;   (om/transact! app :toggle
+;;                 (fn [] [{:color "red"}]))
+;;   (println "color executed"))
+
+(defn display-text [{:keys [color] :as toggle}]
+  (println (str "display-text: " color))
+  (str color))
+
+(defn text-view [app owner]
+  (let [toggle (:toggle app)]
+  (reify
+    om/IRenderState
+    (render-state [this {:keys [delete]}]
+                  (dom/div #js
+                           {:id "foo"
+                            :style #js {:backgroundColor (display-text toggle)}}
+                           (str "text: " (display-text toggle)))
+                  ))))
 
 (defn view [app owner]
   (let [dbase (name :employees)] ;; (name :kw) => "kw"
     (reify
+      om/IInitState (init-state [_] {:toggle false})
       om/IWillMount
       (will-mount [_] (edn-xhr
                        {:method :put
@@ -188,8 +222,17 @@
 ;;                         :data {:show-tables-from ["employees"]}
                         :data {:show-tables-with-data-from [dbase]}
                         :on-complete #(om/transact! app dbaseVal0 (fn [_] %))}))
-      om/IRender
-      (render [_] (construct-component app dbase)))))
+      om/IRenderState
+      (render-state [this state]
+                    ;;                     (cc app dbase)
+;;                     (construct-component app dbase)
+                    (apply dom/div nil
+                           (om/build-all
+                            construct-component
+;;                             text-view
+                            app
+                            {:init-state state}))
+                    ))))
 
 (om/root view app-state {:target (gdom/getElement
                                   "dbase0")}) ;; dbase0 is in index.html
