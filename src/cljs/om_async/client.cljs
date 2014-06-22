@@ -37,22 +37,43 @@
         #js {"Content-Type" "application/edn"}))))
 
 (defn onClick [owner dbase table column row-value]
-  (fn [e]
-    (let [idx 0
-          data {(u/kw :dbase :name idx) dbase
-                (u/kw :table :name idx) table
-                (u/kw :col :name idx) column
-                (u/kw :row :val idx) row-value}]
-;;       (l/info src "onClick" (str "data: " data))
-;;       (l/info src "onClick" (str "pr-str owner: " (pr-str owner)))
-      (om/set-state! owner :toggle (not (om/get-state owner :toggle)))
-      (edn-xhr
-       {:method :put
-        :url (str "select/id0")
-        :data {:request data}
-        :on-complete
-        (fn [response]
-          (l/info src "onClick" (str "Server response: " response)))}))))
+  (let [fn-name "onClick"]
+    (fn [e]
+      (let [idx 0
+            data {(u/kw :dbase :name idx) dbase
+                  (u/kw :table :name idx) table
+                  (u/kw :col :name idx) column
+                  (u/kw :row :val idx) row-value}]
+        (l/info src fn-name (str "data: " data))
+        ;;       (l/info src fn-name (str "pr-str owner: " (pr-str owner)))
+        (let [toggled-elems (om/get-state owner :toggle)
+              isIn (u/contains-value? toggled-elems data)]
+
+          (l/info src fn-name (str "isIn: " isIn))
+          ;; (if (isIn)
+          ;;   ;; TODO serch if om has some 'state-remove' function
+          ;;   (om/set-state! owner :toggle data))
+          )
+
+        (edn-xhr
+         {:method :put
+          :url (str "select/id0")
+          :data {:request data}
+          :on-complete
+          (fn [response]
+            ;; (l/info src fn-name (str "Server response: " response))
+            )})))))
+
+(def hm (conj #{}
+       {:a 1 :b 2}
+       {:x 1 :b 2}
+       {:y 1 :b 2}
+       ))
+
+(dissoc hm
+       {:x 1 :b 2}
+        )
+
 
 (defn tr
   "Display table row. dom-cell-elem cound be dom/td or dom/th"
@@ -91,7 +112,8 @@
 
 (def app-state
   (atom {dbaseVal0 []
-         :toggle [nil]
+         :toggle #{nil}
+         ;;[nil]
          }))
 
 (defn display [show] ;; TODO get rid of 'if'
@@ -147,7 +169,7 @@
 (defn construct-component [app owner {:keys [toggle] :as opts}]
   (reify
     om/IInitState (init-state [_]
-                              {:toggle "foo"}
+;;                               {:toggle "foo"}
                               )
     om/IRenderState
     (render-state [_ {:keys [toggle]}]
