@@ -9,6 +9,9 @@
                 (if (nil? modifier) nil (modifier modifiers))
                 idx)))
 
+(defn contains-value? [coll element]
+  (boolean (some #(= element %) coll)))
+
 (def d  "departments")
 (def e  "employees")
 (def s  "salaries")
