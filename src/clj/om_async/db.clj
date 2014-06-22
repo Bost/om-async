@@ -38,16 +38,36 @@
 
 ;; (sql-show-tables-from u/e)
 
-(declare salaries titles departments dept_emp  dept_manager employees salaries titles)
+(declare salaries titles departments dept_emp dept_manager employees salaries titles)
+(def all-entities #{salaries titles departments dept_emp dept_manager employees})
 
-(defentity departments)
+(defentity titles)
+(defentity salaries)
 (defentity dept_emp)
 (defentity dept_manager)
+
+(defentity departments
+  (pk :dept_no)
+  (has-many dept_emp)
+  (has-many dept_manager))
+
 (defentity employees
-        (has-many salaries)
-        (has-many titles)
-        (has-many dept_manager)
-        (has-many dept_emp))
+  (pk :emp_no)
+  (has-many salaries)
+  (has-many titles)
+  (has-many dept_manager)
+  (has-many dept_emp))
+
+(def sources [employees departments])
+(def intermediate [dept_emp dept_manager])
+(def sinks [titles salaries])
+
+;; return a vector of tables where to select
+;; beware of cycles!
+(defn x [entity]
+  (u/contains-value? sinks entity) ;; => [entity]
+  (u/contains-value? sinks entity) ;; => [entity]
+  )
 
 (defn s [params idx]
   (let [fn-name "s"
@@ -69,6 +89,9 @@
             (where {(keyword col) row-val})
             (limit 2))))
 
+    (select dept_emp
+            (where {:dept_no "d006"})
+            (limit 2))
+
 (s {:dbaseN0 "employees", :tableN0 "departments",
     :colN0 "dept_name", :rowV0 "Development"} 0)
-
