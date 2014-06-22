@@ -9,7 +9,10 @@
                 (if (nil? modifier) nil (modifier modifiers))
                 idx)))
 
-(defn contains-value? [coll element]
+(defn contains-value?
+  "'contains?' tests if the numeric key is within the range of indexes.
+  We need to use 'some'."
+  [coll element]
   (boolean (some #(= element %) coll)))
 
 (def d  "departments")
