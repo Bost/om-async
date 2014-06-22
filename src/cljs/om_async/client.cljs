@@ -43,11 +43,9 @@
                 (u/kw :table :name idx) table
                 (u/kw :col :name idx) column
                 (u/kw :row :val idx) row-value}]
-      (l/info src "onClick" (str "data: " data))
-      (l/info src "onClick" (str "pr-str owner: " (pr-str owner)))
-      (om/set-state! owner :toggle true)
-;;       (l/info src "onClick" (str "toggle: " toggle))
-      ;; (om/set-state! owner :editing true)
+;;       (l/info src "onClick" (str "data: " data))
+;;       (l/info src "onClick" (str "pr-str owner: " (pr-str owner)))
+      (om/set-state! owner :toggle (not (om/get-state owner :toggle)))
       (edn-xhr
        {:method :put
         :url (str "select/id0")
@@ -93,7 +91,7 @@
 
 (def app-state
   (atom {dbaseVal0 []
-         :toggle [{:toggle false}]
+         :toggle [nil]
          }))
 
 (defn display [show] ;; TODO get rid of 'if'
@@ -148,7 +146,9 @@
 
 (defn construct-component [app owner {:keys [toggle] :as opts}]
   (reify
-    om/IInitState (init-state [_] {:toggle false})
+    om/IInitState (init-state [_]
+                              {:toggle "foo"}
+                              )
     om/IRenderState
     (render-state [_ {:keys [toggle]}]
                   (let [dbase (name :employees)] ;; (name :kw) => "kw"
@@ -195,7 +195,8 @@
                             (map
                              (fn [_]
                                (om/build construct-component app
-                                         {:opts {:toggle false}}))
+                                         ;; {:opts {:toggle false}} ;; this has no effect
+                                         ))
                              (:toggle app))
                             ))
             )))
