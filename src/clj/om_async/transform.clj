@@ -37,18 +37,18 @@
 
 (defn encode-table [table data idx]
   (let [fn-name "encode-table"
-        data
-        {(u/kw :table :name idx) table
-         (u/kw :table :val idx)
-         (apply merge
-                (let [all-vals (table-vals data)
-                      all-cols (table-cols data)
-                      indexes (range (count all-cols))
-                      table-vals (map #(nth-from all-vals %) indexes)]
-                  (map #(format-columns %1 %2 %3)
-                       indexes
-                       all-cols
-                       table-vals)))}
+        data  {(u/kw-prefix :table idx)
+               {:name table
+                :vals
+                (apply merge
+                       (let [all-vals (table-vals data)
+                             all-cols (table-cols data)
+                             indexes (range (count all-cols))
+                             table-vals (map #(nth-from all-vals %) indexes)]
+                         (map #(format-columns %1 %2 %3)
+                              indexes
+                              all-cols
+                              table-vals)))}}
         ]
     ;; (l/info src fn-name (str "table: " table))
     ;; (l/info src fn-name (str "data: " data))
@@ -109,7 +109,7 @@
       ;; (l/info src fn-name (str "manipulator-fn: " manipulator-fn))
       ;; (l/info src fn-name (str "params: " params))
       (let [data (manipulator-fn (map #(fetch-fn %) params))]
-        ;; (l/info src fn-name (str "data: " data))
+        (l/info src fn-name (str "data: " data))
         data))))
 
 (defn request [edn-params]

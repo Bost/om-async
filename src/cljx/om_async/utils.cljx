@@ -5,9 +5,18 @@
 (def modifiers {:name "N" :val "V"})
 
 (defn kw [prefix modifier idx]
-  (keyword (str (prefix prefixes)
+  (keyword (str (if (nil? prefix)   nil (prefix   prefixes))
                 (if (nil? modifier) nil (modifier modifiers))
                 idx)))
+
+(defn kw-prefix [prefix idx]
+  (kw prefix nil idx))
+
+(defn kw-name [idx]
+  (kw nil :name idx))
+
+(defn kw-val [idx]
+  (kw nil :val idx))
 
 (defn contains-value?
   "'contains?' tests if the numeric key is within the range of indexes.

@@ -17,12 +17,33 @@
 (enable-console-print!)
 
 (def dbaseVal0 (u/kw :dbase :val 0))
+(def dbaseName0 (u/kw :dbase :name 0))
+;; dbaseVal0
 
 (def ^:private http-req-methods
   {:get "GET"
    :put "PUT"
    :post "POST"
    :delete "DELETE"})
+
+;; TODO I need @app-state {:dbase0 {:name "somename" :val [...]}}
+(def app-state
+  (atom {
+         dbaseName0 "employees"
+         dbaseVal0 []
+         :toggle #{nil}
+         ;;[nil]
+         }))
+
+;; {:dbaseN0 "employees", :tableN0 "employees", :colN0 "hire_date", :rowV0 "1985-11-21"}
+;; @app-state
+
+(defn vals-for-name [owner keyNameX val-keyNameX keyValX]
+  (if (= (keyNameX owner) val-keyNameX)
+    (keyValX owner)))
+
+(def t (vals-for-name @app-state :dbaseN0 "employees" :dbaseV0))
+(remove nil? (map #(vals-for-name % :tableN0 "departments" :tableV0) t))
 
 (defn edn-xhr
   "XMLHttpRequest: send HTTP/HTTPS async requests to a web server and load the
@@ -45,8 +66,10 @@
                   (u/kw :col :name idx) column
                   (u/kw :row :val idx) row-value}]
         (l/info src fn-name (str "data: " data))
-        ;;       (l/info src fn-name (str "pr-str owner: " (pr-str owner)))
-        (let [toggled-elems (om/get-state owner :toggle)
+        ;; (l/info src fn-name (str "pr-str owner: " (pr-str owner)))
+        (let [toggled-elems (om/get-state owner ;; :toggle
+                                          dbaseVal0
+                                          )
               isIn (u/contains-value? toggled-elems data)]
 
           (l/info src fn-name (str "isIn: " isIn))
@@ -63,17 +86,6 @@
           (fn [response]
             ;; (l/info src fn-name (str "Server response: " response))
             )})))))
-
-(def hm (conj #{}
-       {:a 1 :b 2}
-       {:x 1 :b 2}
-       {:y 1 :b 2}
-       ))
-
-(dissoc hm
-       {:x 1 :b 2}
-        )
-
 
 (defn tr
   "Display table row. dom-cell-elem cound be dom/td or dom/th"
@@ -110,22 +122,16 @@
               (rows kw app col-indexes)
               (cycle ["" alt-row-css-class]))))
 
-(def app-state
-  (atom {dbaseVal0 []
-         :toggle #{nil}
-         ;;[nil]
-         }))
-
 (defn display [show] ;; TODO get rid of 'if'
   (if show
     #js {}
     #js {:display "none"}))
 
+;; TODO the {:name ".." :vals [...]} structure must be created generically
 (defn create-table-for-columns [toggle owner dbase db-table data col-indexes]
-  ;; (l/info (str src "create-table-for-columns: data: " data))
+  (l/info src "create-table-for-columns" (str "data: " data))
   ;; (l/info (str src "create-table-for-columns: col-indexes: " col-indexes))
   (dom/div nil (str "toggle: " toggle)
-
   (dom/div nil
            db-table
            (dom/table nil
@@ -173,7 +179,7 @@
                               )
     om/IRenderState
     (render-state [_ {:keys [toggle]}]
-                  (let [dbase (name :employees)] ;; (name :kw) => "kw"
+                  (let [dbase (dbaseName0 app)] ;; (name :kw) => "kw"
                     ;; TODO get rid of 'if'
                     ;; (l/info src "component-constructor" (str "app: " (pr-str app)))
                     (apply dom/div nil
@@ -207,7 +213,10 @@
                   ;; :data {:select-rows-from ["departments"]}
                   ;; :data {:show-tables-from ["employees"]}
                   ;; :data {:show-tables-with-data-from [dbase]}
-                  :data {:show-tables-with-data-from ["employees"]}
+                  :data {:show-tables-with-data-from [
+                                                      "employees"
+;;                                                       (dbaseName0 app)
+                                                      ]}
                   :on-complete #(om/transact! app dbaseVal0 (fn [_] %))})
                 ) ;; (name :kw) => "kw"
     om/IRender
