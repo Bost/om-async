@@ -16,9 +16,8 @@
         k (keys row)
         kv (into [] k)
         n (map #(name %) kv)
-        nv (into [] n)
-        vvn (into [] (map (fn [v] [v]) nv))]
-    vvn))
+        nv (into [] n)]
+    nv))
 
 (defn table-vals [data]
   (into []
@@ -28,28 +27,26 @@
                              (into [] (vals v)))))
              data)))
 
-(defn nth-from [all-vals i]
-  (into [] (map #(nth % i) all-vals)))
+(defn nth-from [all-vals idx]
+  (into [] (map #(nth % idx) all-vals)))
 
-(defn format-columns [idx column column-vals]
-  {(u/kw :col nil idx)
-   {:name column :vals column-vals}})
+(defn encode-entity [idx prefix name vals]
+  {(u/kw-prefix prefix idx)
+   ;; TODO don't transfer a vector containing a single name
+   {:name [name] :vals vals}})
 
 (defn encode-table [table data idx]
   (let [fn-name "encode-table"
-        data  {(u/kw-prefix :table idx)
-               {:name table
-                :vals
-                (apply merge
-                       (let [all-vals (table-vals data)
-                             all-cols (table-cols data)
-                             indexes (range (count all-cols))
-                             table-vals (map #(nth-from all-vals %) indexes)]
-                         (map #(format-columns %1 %2 %3)
-                              indexes
-                              all-cols
-                              table-vals)))}}
-        ]
+        vals (apply merge
+                    (let [all-vals (table-vals data)
+                          all-cols (table-cols data)
+                          indexes (range (count all-cols))
+                          table-vals (map #(nth-from all-vals %) indexes)]
+                      (map #(encode-entity %1 :col %2 %3)
+                           indexes
+                           all-cols
+                           table-vals)))
+        data (encode-entity idx :table table vals)]
     ;; (l/info src fn-name (str "table: " table))
     ;; (l/info src fn-name (str "data: " data))
     ;; (l/info src fn-name (str "idx: " idx))
@@ -69,7 +66,7 @@
   (let [list-tables (map first (table-vals (db/show-tables-from dbase)))
         tables (into [] list-tables)
         count-tables (count tables)]
-    ;; (l/info src "" (str "tables: " tables))
+    ;; (l/info src "process-show-tables-with-data-from" (str "tables: " tables))
     (map #(process-select-rows-from dbase %1 %2)
          tables
          (into [] (range count-tables)))))

@@ -26,13 +26,10 @@
    :post "POST"
    :delete "DELETE"})
 
-;; TODO I need @app-state {:dbase0 {:name "somename" :val [...]}}
 (def app-state
-  (atom {
-         dbaseName0 "employees"
-         dbaseVal0 []
+  (atom {;; TODO dbase0 should be created by transfer.clj
+         :dbase0 {:name ["employees"] :vals []}
          :toggle #{nil}
-         ;;[nil]
          }))
 
 ;; {:dbaseN0 "employees", :tableN0 "employees", :colN0 "hire_date", :rowV0 "1985-11-21"}
