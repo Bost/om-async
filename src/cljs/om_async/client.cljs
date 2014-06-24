@@ -16,10 +16,6 @@
 
 (enable-console-print!)
 
-(def dbaseVal0 (u/kw :dbase :val 0))
-(def dbaseName0 (u/kw :dbase :name 0))
-;; dbaseVal0
-
 (def ^:private http-req-methods
   {:get "GET"
    :put "PUT"
@@ -29,7 +25,7 @@
 (def app-state
   (atom {;; TODO dbase0 should be created by transfer.clj
          :dbase0 {:name ["employees"] :vals []}
-         :toggle #{nil}
+         ;;:toggle #{nil}
          }))
 
 ;; {:dbaseN0 "employees", :tableN0 "employees", :colN0 "hire_date", :rowV0 "1985-11-21"}
@@ -38,9 +34,6 @@
 (defn vals-for-name [owner keyNameX val-keyNameX keyValX]
   (if (= (keyNameX owner) val-keyNameX)
     (keyValX owner)))
-
-(def t (vals-for-name @app-state :dbaseN0 "employees" :dbaseV0))
-(remove nil? (map #(vals-for-name % :tableN0 "departments" :tableV0) t))
 
 (defn edn-xhr
   "XMLHttpRequest: send HTTP/HTTPS async requests to a web server and load the
@@ -65,8 +58,7 @@
         (l/info src fn-name (str "data: " data))
         ;; (l/info src fn-name (str "pr-str owner: " (pr-str owner)))
         (let [toggled-elems (om/get-state owner ;; :toggle
-                                          dbaseVal0
-                                          )
+                                          (:val (:dbase0 app)))
               isIn (u/contains-value? toggled-elems data)]
 
           (l/info src fn-name (str "isIn: " isIn))
@@ -170,64 +162,73 @@
 ;;   (println "color executed"))
 
 (defn construct-component [app owner {:keys [toggle] :as opts}]
-  (reify
-    om/IInitState (init-state [_]
-;;                               {:toggle "foo"}
-                              )
-    om/IRenderState
-    (render-state [_ {:keys [toggle]}]
-                  (let [dbase (dbaseName0 app)] ;; (name :kw) => "kw"
-                    ;; TODO get rid of 'if'
-                    ;; (l/info src "component-constructor" (str "app: " (pr-str app)))
-                    (apply dom/div nil
-                           (let [tables (dbaseVal0 app)
-                                 cnt-tables (count tables)]
-                             ;; (l/info src "component-constructor" (str "tables: " (pr-str tables)))
-                             ;; (l/info src "component-constructor" (str "cnt-tables: " cnt-tables))
-                             (if (= 0 cnt-tables)
-                               (let [msg (str "Fetching data from dbase: " dbase)]
-                                 (l/info src "construct-component" msg)
-                                 msg)
-                               (let [all-tables (into [] (range cnt-tables))
-                                     displayed-tables (into [] (filter table-filter? all-tables))]
-                                 (map #(create-table
-                                        toggle
-                                        owner
-                                        dbase
-                                        (get-data (u/kw :table :name %) tables)
-                                        (get-data (u/kw :table :val  %) tables))
-                                      displayed-tables)))))))))
+  (let [fn-name "construct-component"]
+    (reify
+      om/IInitState (init-state [_]
+                                ;; {:toggle "foo"}
+                                )
+      om/IRenderState
+      (render-state [_ {:keys [toggle]}]
+                    (let [dbase (first (:name (:dbase0 app)))] ;; (name :kw) => "kw"
+                      ;; TODO get rid of 'if'
+                      (l/info src fn-name (str "dbase: " dbase))
+                      (l/info src fn-name (str "app: " (pr-str app)))
+                      (apply dom/div nil
+                             (let [tables (:val (:dbase0 app))
+                                   cnt-tables (count tables)]
+                               (l/info src fn-name (str "tables: " (pr-str tables)))
+                               (l/info src fn-name (str "cnt-tables: " cnt-tables))
+                               (if (= 0 cnt-tables)
+                                 (let [msg (str "Fetching data from dbase: " dbase)]
+                                   (l/info src fn-name msg)
+                                   msg)
+                                 (let [all-tables (into [] (range cnt-tables))
+                                       displayed-tables (into [] (filter table-filter? all-tables))]
+                                   (map #(create-table
+                                          toggle
+                                          owner
+                                          dbase
+                                          (get-data (u/kw :table :name %) tables)
+                                          (get-data (u/kw :table :val  %) tables))
+                                        displayed-tables))))))))))
 
 (defn view [app owner]
-  (reify
-    om/IWillMount
-    (will-mount [_]
-                ;;(contact-server (name :employees))
-                (edn-xhr
-                 {:method :put
-                  :url "fetch"
-                  ;; :data {:select-rows-from ["employees" "departments"]}
-                  ;; :data {:select-rows-from ["departments"]}
-                  ;; :data {:show-tables-from ["employees"]}
-                  ;; :data {:show-tables-with-data-from [dbase]}
-                  :data {:show-tables-with-data-from [
-                                                      "employees"
-;;                                                       (dbaseName0 app)
-                                                      ]}
-                  :on-complete #(om/transact! app dbaseVal0 (fn [_] %))})
-                ) ;; (name :kw) => "kw"
-    om/IRender
-    (render [_]
-            (dom/div nil
-                     (apply dom/div nil
-                            (map
-                             (fn [_]
-                               (om/build construct-component app
-                                         ;; {:opts {:toggle false}} ;; this has no effect
-                                         ))
-                             (:toggle app))
-                            ))
-            )))
+  (let [fn-name "view"]
+    (reify
+      om/IWillMount
+      (will-mount [_]
+                  ;;(contact-server (name :employees))
+                  (edn-xhr
+                   {:method :put
+                    :url "fetch"
+                    ;; :data {:select-rows-from ["employees" "departments"]}
+                    ;; :data {:select-rows-from ["departments"]}
+                    ;; :data {:show-tables-from ["employees"]}
+                    ;; :data {:show-tables-with-data-from [dbase]}
+                    :data {:show-tables-with-data-from
+                           [(first (:name (:dbase0 app))) ;; i.e. "employees"
+                            ]}
+                    :on-complete (let [x (:val (:dbase0 app))]
+                                   (l/info src fn-name (str "before x: " (pr-str x)))
+                                   #(om/transact! app x (fn [_] %))
+                                   ;; TODO the problem is in the x
+                                   (l/info src fn-name (str "after x: " (pr-str x)))
+                                   )})
+                  ) ;; (name :kw) => "kw"
+      om/IRender
+      (render [_]
+              (dom/div nil
+                       (apply dom/div nil
+                              (map
+                               (fn [_]
+                                 (om/build construct-component app
+                                           ;; {:opts {:toggle false}} ;; this has no effect
+                                           ))
+                               ;; (:toggle app)
+                               (:dbase0 app)
+                               )
+                              ))
+              ))))
 
 
 (om/root view app-state {:target (gdom/getElement

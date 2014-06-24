@@ -72,11 +72,12 @@
          (into [] (range count-tables)))))
 
 (defn process-request [params idx]
-  (let [table ((u/kw :table :name idx) params)
-        data (encode-table table (db/s params idx) idx)]
-    ;; (l/info src "process-request" (str "table: " table))
-    ;; (l/info src "process-request" (str "data: " data))
-    data))
+  (let [fn-name "process-request"]
+    (let [table ((u/kw :table :name idx) params)
+          data (encode-table table (db/s params idx) idx)]
+      (l/info src fn-name (str "table: " table))
+      ;; (l/info src fn-name (str "data: " data))
+      data)))
 
 (def fetch-fns {:select-rows-from           process-select-rows-from
                 :show-tables-from           process-show-tables-from

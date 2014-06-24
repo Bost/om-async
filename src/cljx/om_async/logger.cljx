@@ -1,7 +1,18 @@
 (ns om-async.logger
   ;; TODO find a logger for server (clj) and client (cljs)
-  ;; (:require [taoensso.timbre :as logger])
-  )
+  (:require [om-async.utils :as u]
+            ;; [taoensso.timbre :as logger]
+   ))
 
-(defn info [file fn-name msg]
-  (println (str file "; " fn-name "; " msg)))
+(defn info [src fn-name msg]
+  (if (u/contains-value?
+       ["client.cljs"
+        "transform.clj"
+        ] src)
+    (if (u/contains-value?
+         ["construct-component"
+          "fetch"
+          "process-request"
+          "view"] fn-name)
+      (println (str src "; " fn-name "; " msg))
+      )))
