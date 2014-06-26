@@ -103,15 +103,18 @@
   [owner dbase table column-vals
    dom-cell-elem row-vals css-class]
   (let [fn-name "tr"]
-    (l/infod src fn-name "table" table)
+    ;;(l/infod src fn-name "table" table)
     (l/infod src fn-name "column-vals" column-vals)
+    ;; (l/infod src fn-name "dom-cell-elem" dom-cell-elem)
     (l/infod src fn-name "row-vals" row-vals)
     (apply dom/tr #js {:className css-class}
            (map #(dom-cell-elem
-                  #js {:onClick (onClick owner dbase table %1 %2)}
+                  ;;#js {:onClick (onClick owner dbase table %1 %2)}
+                  nil
                   %2)
-                (:vals column-vals)
-                (:vals row-vals)
+                column-vals
+                row-vals
+
                 ))))
 
 (defn key-vector [indexes]
@@ -124,17 +127,17 @@
 
 (defn table-elem
   [owner dbase table
-   app col-indexes kw dom-table-elem dom-cell-elem alt-row-css-class]
+   data col-indexes kw dom-table-elem dom-cell-elem alt-row-css-class]
   (let [fn-name "table-elem"]
-    (l/infod src fn-name "app" app)
+    (l/infod src fn-name "data" data)
     (l/infod src fn-name "col-indexes" col-indexes)
     (l/infod src fn-name "kw" kw)
     (apply dom-table-elem nil
            (map #(tr owner dbase table %1
                      dom-cell-elem %2 %3)
                 ;; TODO do (cycle [nil nil ...]) when processing table header
-                (cycle (rows :name app col-indexes))
-                (rows kw app col-indexes)
+                (cycle    (rows :name data col-indexes))
+                (identity (rows kw    data col-indexes))
                 (cycle ["" alt-row-css-class])))))
 
 (defn display [show] ;; TODO get rid of 'if'
@@ -151,31 +154,60 @@
                                      (table-elem owner dbase db-table
                                                  data col-indexes :name dom/thead dom/th "")
                                      (table-elem owner dbase db-table
+
                                                  data col-indexes :vals dom/tbody dom/td "odd"))))))
 
-(defn get-data [korks parent-data]
-  (let [fn-name "get-data"]
-    ;; (l/infod src fn-name "korks" korks)
-    ;; (l/info src fn-name (str "parent-data: " (pr-str parent-data)))
-    (first (remove nil? (map #(get-in % korks) parent-data)))))
+(def korks [:table0 :name])
+(def parent-data
+  [{:table0 {:vals [{:col0 {:vals ["Customer Service" "Development"], :name ["dept_name"]}}
+                    {:col1 {:vals ["d009" "d005"], :name ["dept_no"]}}], :name ["departments"]}}
+   {:table1 {:vals [{:col0 {:vals ["9999-01-01" "9999-01-01"], :name ["to_date"]}} {:col1 {:vals ["1986-06-26" "1996-08-03"], :name ["from_date"]}} {:col2 {:vals ["d005" "d007"], :name ["dept_no"]}} {:col3 {:vals ["10001" "10002"], :name ["emp_no"]}}], :name ["dept_emp"]}} {:table2 {:vals [{:col0 {:vals ["1991-10-01" "9999-01-01"], :name ["to_date"]}} {:col1 {:vals ["1985-01-01" "1991-10-01"], :name ["from_date"]}} {:col2 {:vals ["110022" "110039"], :name ["emp_no"]}} {:col3 {:vals ["d001" "d001"], :name ["dept_no"]}}], :name ["dept_manager"]}} {:table3 {:vals [{:col0 {:vals ["1986-06-26" "1985-11-21"], :name ["hire_date"]}} {:col1 {:vals ["M" "F"], :name ["gender"]}} {:col2 {:vals ["Facello" "Simmel"], :name ["last_name"]}} {:col3 {:vals ["Georgi" "Bezalel"], :name ["first_name"]}} {:col4 {:vals ["1953-09-02" "1964-06-02"], :name ["birth_date"]}} {:col5 {:vals ["10001" "10002"], :name ["emp_no"]}}], :name ["employees"]}} {:table4 {:vals [{:col0 {:vals ["1987-06-26" "1988-06-25"], :name ["to_date"]}} {:col1 {:vals ["1986-06-26" "1987-06-26"], :name ["from_date"]}} {:col2 {:vals ["60117" "62102"], :name ["salary"]}} {:col3 {:vals ["10001" "10001"], :name ["emp_no"]}}], :name ["salaries"]}} {:table5 {:vals [{:col0 {:vals ["9999-01-01" "9999-01-01"], :name ["to_date"]}} {:col1 {:vals ["1986-06-26" "1996-08-03"], :name ["from_date"]}} {:col2 {:vals ["Senior Engineer" "Staff"], :name ["title"]}} {:col3 {:vals ["10001" "10002"], :name ["emp_no"]}}], :name ["titles"]}}])
+;;(def korks [:table0 :vals])
+
+
+ (defn get-data [kw-table kw-col kw-name-or-vals parent-data]
+   (let [fn-name "get-data"]
+     (l/infod src fn-name "kw-table" kw-table)
+     (l/infod src fn-name "kw-col" kw-col)
+     (l/infod src fn-name "kw-name-or-vals" kw-name-or-vals)
+     (l/infod src fn-name "parent-data" parent-data)
+     ;;(first (remove nil? (map #(get-in % korks) parent-data))))
+     (let [m (first
+              (remove nil?
+                      (into []
+                            (map #(get-in % [kw-table :vals]) parent-data))))]
+       (l/infod src fn-name "m" m)
+       (map #(get-in % [kw-col kw-name-or-vals]) m)
+       ;; (map #(get-in % [:col0 :vals]) m)
+       )
+     ))
+
+
+(def kw-table :table0)
+(def kw-col :col0)
+(def kw-name-or-vals :vals)
+
+(get-data kw-table kw-col kw-name-or-vals parent-data)
+
+
 
 (defn column-filter? [elem-idx] true) ;; no element is filtered out
 ;; (defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no element is filtered out
 (defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no element is filtered out
 
 (defn create-table [toggle owner dbase db-table
-                    tdata]
+                    data]
   (let [fn-name "create-table"]
 ;;     (l/infod src fn-name "owner" owner)
 ;;     (l/info src fn-name (str "owner: " (pr-str owner)))
     ;; (l/info src fn-name (str "dbase: " dbase))
     ;; (l/infod src fn-name "db-table" db-table)
-    (l/infod src fn-name "tdata" tdata)
-    (let [all-cols (into [] (range (count tdata)))
+    (l/infod src fn-name "data" data)
+    (let [all-cols (into [] (range (count data)))
           displayed-cols (into [] (filter column-filter? all-cols))]
       ;; (l/infod src fn-name "all-cols" all-cols)
       (create-table-for-columns toggle owner dbase db-table
-                                tdata displayed-cols))))
+                                data displayed-cols))))
 
 ;; (defn contact-server [dbase]
 ;;   (edn-xhr
@@ -224,8 +256,8 @@
                                             toggle
                                             owner
                                             dbase
-                                            (get-data [(u/kw-prefix :table %) :name] tables)
-                                            (get-data [(u/kw-prefix :table %) :vals] tables))
+                                            (get-data (u/kw-prefix :table %) :col0 :name tables)
+                                            (get-data (u/kw-prefix :table %) :col0 :vals tables))
                                           displayed-tables))
                                    )))))))))
 
