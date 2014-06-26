@@ -23,13 +23,9 @@
    :delete "DELETE"})
 
 (def app-state
-  (atom {;; TODO dbase0 should be created by transfer.clj
-         :dbase0 {:name ["employees"] :vals []}
+  (atom {:dbase0 {:name ["employees"] :vals []} ;; TODO create dbase0 by transfer.clj
          ;;:toggle #{nil}
          }))
-
-;; {:dbaseN0 "employees", :tableN0 "employees", :colN0 "hire_date", :rowV0 "1985-11-21"}
-;; @app-state
 
 (defn vals-for-name [owner keyNameX val-keyNameX keyValX]
   (if (= (keyNameX owner) val-keyNameX)
@@ -57,8 +53,10 @@
                   (u/kw :row :val idx) row-value}]
         (l/info src fn-name (str "data: " data))
         ;; (l/info src fn-name (str "pr-str owner: " (pr-str owner)))
-        (let [toggled-elems (om/get-state owner ;; :toggle
-                                          (:val (:dbase0 app)))
+        (let [toggled-elems (om/get-state owner
+                                          :toggle
+                                          ;;(:val (:dbase0 app))
+                                          )
               isIn (u/contains-value? toggled-elems data)]
 
           (l/info src fn-name (str "isIn: " isIn))
@@ -100,51 +98,79 @@
 (defn table-elem
   [owner dbase table
    app col-indexes kw dom-table-elem dom-cell-elem alt-row-css-class]
-  ;; (l/info (str src "table-elem: (def app " (pr-str app) ")"))
-  ;; (l/info (str src "table-elem: (rows :name app " col-indexes ")"))
-  ;; (l/info (str src "table-elem: (rows " kw " app " col-indexes ")"))
-  (apply dom-table-elem nil
-         (map #(tr owner dbase table %1
-                   dom-cell-elem %2 %3)
-              ;; TODO do (cycle [nil nil ...]) when processing table header
-              (cycle (rows :name app col-indexes))
-              (rows kw app col-indexes)
-              (cycle ["" alt-row-css-class]))))
+  (let [fn-name "table-elem"]
+    (l/info src fn-name (str "(def app " (pr-str app) ")"))
+    (l/info src fn-name (str "(rows :name app " col-indexes ")"))
+    (l/info src fn-name (str "(rows " kw " app " col-indexes ")"))
+    (apply dom-table-elem nil
+           (map #(tr owner dbase table %1
+                     dom-cell-elem %2 %3)
+                ;; TODO do (cycle [nil nil ...]) when processing table header
+                (cycle (rows :name app col-indexes))
+                (rows kw app col-indexes)
+                (cycle ["" alt-row-css-class])))))
+
+(def app
+  [
+   [:vals {:col0 {:vals ["Customer Service" "Development"], :name ["dept_name"]}, :col1 {:vals ["d009" "d005"], :name ["dept_no"]}}]
+   [:name ["departments"]]])
+
+(def app
+  {
+   :vals {:col0 {:vals ["Customer Service" "Development"], :name ["dept_name"]},
+          :col1 {:vals ["d009" "d005"], :name ["dept_no"]}},
+   :name ["departments"]})
+
+(key-vector [0 1])
+(rows :vals app [0 1])
 
 (defn display [show] ;; TODO get rid of 'if'
   (if show
     #js {}
     #js {:display "none"}))
 
-;; TODO the {:name ".." :vals [...]} structure must be created generically
 (defn create-table-for-columns [toggle owner dbase db-table data col-indexes]
-  (l/info src "create-table-for-columns" (str "data: " data))
-  ;; (l/info (str src "create-table-for-columns: col-indexes: " col-indexes))
-  (dom/div nil (str "toggle: " toggle)
-  (dom/div nil
-           db-table
-           (dom/table nil
-                      (table-elem owner dbase db-table
-                                  data col-indexes :name dom/thead dom/th "")
-                      (table-elem owner dbase db-table
-                                  data col-indexes :vals dom/tbody dom/td "odd")))))
+  (let [fn-name "create-table-for-columns"]
+;;     (l/info src fn-name (str "data: " (pr-str data)))
+    ;; (l/info (str src "create-table-for-columns: col-indexes: " col-indexes))
+    (dom/div nil (str "toggle: " toggle)
+             (dom/div nil
+                      db-table
+                      (dom/table nil
+                                 (table-elem owner dbase db-table
+                                             data col-indexes :name dom/thead dom/th "")
+                                 (table-elem owner dbase db-table
+                                             data col-indexes :vals dom/tbody dom/td "odd"))))))
 
-(defn get-data [kw parent-data]
-  ;; (l/info src "get-data" (str "parent-data: " (pr-str parent-data)))
-  (let [child-data (remove nil? (map kw parent-data))]
-    ;; (l/info src "get-data" (str " kw: " kw))
-    ;; (l/info src "get-data" (str "child-data: " (pr-str child-data)))
-    (first child-data)))
+;; TODO get-data; korks
+(defn get-data [korks parent-data]
+  (let [fn-name "get-data"]
+    (l/info src fn-name (str "parent-data: " (pr-str parent-data)))
+    (let [ks (if (sequential? korks) korks [korks])
+          child-data (remove nil? (map kw parent-data))]
+      (l/info src fn-name (str " kw: " kw))
+      (l/info src fn-name (str "child-data: " (pr-str child-data)))
+      (;; into []
+       identity
+       (first child-data)))))
 
 (defn column-filter? [elem-idx] true) ;; no element is filtered out
-(defn table-filter?  [elem-idx] true) ;; no element is filtered out
+(defn table-filter?  [elem-idx]
+  (= elem-idx 0)
+  ;; true
+  ) ;; no element is filtered out
 
 (defn create-table [toggle owner dbase db-table
                     tdata]
-  (let [all-cols (into [] (range (count tdata)))
-        displayed-cols (into [] (filter column-filter? all-cols))]
-    (create-table-for-columns toggle owner dbase db-table
-                              tdata displayed-cols)))
+  (let [fn-name "create-table"]
+;;     (l/info src fn-name (str "owner: " owner))
+;;     (l/info src fn-name (str "dbase: " dbase))
+;;     (l/info src fn-name (str "db-table: " db-table))
+;;     (l/info src fn-name (str "tdata: " (pr-str tdata)))
+    (let [all-cols (into [] (range (count tdata)))
+          displayed-cols (into [] (filter column-filter? all-cols))]
+      (create-table-for-columns toggle owner dbase db-table
+                                tdata displayed-cols))))
 
 ;; (defn contact-server [dbase]
 ;;   (edn-xhr
@@ -171,26 +197,32 @@
       (render-state [_ {:keys [toggle]}]
                     (let [dbase (first (:name (:dbase0 app)))] ;; (name :kw) => "kw"
                       ;; TODO get rid of 'if'
-                      (l/info src fn-name (str "dbase: " dbase))
-                      (l/info src fn-name (str "app: " (pr-str app)))
+                      ;; (l/info src fn-name (str "dbase: " dbase))
+                      ;; (l/info src fn-name (str "app: " (pr-str app)))
                       (apply dom/div nil
-                             (let [tables (:val (:dbase0 app))
+                             (let [tables (:vals (:dbase0 app))
                                    cnt-tables (count tables)]
-                               (l/info src fn-name (str "tables: " (pr-str tables)))
-                               (l/info src fn-name (str "cnt-tables: " cnt-tables))
+                               ;; (l/info src fn-name (str "tables: " (pr-str tables)))
+                               ;; (l/info src fn-name (str "cnt-tables: " cnt-tables))
                                (if (= 0 cnt-tables)
                                  (let [msg (str "Fetching data from dbase: " dbase)]
                                    (l/info src fn-name msg)
                                    msg)
                                  (let [all-tables (into [] (range cnt-tables))
                                        displayed-tables (into [] (filter table-filter? all-tables))]
+                                   ;; (l/info src fn-name (str "all-tables: " (pr-str all-tables)))
                                    (map #(create-table
                                           toggle
                                           owner
                                           dbase
-                                          (get-data (u/kw :table :name %) tables)
-                                          (get-data (u/kw :table :val  %) tables))
-                                        displayed-tables))))))))))
+                                          (get-data [:table0 :name]
+                                                    ;; (u/kw-prefix :table %)
+                                                    tables)
+                                          (get-data [:table0 :vals]
+                                                    ;; (u/kw :table :vals  %)
+                                                    tables))
+                                        displayed-tables))
+                                 ))))))))
 
 (defn view [app owner]
   (let [fn-name "view"]
@@ -208,13 +240,8 @@
                     :data {:show-tables-with-data-from
                            [(first (:name (:dbase0 app))) ;; i.e. "employees"
                             ]}
-                    :on-complete (let [x (:val (:dbase0 app))]
-                                   (l/info src fn-name (str "before x: " (pr-str x)))
-                                   #(om/transact! app x (fn [_] %))
-                                   ;; TODO the problem is in the x
-                                   (l/info src fn-name (str "after x: " (pr-str x)))
-                                   )})
-                  ) ;; (name :kw) => "kw"
+                    :on-complete (let [korks [:dbase0 :vals]]  ;; korks: key or key-sequence
+                                   #(om/transact! app korks (fn [_] %)))})) ;; (name :kw) => "kw"
       om/IRender
       (render [_]
               (dom/div nil

@@ -11,7 +11,11 @@
         ] src)
     (if (u/contains-value?
          ["construct-component"
-          "fetch"
+          ;; "fetch"
+          ;; "create-table-for-columns"
+          "get-data"
+          "create-table"
+          "table-elem"
           "process-request"
           "view"] fn-name)
       (println (str src "; " fn-name "; " msg))
