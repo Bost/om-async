@@ -20,37 +20,35 @@
     nv))
 
 (defn table-vals [data]
-  (into []
-        (map (fn [v]
-               ;; TODO convert only dates to strings
-               (into [] (map str
-                             (into [] (vals v)))))
-             data)))
+  (map (fn [v]
+         ;; TODO convert only dates to strings
+         (into [] (map str
+                       (into [] (vals v)))))
+       data))
 
 (defn nth-from [all-vals idx]
-  (into [] (map #(nth % idx) all-vals)))
+  (map #(nth % idx) all-vals))
 
 (defn encode-entity [idx prefix name vals]
   {(u/kw-prefix prefix idx)
    ;; TODO don't transfer a vector containing a single name
-   {:name [name] :vals vals}})
+   {:name [name] :vals (into [] vals)}})
 
 (defn encode-table [table data idx]
-  (let [fn-name "encode-table"
-        vals (apply merge
-                    (let [all-vals (table-vals data)
-                          all-cols (table-cols data)
-                          indexes (range (count all-cols))
-                          table-vals (map #(nth-from all-vals %) indexes)]
-                      (map #(encode-entity %1 :col %2 %3)
-                           indexes
-                           all-cols
-                           table-vals)))
-        data (encode-entity idx :table table vals)]
-    ;; (l/info src fn-name (str "table: " table))
-    ;; (l/info src fn-name (str "data: " data))
-    ;; (l/info src fn-name (str "idx: " idx))
-    data))
+  (let [fn-name "encode-table"]
+    (let [vals (let [all-vals (table-vals data)
+                     all-cols (table-cols data)
+                     indexes (range (count all-cols))
+                     table-vals (map #(nth-from all-vals %) indexes)]
+                 (map #(encode-entity %1 :col %2 %3)
+                      indexes
+                      all-cols
+                      table-vals))
+          data (encode-entity idx :table table vals)]
+      ;; (l/info src fn-name (str "table: " table))
+      ;; (l/info src fn-name (str "data: " data))
+      ;; (l/info src fn-name (str "idx: " idx))
+      data)))
 
 ;; every process-* function must call a function from om-async.db
 (defn process-sql [sql-fn dbase obj idx]

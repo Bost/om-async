@@ -27,9 +27,18 @@
          ;;:toggle #{nil}
          }))
 
-(defn vals-for-name [owner keyNameX val-keyNameX keyValX]
-  (if (= (keyNameX owner) val-keyNameX)
-    (keyValX owner)))
+(defn kw-from-vec
+  "Returns a hash-map from the vector of hash-maps m where the first
+  key of the returned hashmap equals to kw"
+  [kw vec-of-hash-maps]
+  (filter #(= kw (first (keys %)))
+          vec-of-hash-maps))
+
+ (defn x [kw vec-of-vals]
+   (first
+    (vals
+     (first
+      (kw-from-vec kw vec-of-vals)))))
 
 (defn edn-xhr
   "XMLHttpRequest: send HTTP/HTTPS async requests to a web server and load the
@@ -43,65 +52,83 @@
       (send url (http-req-methods method) (when data (pr-str data))
         #js {"Content-Type" "application/edn"}))))
 
-(defn onClick [owner dbase table column row-value]
+
+(defn onClick [owner dbase table col row-value]
   (let [fn-name "onClick"]
     (fn [e]
       (let [idx 0
-            data {(u/kw :dbase :name idx) dbase
-                  (u/kw :table :name idx) table
-                  (u/kw :col :name idx) column
-                  (u/kw :row :val idx) row-value}]
-        (l/info src fn-name (str "data: " data))
-        ;; (l/info src fn-name (str "pr-str owner: " (pr-str owner)))
-        (let [toggled-elems (om/get-state owner
-                                          :toggle
-                                          ;;(:val (:dbase0 app))
-                                          )
-              isIn (u/contains-value? toggled-elems data)]
+            kw-dbase (u/kw-prefix :dbase idx)
+            kw-table (u/kw-prefix :table idx)
+            kw-col (u/kw-prefix :col idx)
+            kw-row-value (u/kw-prefix :row idx)
+            data {kw-dbase dbase
+                  kw-table table
+                  kw-col col
+                  kw-row-value row-value}]
+;;         (l/infod src fn-name "data" data)  ;; impossible to work with data
 
-          (l/info src fn-name (str "isIn: " isIn))
-          ;; (if (isIn)
-          ;;   ;; TODO serch if om has some 'state-remove' function
-          ;;   (om/set-state! owner :toggle data))
+;;         (l/info src fn-name (str "pr-str owner: " (pr-str owner)))
+        ;; (l/infod src fn-name "owner" owner)
+        (l/infod src fn-name "kw-dbase" kw-dbase)
+        (l/infod src fn-name "kw-table" kw-table)
+        (l/infod src fn-name "kw-col" kw-col)
+        (l/infod src fn-name "kw-row-value" kw-row-value)
+        (let [korks [kw-dbase :vals kw-table :vals kw-col :vals]]
+          (l/infod src fn-name "korks" korks)
           )
+;;         (let [toggled-elems (om/get-state owner
+;;                                           :toggle
+;;                                           ;;(:val (:dbase0 app))
+;;                                           )
+;;               isIn (u/contains-value? toggled-elems data)]
 
-        (edn-xhr
-         {:method :put
-          :url (str "select/id0")
-          :data {:request data}
-          :on-complete
-          (fn [response]
-            ;; (l/info src fn-name (str "Server response: " response))
-            )})))))
+;;           (l/info src fn-name (str "isIn: " isIn))
+;;           ;; (if (isIn)
+;;           ;;   ;; TODO serch if om has some 'state-remove' function
+;;           ;;   (om/set-state! owner :toggle data))
+;;           )
+
+;;         (edn-xhr
+;;          {:method :put
+;;           :url (str "select/id0")
+;;           :data {:request data}
+;;           :on-complete
+;;           (fn [response]
+;;             ;; (l/info src fn-name (str "Server response: " response))
+;;             )})
+        ))))
 
 (defn tr
   "Display table row. dom-cell-elem cound be dom/td or dom/th"
   [owner dbase table column-vals
    dom-cell-elem row-vals css-class]
-  ;; (l/info (str src "tr: column-vals: " column-vals))
-  (apply dom/tr #js {:className css-class}
-         (map #(dom-cell-elem
-                #js {:onClick (onClick owner dbase table %1 %2)}
-                %2)
-              column-vals
-              row-vals
-              )))
+  (let [fn-name "tr"]
+    (l/infod src fn-name "table" table)
+    (l/infod src fn-name "column-vals" column-vals)
+    (l/infod src fn-name "row-vals" row-vals)
+    (apply dom/tr #js {:className css-class}
+           (map #(dom-cell-elem
+                  #js {:onClick (onClick owner dbase table %1 %2)}
+                  %2)
+                (:vals column-vals)
+                (:vals row-vals)
+                ))))
 
 (defn key-vector [indexes]
   (into [] (map #(u/kw :col nil %) indexes)))
 
 (defn rows [kw app col-indexes]
-  (apply map vector
-         (map #(kw (% app))
-              (key-vector col-indexes))))
+  (into []
+  (map #(x % app)
+       (key-vector col-indexes))))
 
 (defn table-elem
   [owner dbase table
    app col-indexes kw dom-table-elem dom-cell-elem alt-row-css-class]
   (let [fn-name "table-elem"]
-    ;; (l/info src fn-name (str "(def app " (pr-str app) ")"))
-    ;; (l/info src fn-name (str "(rows :name app " col-indexes ")"))
-    ;; (l/info src fn-name (str "(rows " kw " app " col-indexes ")"))
+    (l/infod src fn-name "app" app)
+    (l/infod src fn-name "col-indexes" col-indexes)
+    (l/infod src fn-name "kw" kw)
     (apply dom-table-elem nil
            (map #(tr owner dbase table %1
                      dom-cell-elem %2 %3)
@@ -117,7 +144,7 @@
 
 (defn create-table-for-columns [toggle owner dbase db-table data col-indexes]
   (let [fn-name "create-table-for-columns"]
-    ;; (l/info src fn-name (str "data: " (pr-str data)))
+    (l/infod src fn-name "data" data)
     ;; (l/info (str src "create-table-for-columns: col-indexes: " col-indexes))
     (dom/div nil (str "toggle: " toggle)
              (dom/div nil (dom/table nil
@@ -128,22 +155,25 @@
 
 (defn get-data [korks parent-data]
   (let [fn-name "get-data"]
-    ;; (l/info src fn-name (str "(def parent-data " (pr-str parent-data) ")"))
-    ;; (l/info src fn-name (str "(def korks " (pr-str korks) ")"))
+    ;; (l/infod src fn-name "korks" korks)
+    ;; (l/info src fn-name (str "parent-data: " (pr-str parent-data)))
     (first (remove nil? (map #(get-in % korks) parent-data)))))
 
 (defn column-filter? [elem-idx] true) ;; no element is filtered out
-(defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no element is filtered out
+;; (defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no element is filtered out
+(defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no element is filtered out
 
 (defn create-table [toggle owner dbase db-table
                     tdata]
   (let [fn-name "create-table"]
-    ;; (l/info src fn-name (str "owner: " owner))
+;;     (l/infod src fn-name "owner" owner)
+;;     (l/info src fn-name (str "owner: " (pr-str owner)))
     ;; (l/info src fn-name (str "dbase: " dbase))
-    ;; (l/info src fn-name (str "db-table: " db-table))
-    ;; (l/info src fn-name (str "tdata: " (pr-str tdata)))
+    ;; (l/infod src fn-name "db-table" db-table)
+    (l/infod src fn-name "tdata" tdata)
     (let [all-cols (into [] (range (count tdata)))
           displayed-cols (into [] (filter column-filter? all-cols))]
+      ;; (l/infod src fn-name "all-cols" all-cols)
       (create-table-for-columns toggle owner dbase db-table
                                 tdata displayed-cols))))
 
@@ -164,6 +194,7 @@
 
 (defn construct-component [app owner {:keys [toggle] :as opts}]
   (let [fn-name "construct-component"]
+    ;; (l/infod src fn-name "owner" owner)
     (reify
       om/IInitState (init-state [_]
                                 (l/info src fn-name (str "init-state"))
@@ -177,7 +208,7 @@
                       (apply dom/div nil
                              (let [tables (get-in app [:dbase0 :vals])
                                    cnt-tables (count tables)]
-                               ;; (l/info src fn-name (str "tables: " (pr-str tables)))
+                               (l/info src fn-name (str "tables: " (pr-str tables)))
                                ;; (l/info src fn-name (str "cnt-tables: " cnt-tables))
                                (if (= 0 cnt-tables)
                                  (let [msg (str "Fetching data from dbase: " dbase)]
@@ -194,12 +225,13 @@
                                             owner
                                             dbase
                                             (get-data [(u/kw-prefix :table %) :name] tables)
-                                            (get-data [(u/kw :table :vals  %) :vals] tables))
+                                            (get-data [(u/kw-prefix :table %) :vals] tables))
                                           displayed-tables))
                                    )))))))))
 
 (defn view [app owner]
   (let [fn-name "view"]
+    ;; (l/infod src fn-name "owner" owner)
     (reify
       om/IWillMount
       (will-mount [_]
