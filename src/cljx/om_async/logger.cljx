@@ -32,3 +32,17 @@
   (if (u/contains-value? files src)
     (if (u/contains-value? functions fn-name)
       (println (str src "; " fn-name "; " msg)))))
+
+
+(defmacro defnd
+  [fname params & body]
+  `(defn ~fname ~params
+     (do
+       (println "defnd")
+       ~@body)))
+
+(defnd f [x y z]
+  (println "foo")
+  (+ x y z))
+
+(f 1 2 3)
