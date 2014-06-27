@@ -35,14 +35,12 @@
 
 
 (defmacro defnd
+  "This macro is translated to clj file. In clsj files
+  (:require-macros [om-async.logger :as l]) and then l/defnd
+  must be used."
   [fname params & body]
   `(defn ~fname ~params
      (do
        (println "defnd")
        ~@body)))
 
-(defnd f [x y z]
-  (println "foo")
-  (+ x y z))
-
-(f 1 2 3)

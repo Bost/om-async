@@ -9,11 +9,19 @@
             [om-async.logger :as l])
   (:import [goog.net XhrIo]
            goog.net.EventType
-           [goog.events EventType]))
+           [goog.events EventType])
+  (:require-macros [om-async.logger :as l]))
 
 (def src "client.cljs")
 
 (enable-console-print!)
+
+
+(l/defnd ff [x y z]
+  (println "foo")
+  (+ x y z))
+
+(ff 1 2 3)
 
 (def ^:private http-req-methods
   {:get "GET"
