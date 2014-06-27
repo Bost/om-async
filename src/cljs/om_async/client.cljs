@@ -34,11 +34,12 @@
   (filter #(= kw (first (keys %)))
           vec-of-hash-maps))
 
- (defn x [kw vec-of-vals]
-   (first
-    (vals
-     (first
-      (kw-from-vec kw vec-of-vals)))))
+(defn get-table-data [kw vec-of-vals]
+  (;;identity
+   first
+   (vals
+    (first
+     (kw-from-vec kw vec-of-vals)))))
 
 (defn edn-xhr
   "XMLHttpRequest: send HTTP/HTTPS async requests to a web server and load the
@@ -157,15 +158,7 @@
 
                                                  data col-indexes :vals dom/tbody dom/td "odd"))))))
 
-(def korks [:table0 :name])
-(def parent-data
-  [{:table0 {:vals [{:col0 {:vals ["Customer Service" "Development"], :name ["dept_name"]}}
-                    {:col1 {:vals ["d009" "d005"], :name ["dept_no"]}}], :name ["departments"]}}
-   {:table1 {:vals [{:col0 {:vals ["9999-01-01" "9999-01-01"], :name ["to_date"]}} {:col1 {:vals ["1986-06-26" "1996-08-03"], :name ["from_date"]}} {:col2 {:vals ["d005" "d007"], :name ["dept_no"]}} {:col3 {:vals ["10001" "10002"], :name ["emp_no"]}}], :name ["dept_emp"]}} {:table2 {:vals [{:col0 {:vals ["1991-10-01" "9999-01-01"], :name ["to_date"]}} {:col1 {:vals ["1985-01-01" "1991-10-01"], :name ["from_date"]}} {:col2 {:vals ["110022" "110039"], :name ["emp_no"]}} {:col3 {:vals ["d001" "d001"], :name ["dept_no"]}}], :name ["dept_manager"]}} {:table3 {:vals [{:col0 {:vals ["1986-06-26" "1985-11-21"], :name ["hire_date"]}} {:col1 {:vals ["M" "F"], :name ["gender"]}} {:col2 {:vals ["Facello" "Simmel"], :name ["last_name"]}} {:col3 {:vals ["Georgi" "Bezalel"], :name ["first_name"]}} {:col4 {:vals ["1953-09-02" "1964-06-02"], :name ["birth_date"]}} {:col5 {:vals ["10001" "10002"], :name ["emp_no"]}}], :name ["employees"]}} {:table4 {:vals [{:col0 {:vals ["1987-06-26" "1988-06-25"], :name ["to_date"]}} {:col1 {:vals ["1986-06-26" "1987-06-26"], :name ["from_date"]}} {:col2 {:vals ["60117" "62102"], :name ["salary"]}} {:col3 {:vals ["10001" "10001"], :name ["emp_no"]}}], :name ["salaries"]}} {:table5 {:vals [{:col0 {:vals ["9999-01-01" "9999-01-01"], :name ["to_date"]}} {:col1 {:vals ["1986-06-26" "1996-08-03"], :name ["from_date"]}} {:col2 {:vals ["Senior Engineer" "Staff"], :name ["title"]}} {:col3 {:vals ["10001" "10002"], :name ["emp_no"]}}], :name ["titles"]}}])
-;;(def korks [:table0 :vals])
-
-
- (defn get-data [kw-table kw-col kw-name-or-vals parent-data]
+(defn get-data [kw-table kw-col kw-name-or-vals parent-data]
    (let [fn-name "get-data"]
      (l/infod src fn-name "kw-table" kw-table)
      (l/infod src fn-name "kw-col" kw-col)
@@ -201,7 +194,9 @@
 ;;     (l/infod src fn-name "owner" owner)
 ;;     (l/info src fn-name (str "owner: " (pr-str owner)))
     ;; (l/info src fn-name (str "dbase: " dbase))
-    ;; (l/infod src fn-name "db-table" db-table)
+     (l/infod src fn-name "db-table" db-table)
+    ;; (:name data)
+    ;; (:vals data)
     (l/infod src fn-name "data" data)
     (let [all-cols (into [] (range (count data)))
           displayed-cols (into [] (filter column-filter? all-cols))]
@@ -256,8 +251,15 @@
                                             toggle
                                             owner
                                             dbase
-                                            (get-data (u/kw-prefix :table %) :col0 :name tables)
-                                            (get-data (u/kw-prefix :table %) :col0 :vals tables))
+                                            (get-table-data (u/kw-prefix :table %) (get-in app [:dbase0 :vals]))
+
+
+                                            ;; table name
+                                            ;; table data
+                                            ;;(get-data (u/kw-prefix :table %) :col0 :name tables)
+
+                                            ;;(get-data (u/kw-prefix :table %) :col0 :vals tables)
+                                            )
                                           displayed-tables))
                                    )))))))))
 
