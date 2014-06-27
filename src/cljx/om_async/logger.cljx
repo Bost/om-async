@@ -15,6 +15,7 @@
                 "create-table"
                 "table-elem"
                 "get-data"
+                "get-table-data"
                 ;; "process-request"
                 ;; "fetch"
                 ])

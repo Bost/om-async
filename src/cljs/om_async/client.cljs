@@ -6,8 +6,7 @@
             [om.dom :as dom :include-macros true]
             [cljs.core.async :refer [put! chan <!]]
             [om-async.utils :as u]
-            [om-async.logger :as l]
-            )
+            [om-async.logger :as l])
   (:import [goog.net XhrIo]
            goog.net.EventType
            [goog.events EventType]))
@@ -27,19 +26,20 @@
          ;;:toggle #{nil}
          }))
 
-(defn kw-from-vec
+(defn filter-kw
   "Returns a hash-map from the vector of hash-maps m where the first
   key of the returned hashmap equals to kw"
   [kw vec-of-hash-maps]
   (filter #(= kw (first (keys %)))
           vec-of-hash-maps))
 
-(defn get-table-data [kw vec-of-vals]
-  (;;identity
-   first
-   (vals
-    (first
-     (kw-from-vec kw vec-of-vals)))))
+(defn get-table-data [vec-of-hash-maps korks]
+  (let [fn-name "get-table-data"]
+    ;; (l/infod src fn-name "vec-of-hash-maps" vec-of-hash-maps)
+    ;; (l/infod src fn-name "korks" korks)
+    ;; (l/info src fn-name "(get-table-data kw vec-of-hash-maps)")
+    (get-in (first (filter-kw (first korks) vec-of-hash-maps))
+            korks)))
 
 (defn edn-xhr
   "XMLHttpRequest: send HTTP/HTTPS async requests to a web server and load the
@@ -52,7 +52,6 @@
     (. xhr
       (send url (http-req-methods method) (when data (pr-str data))
         #js {"Content-Type" "application/edn"}))))
-
 
 (defn onClick [owner dbase table col row-value]
   (let [fn-name "onClick"]
@@ -101,8 +100,7 @@
 
 (defn tr
   "Display table row. dom-cell-elem cound be dom/td or dom/th"
-  [owner dbase table column-vals
-   dom-cell-elem row-vals css-class]
+  [owner dbase table column-vals dom-cell-elem row-vals css-class]
   (let [fn-name "tr"]
     ;;(l/infod src fn-name "table" table)
     (l/infod src fn-name "column-vals" column-vals)
@@ -110,36 +108,36 @@
     (l/infod src fn-name "row-vals" row-vals)
     (apply dom/tr #js {:className css-class}
            (map #(dom-cell-elem
-                  ;;#js {:onClick (onClick owner dbase table %1 %2)}
-                  nil
+                  #js {:onClick (onClick owner dbase table %1 %2)}
                   %2)
                 column-vals
                 row-vals
-
                 ))))
 
 (defn key-vector [indexes]
   (into [] (map #(u/kw :col nil %) indexes)))
 
-(defn rows [kw app col-indexes]
+(defn rows [kw data col-indexes]
   (into []
-  (map #(x % app)
-       (key-vector col-indexes))))
+        (map #(get-table-data data [% kw])
+             (key-vector col-indexes))))
 
 (defn table-elem
   [owner dbase table
    data col-indexes kw dom-table-elem dom-cell-elem alt-row-css-class]
   (let [fn-name "table-elem"]
     (l/infod src fn-name "data" data)
-    (l/infod src fn-name "col-indexes" col-indexes)
-    (l/infod src fn-name "kw" kw)
+    ;; (l/infod src fn-name "col-indexes" col-indexes)
+    ;; (l/infod src fn-name "kw" kw)
+    ;; (l/info  src fn-name "(rows :name data col-indexes)")
     (apply dom-table-elem nil
-           (map #(tr owner dbase table %1
-                     dom-cell-elem %2 %3)
+           (map #(tr owner dbase table %1 dom-cell-elem %2 %3)
                 ;; TODO do (cycle [nil nil ...]) when processing table header
-                (cycle    (rows :name data col-indexes))
-                (identity (rows kw    data col-indexes))
-                (cycle ["" alt-row-css-class])))))
+                (rows :name data col-indexes)
+                ;;[["dept_name" "dept_no"] ["dept_name" "dept_no"]]
+                (rows kw    data col-indexes)
+                (cycle ["" alt-row-css-class])
+                ))))
 
 (defn display [show] ;; TODO get rid of 'if'
   (if show
@@ -150,13 +148,15 @@
   (let [fn-name "create-table-for-columns"]
     (l/infod src fn-name "data" data)
     ;; (l/info (str src "create-table-for-columns: col-indexes: " col-indexes))
-    (dom/div nil (str "toggle: " toggle)
+    (dom/div nil
+             ;;(str "toggle: " toggle)
+             db-table
              (dom/div nil (dom/table nil
+;;                                      (table-elem owner dbase db-table
+;;                                                  data col-indexes :name dom/thead dom/th "")
                                      (table-elem owner dbase db-table
-                                                 data col-indexes :name dom/thead dom/th "")
-                                     (table-elem owner dbase db-table
-
-                                                 data col-indexes :vals dom/tbody dom/td "odd"))))))
+                                                 data col-indexes :vals dom/tbody dom/td "odd")
+                                     )))))
 
 (defn get-data [kw-table kw-col kw-name-or-vals parent-data]
    (let [fn-name "get-data"]
@@ -175,28 +175,14 @@
        )
      ))
 
-
-(def kw-table :table0)
-(def kw-col :col0)
-(def kw-name-or-vals :vals)
-
-(get-data kw-table kw-col kw-name-or-vals parent-data)
-
-
-
 (defn column-filter? [elem-idx] true) ;; no element is filtered out
 ;; (defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no element is filtered out
 (defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no element is filtered out
 
-(defn create-table [toggle owner dbase db-table
-                    data]
+(defn create-table [toggle owner dbase db-table data]
   (let [fn-name "create-table"]
-;;     (l/infod src fn-name "owner" owner)
-;;     (l/info src fn-name (str "owner: " (pr-str owner)))
-    ;; (l/info src fn-name (str "dbase: " dbase))
-     (l/infod src fn-name "db-table" db-table)
-    ;; (:name data)
-    ;; (:vals data)
+    (l/infod src fn-name "dbase" dbase)
+    ;; (l/infod src fn-name "db-table" db-table)
     (l/infod src fn-name "data" data)
     (let [all-cols (into [] (range (count data)))
           displayed-cols (into [] (filter column-filter? all-cols))]
@@ -204,6 +190,76 @@
       (create-table-for-columns toggle owner dbase db-table
                                 data displayed-cols))))
 
+(defn render-data [data owner dbase cnt-tables toggle]
+  (let [fn-name "render-data"]
+    (l/info src fn-name (str "Rendering data from dbase: " dbase))
+    (let [all-tables       (into [] (range cnt-tables))
+          displayed-tables (into [] (filter table-filter? all-tables))
+          vec-of-hash-maps (get-in data [:dbase0 :vals])
+          ]
+      ;; (l/infod src fn-name "all-tables" all-tables)
+      ;; (l/infod src fn-name "displayed-tables" displayed-tables)
+      (map #(create-table toggle owner dbase
+                          (first
+                           (get-table-data vec-of-hash-maps
+                                           [(u/kw-prefix :table %) :name]))
+                          (identity
+                           (get-table-data vec-of-hash-maps
+                                           [(u/kw-prefix :table %) :vals])))
+           displayed-tables))))
+
+(defn construct-component [data owner {:keys [toggle] :as opts}]
+  (let [fn-name "construct-component"]
+    ;; (l/infod src fn-name "owner" owner)
+    (reify
+      om/IInitState (init-state [_]
+                                (l/infod src fn-name "_" _)
+                                {:toggle "foo"})
+      om/IRenderState
+      (render-state [_ {:keys [toggle]}]
+                    (let [dbase (first (get-in data [:dbase0 :name]))]
+                      ;; TODO get rid of 'if'
+                      ;; (l/infod src fn-name "dbase" dbase)
+                      ;; (l/infod src fn-name "data" data)
+                      (apply dom/div nil
+                             (let [tables (get-in data [:dbase0 :vals])
+                                   cnt-tables (count tables)]
+                               ;; (l/infod src fn-name "tables" tables)
+                               ;; (l/infod src fn-name "cnt-tables" cnt-tables)
+                               (if (= 0 cnt-tables)
+                                 (let [msg (str "Fetching data from dbase: " dbase)]
+                                   (l/info src fn-name msg)
+                                   msg)
+                                 (render-data data owner dbase cnt-tables toggle)))))))))
+
+(defn view [data owner]
+  (let [fn-name "view"]
+    ;; (l/infod src fn-name "owner" owner)
+    (reify
+      om/IWillMount
+      (will-mount [_]
+                  (l/info src fn-name "will-mount")
+                  (edn-xhr
+                   {:method :put
+                    :url "fetch"
+                    ;; :data {:select-rows-from ["employees" "departments"]}
+                    ;; :data {:select-rows-from ["departments"]}
+                    ;; :data {:show-tables-from ["employees"]}
+                    ;; :data {:show-tables-with-data-from [dbase]}
+                    :data {:show-tables-with-data-from [(first (get-in data [:dbase0 :name]))]}
+                    :on-complete #(om/transact! data [:dbase0 :vals] (fn [_] %))})
+                  )
+      om/IRenderState
+      (render-state [_ {:keys [err-msg]}]
+                    (l/info src fn-name "render-state")
+                    (om/build construct-component data)
+                    ))))
+
+
+(om/root view app-state {:target (gdom/getElement
+                                  "dbase0")}) ;; dbase0 is in index.html
+
+;; eval server.clj, client.cljs, open browser with http://localhost:8080
 ;; (defn contact-server [dbase]
 ;;   (edn-xhr
 ;;    {:method :put
@@ -219,75 +275,3 @@
 ;;                 (fn [] [{:color "red"}]))
 ;;   (println "color executed"))
 
-(defn construct-component [app owner {:keys [toggle] :as opts}]
-  (let [fn-name "construct-component"]
-    ;; (l/infod src fn-name "owner" owner)
-    (reify
-      om/IInitState (init-state [_]
-                                (l/info src fn-name (str "init-state"))
-                                {:toggle "foo"})
-      om/IRenderState
-      (render-state [_ {:keys [toggle]}]
-                    (let [dbase (first (get-in app [:dbase0 :name]))] ;; (name :kw) => "kw"
-                      ;; TODO get rid of 'if'
-                      ;; (l/infod src fn-name "dbase" dbase)
-                      ;; (l/info src fn-name (str "app: " (pr-str app)))
-                      (apply dom/div nil
-                             (let [tables (get-in app [:dbase0 :vals])
-                                   cnt-tables (count tables)]
-                               (l/info src fn-name (str "tables: " (pr-str tables)))
-                               ;; (l/info src fn-name (str "cnt-tables: " cnt-tables))
-                               (if (= 0 cnt-tables)
-                                 (let [msg (str "Fetching data from dbase: " dbase)]
-                                   (l/info src fn-name msg)
-                                   msg)
-                                 (do
-                                   (l/info src fn-name (str "Rendering data from dbase: " dbase))
-                                   (let [all-tables (into [] (range cnt-tables))
-                                         displayed-tables (into [] (filter table-filter? all-tables))]
-                                     ;; (l/info src fn-name (str "all-tables: " (pr-str all-tables)))
-                                     ;; (l/infod src fn-name "displayed-tables" displayed-tables)
-                                     (map #(create-table
-                                            toggle
-                                            owner
-                                            dbase
-                                            (get-table-data (u/kw-prefix :table %) (get-in app [:dbase0 :vals]))
-
-
-                                            ;; table name
-                                            ;; table data
-                                            ;;(get-data (u/kw-prefix :table %) :col0 :name tables)
-
-                                            ;;(get-data (u/kw-prefix :table %) :col0 :vals tables)
-                                            )
-                                          displayed-tables))
-                                   )))))))))
-
-(defn view [app owner]
-  (let [fn-name "view"]
-    ;; (l/infod src fn-name "owner" owner)
-    (reify
-      om/IWillMount
-      (will-mount [_]
-                  (l/info src fn-name "will-mount")
-                  (edn-xhr
-                   {:method :put
-                    :url "fetch"
-                    ;; :data {:select-rows-from ["employees" "departments"]}
-                    ;; :data {:select-rows-from ["departments"]}
-                    ;; :data {:show-tables-from ["employees"]}
-                    ;; :data {:show-tables-with-data-from [dbase]}
-                    :data {:show-tables-with-data-from [(first (get-in app [:dbase0 :name]))]}
-                    :on-complete #(om/transact! app [:dbase0 :vals] (fn [_] %))})
-                  )
-      om/IRenderState
-      (render-state [_ {:keys [err-msg]}]
-                    (l/info src fn-name "render-state")
-                    (om/build construct-component app)
-                    ))))
-
-
-(om/root view app-state {:target (gdom/getElement
-                                  "dbase0")}) ;; dbase0 is in index.html
-
-;; eval server.clj, client.cljs, open browser with http://localhost:8080
