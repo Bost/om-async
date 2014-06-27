@@ -33,14 +33,6 @@
   (filter #(= kw (first (keys %)))
           vec-of-hash-maps))
 
-(defn get-table-data [vec-of-hash-maps korks]
-  (let [fn-name "get-table-data"]
-    ;; (l/infod src fn-name "vec-of-hash-maps" vec-of-hash-maps)
-    ;; (l/infod src fn-name "korks" korks)
-    ;; (l/info src fn-name "(get-table-data kw vec-of-hash-maps)")
-    (get-in (first (filter-kw (first korks) vec-of-hash-maps))
-            korks)))
-
 (defn edn-xhr
   "XMLHttpRequest: send HTTP/HTTPS async requests to a web server and load the
   server response data back into the script"
@@ -102,10 +94,10 @@
   "Display table row. dom-cell-elem cound be dom/td or dom/th"
   [owner dbase table column-vals dom-cell-elem row-vals css-class]
   (let [fn-name "tr"]
-    ;;(l/infod src fn-name "table" table)
-    (l/infod src fn-name "column-vals" column-vals)
+    ;; (l/infod src fn-name "table" table)
+    ;; (l/infod src fn-name "column-vals" column-vals)
     ;; (l/infod src fn-name "dom-cell-elem" dom-cell-elem)
-    (l/infod src fn-name "row-vals" row-vals)
+    ;; (l/infod src fn-name "row-vals" row-vals)
     (apply dom/tr #js {:className css-class}
            (map #(dom-cell-elem
                   #js {:onClick (onClick owner dbase table %1 %2)}
@@ -114,27 +106,52 @@
                 row-vals
                 ))))
 
+(defn get-table-data [vec-of-hash-maps korks]
+  (let [fn-name "get-table-data"]
+    ;; (l/info src fn-name "----------")
+    ;; (l/infod src fn-name "vec-of-hash-maps" vec-of-hash-maps)
+    ;; (l/infod src fn-name "korks" korks)
+    ;; (l/info src fn-name "(get-table-data vec-of-hash-maps korks)")
+    (let [kw (first korks)
+          m (filter-kw kw vec-of-hash-maps)
+          r (get-in (first m) korks)]
+      ;; (l/infod src fn-name "kw" kw)
+      ;; (l/infod src fn-name "m" m)
+      ;; (l/infod src fn-name "r" r)
+      r)))
+
 (defn key-vector [indexes]
   (into [] (map #(u/kw :col nil %) indexes)))
 
 (defn rows [kw data col-indexes]
-  (into []
-        (map #(get-table-data data [% kw])
-             (key-vector col-indexes))))
+  (let [fn-name "rows"]
+    ;; (l/infod src fn-name "kw" kw)
+    ;; (l/infod src fn-name "data" data)
+    ;; (l/infod src fn-name "col-indexes" col-indexes)
+    ;; (l/info src fn-name "(rows kw data col-indexes)")
+    (let [v (into []
+                  (map #(get-table-data data [% kw])
+                       (key-vector col-indexes)))
+          f (fn [a b] [a b])
+          r (apply map f v)
+          ]
+      ;; (l/infod src fn-name "v" v)
+      ;; (l/infod src fn-name "r" r)
+      r)))
 
 (defn table-elem
   [owner dbase table
    data col-indexes kw dom-table-elem dom-cell-elem alt-row-css-class]
   (let [fn-name "table-elem"]
-    (l/infod src fn-name "data" data)
+    ;; (l/infod src fn-name "data" data)
     ;; (l/infod src fn-name "col-indexes" col-indexes)
     ;; (l/infod src fn-name "kw" kw)
     ;; (l/info  src fn-name "(rows :name data col-indexes)")
+    ;; (l/info  src fn-name "(rows kw data col-indexes)")
     (apply dom-table-elem nil
            (map #(tr owner dbase table %1 dom-cell-elem %2 %3)
                 ;; TODO do (cycle [nil nil ...]) when processing table header
-                (rows :name data col-indexes)
-                ;;[["dept_name" "dept_no"] ["dept_name" "dept_no"]]
+                (cycle (rows :name data col-indexes))
                 (rows kw    data col-indexes)
                 (cycle ["" alt-row-css-class])
                 ))))
@@ -146,34 +163,17 @@
 
 (defn create-table-for-columns [toggle owner dbase db-table data col-indexes]
   (let [fn-name "create-table-for-columns"]
-    (l/infod src fn-name "data" data)
+    ;; (l/infod src fn-name "data" data)
     ;; (l/info (str src "create-table-for-columns: col-indexes: " col-indexes))
     (dom/div nil
              ;;(str "toggle: " toggle)
              db-table
              (dom/div nil (dom/table nil
-;;                                      (table-elem owner dbase db-table
-;;                                                  data col-indexes :name dom/thead dom/th "")
+                                     (table-elem owner dbase db-table
+                                                 data col-indexes :name dom/thead dom/th "")
                                      (table-elem owner dbase db-table
                                                  data col-indexes :vals dom/tbody dom/td "odd")
                                      )))))
-
-(defn get-data [kw-table kw-col kw-name-or-vals parent-data]
-   (let [fn-name "get-data"]
-     (l/infod src fn-name "kw-table" kw-table)
-     (l/infod src fn-name "kw-col" kw-col)
-     (l/infod src fn-name "kw-name-or-vals" kw-name-or-vals)
-     (l/infod src fn-name "parent-data" parent-data)
-     ;;(first (remove nil? (map #(get-in % korks) parent-data))))
-     (let [m (first
-              (remove nil?
-                      (into []
-                            (map #(get-in % [kw-table :vals]) parent-data))))]
-       (l/infod src fn-name "m" m)
-       (map #(get-in % [kw-col kw-name-or-vals]) m)
-       ;; (map #(get-in % [:col0 :vals]) m)
-       )
-     ))
 
 (defn column-filter? [elem-idx] true) ;; no element is filtered out
 ;; (defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no element is filtered out
@@ -181,10 +181,10 @@
 
 (defn create-table [toggle owner dbase db-table data]
   (let [fn-name "create-table"]
-    (l/infod src fn-name "dbase" dbase)
+    ;; (l/infod src fn-name "dbase" dbase)
     ;; (l/infod src fn-name "db-table" db-table)
-    (l/infod src fn-name "data" data)
-    (let [all-cols (into [] (range (count data)))
+    ;; (l/infod src fn-name "data" data)
+    (let [all-cols       (into [] (range (count data)))
           displayed-cols (into [] (filter column-filter? all-cols))]
       ;; (l/infod src fn-name "all-cols" all-cols)
       (create-table-for-columns toggle owner dbase db-table

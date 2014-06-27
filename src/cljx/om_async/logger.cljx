@@ -16,6 +16,7 @@
                 "table-elem"
                 "get-data"
                 "get-table-data"
+                "rows"
                 ;; "process-request"
                 ;; "fetch"
                 ])
