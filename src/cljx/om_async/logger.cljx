@@ -2,7 +2,11 @@
   ;; TODO find a logger for server (clj) and client (cljs)
   (:require [om-async.utils :as u]
             ;; [taoensso.timbre :as logger]
-   ))
+            )
+;;   (:use [clojure.walk :as walk])
+   )
+
+(def src "logger.cljx")
 
 (def files ["client.cljs" "transform.clj"])
 (def functions [
@@ -17,6 +21,7 @@
                 "get-data"
                 "get-table-data"
                 "rows"
+                "f"
                 ;; "process-request"
                 ;; "fetch"
                 ])
@@ -41,6 +46,16 @@
   [fname params & body]
   `(defn ~fname ~params
      (do
-       (println "defnd")
+       (info ~'src '~fname "msgx")
        ~@body)))
+
+(defnd f [x y z]
+  (println "foo")
+  (+ x y z))
+
+(f 1 2 3)
+
+(macroexpand '(defnd f [x y z]
+  (println "foo")
+  (+ x y z)))
 

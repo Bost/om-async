@@ -6,7 +6,9 @@
             [om.dom :as dom :include-macros true]
             [cljs.core.async :refer [put! chan <!]]
             [om-async.utils :as u]
-            [om-async.logger :as l])
+            [om-async.logger :as l]
+            ;;[clojure.walk :as walk]
+            )
   (:import [goog.net XhrIo]
            goog.net.EventType
            [goog.events EventType])
@@ -17,11 +19,11 @@
 (enable-console-print!)
 
 
-(l/defnd ff [x y z]
+(l/defnd f [x y z]
   (println "foo")
   (+ x y z))
 
-(ff 1 2 3)
+(f 1 2 3)
 
 (def ^:private http-req-methods
   {:get "GET"
@@ -184,8 +186,8 @@
                                      )))))
 
 (defn column-filter? [elem-idx] true) ;; no element is filtered out
-;; (defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no element is filtered out
-(defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no element is filtered out
+(defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no element is filtered out
+;; (defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no element is filtered out
 
 (defn create-table [toggle owner dbase db-table data]
   (let [fn-name "create-table"]
