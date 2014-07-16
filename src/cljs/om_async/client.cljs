@@ -19,11 +19,11 @@
 (enable-console-print!)
 
 
-(l/defnd f [x y z]
-  (println "foo")
-  (+ x y z))
+;; (l/defnd f [x y z]
+;;   (println "l/defnd f:")
+;;   (+ x y z))
 
-(f 1 2 3)
+;; (f 1 2 3)
 
 (def ^:private http-req-methods
   {:get "GET"
@@ -31,9 +31,12 @@
    :post "POST"
    :delete "DELETE"})
 
+;; TODO change vectors to hash-maps
 (def app-state
-  (atom {:dbase0 {:name ["employees"] :vals []} ;; TODO create dbase0 by transfer.clj
-         :toggle #{nil}
+  (atom {
+;;          :dbase0 {}
+         :dbase0 {:toggle {:in "in-val"} :name ["employees"] :vals []} ;; TODO create dbase0 by transfer.clj
+;;          :toggle #{nil}
          }))
 
 (defn filter-kw
@@ -72,27 +75,33 @@
         (l/info src fn-name (str "pr-str owner: " (pr-str owner)))
         (l/infod src fn-name "owner" owner)
         (l/infod src fn-name "kw-dbase" kw-dbase)
+        (l/infod src fn-name "dbase" dbase)
         (l/infod src fn-name "kw-table" kw-table)
         (l/infod src fn-name "kw-col" kw-col)
         (l/infod src fn-name "kw-row-value" kw-row-value)
-        (let [korks [kw-dbase :vals kw-table :vals kw-col :vals]]
-          (l/infod src fn-name "korks" korks)
-          )
-        (let [toggled-elems (om/get-state owner
-;;                                           korks
-;;                                           [:dbase0 :name]
-                                          :dbase0 ;; this doesn't work
-;;                                           :toggle ;; this works - do I need #{} ?
-                                          )
-              isIn (u/contains-value? toggled-elems data)
+        (let [korks
+;;               [kw-dbase :vals kw-table :vals kw-col :vals]
+              [kw-dbase :toggle :in]
+;;               [kw-dbase :vals]
+;;               [kw-dbase]
               ]
+          (l/infod src fn-name "korks" korks)
+          (let [
+                toggled-elems-1 (om/get-state owner korks)
+                toggled-elems-2 (om/set-state! owner korks true)
+;;                 toggled-elems-2 (om/transact! data :toggle (fn [_] true))
+                toggled-elems-3 (om/get-state owner korks)
+;;                 isIn (u/contains-value? toggled-elems data)
+                ]
 
-          (l/infod src fn-name "toggled-elems" toggled-elems)
-          (l/infod src fn-name "isIn" isIn)
-          ;; (if (isIn)
-          ;;   ;; TODO serch if om has some 'state-remove' function
-          ;;   (om/set-state! owner :toggle data))
-          )
+            (l/infod src fn-name "toggled-elems-1" toggled-elems-1)
+            (l/infod src fn-name "toggled-elems-2" toggled-elems-2)
+            (l/infod src fn-name "toggled-elems-3" toggled-elems-3)
+;;             (l/infod src fn-name "isIn" isIn)
+            ;; (if (isIn)
+            ;;   ;; TODO serch if om has some 'state-remove' function
+            ;;   (om/set-state! owner :toggle data))
+            ))
 
 ;;         (edn-xhr
 ;;          {:method :put
@@ -170,6 +179,7 @@
                 (cycle ["" alt-row-css-class])
                 ))))
 
+
 (defn display [show] ;; TODO get rid of 'if'
   (if show
     #js {}
@@ -228,7 +238,10 @@
     (reify
       om/IInitState (init-state [_]
                                 (l/infod src fn-name "_" _)
-                                {:toggle "foo"})
+;;                                 {:toggle "foo"}
+;;                                 {:dbase0 {:name ["employees"] :vals ["init-val"]}}
+                                {:dbase0 {:toggle {:in "in-init-val"}}}
+                                )
       om/IRenderState
       (render-state [_ {:keys [toggle]}]
                     (let [dbase (first (get-in data [:dbase0 :name]))]
@@ -248,7 +261,8 @@
 
 (defn view [data owner]
   (let [fn-name "view"]
-    ;; (l/infod src fn-name "owner" owner)
+;;     (l/infod src fn-name "data" data)
+;;     (l/infod src fn-name "owner" owner)
     (reify
       om/IWillMount
       (will-mount [_]

@@ -18,6 +18,9 @@
 (defn kw-val [idx]
   (kw nil :val idx))
 
+(defn kw-row [idx]
+  (kw prefix nil idx))
+
 (defn contains-value?
   "'contains?' tests if the numeric key is within the range of indexes.
   We need to use 'some'."

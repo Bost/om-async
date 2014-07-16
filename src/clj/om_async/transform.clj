@@ -28,8 +28,14 @@
                  (into [] (map str
                                (into [] (vals v)))))
                data)]
-      ;; (l/infod src fn-name "result" result)
+      (l/infod src fn-name "result" result)
       result)))
+
+(def result [["1987-06-26" "1986-06-26" "60117" "10001"] ["1988-06-25" "1987-06-26" "62102" "10001"]])
+(defn to-korks [l-of-vecs]
+  (map (fn [v] {(u/kw-row 0) v}) l-of-vecs)
+  )
+(to-korks result)
 
 (defn nth-from [all-vals idx]
   (map #(nth % idx) all-vals))

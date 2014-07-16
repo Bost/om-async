@@ -8,7 +8,11 @@
 
 (def src "logger.cljx")
 
-(def files ["client.cljs" "transform.clj"])
+(def files
+;;   ["client.cljs" "transform.clj"]
+;;   ["client.cljs"]
+  ["transform.clj"]
+  )
 (def functions [
                 "view"
                 "construct-component"
@@ -40,23 +44,23 @@
       (println (str src "; " fn-name "; " msg)))))
 
 
-(defmacro defnd
-  "This macro is translated to clj file. In cljs files
-  (:require-macros [om-async.logger :as l]) and then l/defnd
-  must be used."
-  [fname params & body]
-  `(defn ~fname ~params
-     (do
-       (info ~'src '~fname "msgx")
-       ~@body)))
+;; (defmacro defnd
+;;   "This macro is translated to clj file. In cljs files
+;;   (:require-macros [om-async.logger :as l]) and then l/defnd
+;;   must be used."
+;;   [fname params & body]
+;;   `(defn ~fname ~params
+;;      (do
+;;        (info ~'src '~fname "msgx")
+;;        ~@body)))
 
-(defnd f [x y z]
-  (println "foo")
-  (+ x y z))
+;; (defnd f [x y z]
+;;   (println "defnd f:"
+;;            (+ x y z)))
 
-(f 1 2 3)
+;; (f 1 2 3)
 
-(macroexpand '(defnd f [x y z]
-  (println "foo")
-  (+ x y z)))
+;; ;; (macroexpand '(defnd f [x y z]
+;; ;;   (println "foox")
+;; ;;   (+ x y z)))
 
