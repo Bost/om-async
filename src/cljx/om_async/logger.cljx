@@ -18,6 +18,7 @@
                 "get-data"
                 "create-table"
                 "table-elem"
+                "table-vals"
                 "get-data"
                 "get-table-data"
                 "rows"

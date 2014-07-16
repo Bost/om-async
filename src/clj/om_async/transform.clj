@@ -20,11 +20,16 @@
     nv))
 
 (defn table-vals [data]
-  (map (fn [v]
-         ;; TODO convert only dates to strings
-         (into [] (map str
-                       (into [] (vals v)))))
-       data))
+  (let [fn-name "table-vals"]
+    (l/infod src fn-name "data" data)
+    (let [result
+          (map (fn [v]
+                 ;; TODO convert only dates to strings
+                 (into [] (map str
+                               (into [] (vals v)))))
+               data)]
+      ;; (l/infod src fn-name "result" result)
+      result)))
 
 (defn nth-from [all-vals idx]
   (map #(nth % idx) all-vals))
