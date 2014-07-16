@@ -146,7 +146,7 @@
     (let [v (into []
                   (map #(get-table-data data [% kw])
                        (key-vector col-indexes)))
-          f (fn [a b] [a b])
+          f (fn [& args] (into [] args))
           r (apply map f v)
           ]
       ;; (l/infod src fn-name "v" v)
@@ -200,7 +200,7 @@
     ;; (l/infod src fn-name "data" data)
     (let [all-cols       (into [] (range (count data)))
           displayed-cols (into [] (filter column-filter? all-cols))]
-      ;; (l/infod src fn-name "all-cols" all-cols)
+      ;; (l/infod src fn-name "displayed-cols" displayed-cols)
       (create-table-for-columns toggle owner dbase db-table
                                 data displayed-cols))))
 
