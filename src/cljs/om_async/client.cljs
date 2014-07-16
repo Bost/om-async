@@ -33,7 +33,7 @@
 
 (def app-state
   (atom {:dbase0 {:name ["employees"] :vals []} ;; TODO create dbase0 by transfer.clj
-         ;;:toggle #{nil}
+         :toggle #{nil}
          }))
 
 (defn filter-kw
@@ -67,10 +67,10 @@
                   kw-table table
                   kw-col col
                   kw-row-value row-value}]
-;;         (l/infod src fn-name "data" data)  ;; impossible to work with data
+        (l/infod src fn-name "data" data)  ;; impossible to work with data
 
-;;         (l/info src fn-name (str "pr-str owner: " (pr-str owner)))
-        ;; (l/infod src fn-name "owner" owner)
+        (l/info src fn-name (str "pr-str owner: " (pr-str owner)))
+        (l/infod src fn-name "owner" owner)
         (l/infod src fn-name "kw-dbase" kw-dbase)
         (l/infod src fn-name "kw-table" kw-table)
         (l/infod src fn-name "kw-col" kw-col)
@@ -78,17 +78,21 @@
         (let [korks [kw-dbase :vals kw-table :vals kw-col :vals]]
           (l/infod src fn-name "korks" korks)
           )
-;;         (let [toggled-elems (om/get-state owner
-;;                                           :toggle
-;;                                           ;;(:val (:dbase0 app))
-;;                                           )
-;;               isIn (u/contains-value? toggled-elems data)]
+        (let [toggled-elems (om/get-state owner
+;;                                           korks
+;;                                           [:dbase0 :name]
+                                          :dbase0 ;; this doesn't work
+;;                                           :toggle ;; this works - do I need #{} ?
+                                          )
+              isIn (u/contains-value? toggled-elems data)
+              ]
 
-;;           (l/info src fn-name (str "isIn: " isIn))
-;;           ;; (if (isIn)
-;;           ;;   ;; TODO serch if om has some 'state-remove' function
-;;           ;;   (om/set-state! owner :toggle data))
-;;           )
+          (l/infod src fn-name "toggled-elems" toggled-elems)
+          (l/infod src fn-name "isIn" isIn)
+          ;; (if (isIn)
+          ;;   ;; TODO serch if om has some 'state-remove' function
+          ;;   (om/set-state! owner :toggle data))
+          )
 
 ;;         (edn-xhr
 ;;          {:method :put

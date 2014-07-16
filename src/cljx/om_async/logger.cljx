@@ -40,7 +40,7 @@
 
 
 (defmacro defnd
-  "This macro is translated to clj file. In clsj files
+  "This macro is translated to clj file. In cljs files
   (:require-macros [om-async.logger :as l]) and then l/defnd
   must be used."
   [fname params & body]
