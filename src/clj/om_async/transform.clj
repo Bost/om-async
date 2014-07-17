@@ -32,10 +32,19 @@
       result)))
 
 (def result [["1987-06-26" "1986-06-26" "60117" "10001"] ["1988-06-25" "1987-06-26" "62102" "10001"]])
-(defn to-korks [l-of-vecs]
-  (map (fn [v] {(u/kw-row 0) v}) l-of-vecs)
-  )
-(to-korks result)
+(defn to-korks-col [values]
+  (into []
+        (map-indexed (fn [idx value] {(u/kw-col idx) value}) values)))
+
+(defn to-korks-row [values]
+  (into []
+        (map-indexed (fn [idx value] {(u/kw-row idx) value}) values)))
+
+(let [rows (map (fn [row] (to-korks-row row)) result)
+      rows-vec (into [] rows)
+      cols (map (fn [col] (to-korks-col col)) rows-vec)
+      cols-vec (first cols)]
+  cols-vec)
 
 (defn nth-from [all-vals idx]
   (map #(nth % idx) all-vals))

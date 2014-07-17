@@ -19,7 +19,10 @@
   (kw nil :val idx))
 
 (defn kw-row [idx]
-  (kw prefix nil idx))
+  (kw-prefix :row idx))
+
+(defn kw-col [idx]
+  (kw-prefix :col idx))
 
 (defn contains-value?
   "'contains?' tests if the numeric key is within the range of indexes.
@@ -35,4 +38,3 @@
 (def t  "titles")
 
 (def t ["employees" "departments"])
-
