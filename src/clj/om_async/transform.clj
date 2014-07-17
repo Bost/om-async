@@ -93,7 +93,13 @@
 (defn process-sql [sql-fn dbase obj idx]
   (encode-table obj (sql-fn dbase obj) idx))
 
-(defn process-select-rows-from [dbase table table-idx]
+(defn process-select-rows-from [table-idx dbase table]
+  "table-idx: the index in the keyword :table"
+  (let [
+        kw-dbase (u/kw :dbase nil 0)
+        kw-dbase (u/kw :table nil 0)
+        m {kw-dbase dbase kw-table table}])
+  ;; TODO pass dbase and table inside a hash-map
   ;; TODO the table-idx param could be replaced by usind map-indexed
   (process-sql db/sql-select-rows-from dbase table table-idx))
 
@@ -144,7 +150,11 @@
       (l/infod src fn-name "fetch-fn" fetch-fn)
       (l/infod src fn-name "manipulator-fn" manipulator-fn)
       (l/infod src fn-name "params" params)
-      (let [m (map #(fetch-fn %) params)]
+      (let [m
+            ;; (map #(fetch-fn %) params)
+            ;; this works only for the request: select-rows-from
+            (map #(fetch-fn 0 "employees" %) params)
+            ]
         (l/infod src fn-name "m" m)
         (let [data (manipulator-fn m)]
           (l/infod src fn-name "data" data)
