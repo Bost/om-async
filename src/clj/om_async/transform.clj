@@ -31,20 +31,38 @@
       (l/infod src fn-name "result" result)
       result)))
 
-(def result [["1987-06-26" "1986-06-26" "60117" "10001"] ["1988-06-25" "1987-06-26" "62102" "10001"]])
-(defn to-korks-col [values]
-  (into []
-        (map-indexed (fn [idx value] {(u/kw-col idx) value}) values)))
+(defn to-korks [f values]
+  (let [r (map-indexed (fn [idx value] {(f idx) value}) values)
+        rv (into [] r)]
+    (apply merge rv)))
 
-(defn to-korks-row [values]
-  (into []
-        (map-indexed (fn [idx value] {(u/kw-row idx) value}) values)))
+(defn convert-to-korks [vals-vec]
+  (let [fn-name "convert-to-korks"]
+    ;; (l/infod src fn-name "vals-vec" vals-vec)
+    (let [rows (map (fn [row] (to-korks u/kw-row row)) vals-vec)
+          rows-seq (into [] rows)
+          cols (to-korks u/kw-col rows-seq)]
+      ;; (l/infod src fn-name "rows" rows)
+      ;; (l/infod src fn-name "rows-seq" rows-seq)
+      (l/infod src fn-name "cols" cols)
+      cols)))
 
-(let [rows (map (fn [row] (to-korks-row row)) result)
-      rows-vec (into [] rows)
-      cols (map (fn [col] (to-korks-col col)) rows-vec)
-      cols-vec (first cols)]
-  cols-vec)
+;; (def vals-vec
+;;   [["1987-06-26" "1986-06-26" "60117" "10001"]
+;;    ["1988-06-25" "1987-06-26" "62102" "10001"]])
+;; (convert-to-korks vals-vec)
+
+(defn to-vals [korks]
+  (into [] (vals cols)))
+
+(defn convert-to-vals [korks]
+  (into []
+        (map #(into [] (vals %)) (to-vals korks))))
+
+;; (def cols
+;;   {:col1 {:row3 "10001", :row2 "62102", :row1 "1987-06-26", :row0 "1988-06-25"}
+;;    :col0 {:row3 "10001", :row2 "60117", :row1 "1986-06-26", :row0 "1987-06-26"}})
+;; (convert-to-vals cols)
 
 (defn nth-from [all-vals idx]
   (map #(nth % idx) all-vals))
@@ -64,17 +82,19 @@
                       indexes
                       all-cols
                       table-vals))
-          data (encode-entity idx :table table vals)]
-      ;; (l/info src fn-name (str "table: " table))
-      ;; (l/info src fn-name (str "data: " data))
-      ;; (l/info src fn-name (str "idx: " idx))
-      data)))
+          out-data (encode-entity idx :table table vals)]
+      ;; (l/infod src fn-name "table" table)
+      (l/infod src fn-name "data" data)
+      (l/infod src fn-name "out-data" out-data)
+      ;; (l/infod src fn-name "idx" idx)
+      out-data)))
 
 ;; every process-* function must call a function from om-async.db
 (defn process-sql [sql-fn dbase obj idx]
   (encode-table obj (sql-fn dbase obj) idx))
 
 (defn process-select-rows-from [dbase table table-idx]
+  ;; TODO the table-idx param could be replaced by usind map-indexed
   (process-sql db/sql-select-rows-from dbase table table-idx))
 
 (defn process-show-tables-from [dbase]
@@ -84,7 +104,7 @@
   (let [list-tables (map first (table-vals (db/show-tables-from dbase)))
         tables (into [] list-tables)
         count-tables (count tables)]
-    ;; (l/info src "process-show-tables-with-data-from" (str "tables: " tables))
+    ;; (l/infod src "process-show-tables-with-data-from" "tables: " tables)
     (map #(process-select-rows-from dbase %1 %2)
          tables
          (into [] (range count-tables)))))
@@ -93,8 +113,8 @@
   (let [fn-name "process-request"]
     (let [table ((u/kw :table :name idx) params)
           data (encode-table table (db/s params idx) idx)]
-      (l/info src fn-name (str "table: " table))
-      ;; (l/info src fn-name (str "data: " data))
+      (l/infod src fn-name "table" table)
+      ;; (l/infod src fn-name "data" data)
       data)))
 
 (def fetch-fns {:select-rows-from           process-select-rows-from
@@ -120,13 +140,15 @@
           manipulator-fn (kw-fetch-fn manipulator-fns)
           params (kw-fetch-fn edn-params)
           ]
-      ;; (l/info src fn-name (str "kw-fetch-fn: " kw-fetch-fn))
-      ;; (l/info src fn-name (str "fetch-fn: " fetch-fn))
-      ;; (l/info src fn-name (str "manipulator-fn: " manipulator-fn))
-      ;; (l/info src fn-name (str "params: " params))
-      (let [data (manipulator-fn (map #(fetch-fn %) params))]
-        (l/info src fn-name (str "data: " data))
-        data))))
+      (l/infod src fn-name "kw-fetch-fn" kw-fetch-fn)
+      (l/infod src fn-name "fetch-fn" fetch-fn)
+      (l/infod src fn-name "manipulator-fn" manipulator-fn)
+      (l/infod src fn-name "params" params)
+      (let [m (map #(fetch-fn %) params)]
+        (l/infod src fn-name "m" m)
+        (let [data (manipulator-fn m)]
+          (l/infod src fn-name "data" data)
+          data)))))
 
 (defn request [edn-params]
   (let [fn-name "request"]

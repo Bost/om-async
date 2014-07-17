@@ -9,26 +9,28 @@
 (def src "logger.cljx")
 
 (def files
-;;   ["client.cljs" "transform.clj"]
+  ["client.cljs" "transform.clj"]
 ;;   ["client.cljs"]
-  ["transform.clj"]
+;;   ["transform.clj"]
   )
 (def functions [
-                "view"
+;;                 "view"
                 "construct-component"
-                "onClick"
-                "tr"
-                "create-table-for-columns"
-                "get-data"
-                "create-table"
-                "table-elem"
-                "table-vals"
-                "get-data"
-                "get-table-data"
-                "rows"
-                "f"
+;;                 "onClick"
+;;                 "tr"
+;;                 "create-table-for-columns"
+;;                 "get-data"
+;;                 "create-table"
+;;                 "table-elem"
+;;                 "table-vals"
+;;                 "get-data"
+;;                 "get-table-data"
+;;                 "rows"
+                "convert-to-korks"
+                "encode-table"
+;;                 "f"
                 ;; "process-request"
-                ;; "fetch"
+                "fetch"
                 ])
 
 (defn infod [src fn-name def-name def-val]

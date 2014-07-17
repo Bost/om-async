@@ -95,7 +95,7 @@
                 ]
 
             (l/infod src fn-name "toggled-elems-1" toggled-elems-1)
-            (l/infod src fn-name "toggled-elems-2" toggled-elems-2)
+;;             (l/infod src fn-name "toggled-elems-2" toggled-elems-2)
             (l/infod src fn-name "toggled-elems-3" toggled-elems-3)
 ;;             (l/infod src fn-name "isIn" isIn)
             ;; (if (isIn)
@@ -247,7 +247,7 @@
                     (let [dbase (first (get-in data [:dbase0 :name]))]
                       ;; TODO get rid of 'if'
                       ;; (l/infod src fn-name "dbase" dbase)
-                      ;; (l/infod src fn-name "data" data)
+                      (l/infod src fn-name "data" data)
                       (apply dom/div nil
                              (let [tables (get-in data [:dbase0 :vals])
                                    cnt-tables (count tables)]
@@ -270,11 +270,11 @@
                   (edn-xhr
                    {:method :put
                     :url "fetch"
-                    ;; :data {:select-rows-from ["employees" "departments"]}
-                    ;; :data {:select-rows-from ["departments"]}
+                    :data {:select-rows-from ["employees" "departments"]}
+;;                     :data {:select-rows-from ["departments"]}
                     ;; :data {:show-tables-from ["employees"]}
                     ;; :data {:show-tables-with-data-from [dbase]}
-                    :data {:show-tables-with-data-from [(first (get-in data [:dbase0 :name]))]}
+;;                     :data {:show-tables-with-data-from [(first (get-in data [:dbase0 :name]))]}
                     :on-complete #(om/transact! data [:dbase0 :vals] (fn [_] %))})
                   )
       om/IRenderState
