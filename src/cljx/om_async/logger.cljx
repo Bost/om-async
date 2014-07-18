@@ -27,9 +27,10 @@
 ;;                 "get-table-data"
 ;;                 "rows"
                 "convert-to-korks"
-                "encode-table"
+;;                 "encode-table"
 ;;                 "f"
                 ;; "process-request"
+                "process-select-rows-from"
                 "fetch"
                 ])
 

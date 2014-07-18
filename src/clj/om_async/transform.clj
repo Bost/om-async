@@ -53,7 +53,7 @@
 ;; (convert-to-korks vals-vec)
 
 (defn to-vals [korks]
-  (into [] (vals cols)))
+  (into [] (vals korks)))
 
 (defn convert-to-vals [korks]
   (into []
@@ -90,18 +90,20 @@
       out-data)))
 
 ;; every process-* function must call a function from om-async.db
-(defn process-sql [sql-fn dbase obj idx]
-  (encode-table obj (sql-fn dbase obj) idx))
+(defn process-sql [sql-fn dbase-obj idx]
+  ;; TODO a hash-map with {:obj :table} should be passed to this fn
+  (encode-table (:table dbase-obj) (sql-fn dbase-obj) idx))
 
 (defn process-select-rows-from [table-idx dbase table]
   "table-idx: the index in the keyword :table"
-  (let [
-        kw-dbase (u/kw :dbase nil 0)
-        kw-dbase (u/kw :table nil 0)
-        m {kw-dbase dbase kw-table table}])
-  ;; TODO pass dbase and table inside a hash-map
-  ;; TODO the table-idx param could be replaced by usind map-indexed
-  (process-sql db/sql-select-rows-from dbase table table-idx))
+  (let [fn-name "process-select-rows-from"]
+    (let [dbase-table {:dbase dbase :table table}]
+      (l/infod src fn-name "dbase-table" dbase-table)
+      ;; TODO pass dbase and table inside a hash-map
+      ;; TODO the table-idx param could be replaced by usind map-indexed
+      (process-sql db/sql-select-rows-from dbase-table table-idx))))
+
+;; TODO paredit grow right should jump over comment
 
 (defn process-show-tables-from [dbase]
   (process-sql db/sql-show-tables-from dbase 0))
@@ -150,14 +152,14 @@
       (l/infod src fn-name "fetch-fn" fetch-fn)
       (l/infod src fn-name "manipulator-fn" manipulator-fn)
       (l/infod src fn-name "params" params)
-      (let [m
+      (let [r
             ;; (map #(fetch-fn %) params)
             ;; this works only for the request: select-rows-from
             (map #(fetch-fn 0 "employees" %) params)
             ]
-        (l/infod src fn-name "m" m)
-        (let [data (manipulator-fn m)]
-          (l/infod src fn-name "data" data)
+        ;; (l/infod src fn-name "r" r)
+        (let [data (manipulator-fn r)]
+          ;; (l/infod src fn-name "data" data)
           data)))))
 
 (defn request [edn-params]
