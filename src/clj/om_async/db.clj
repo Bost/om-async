@@ -19,7 +19,8 @@
   ;; (entity-fields :table_schema :table_name :table_type :engine)
   )
 
-(defn sql-select-rows-from [{dbase :dbase table :table}]
+;; [{:keys [dbase table]}] is a special form for [{dbase :dbase, table :table}]
+(defn sql-select-rows-from [{:keys [dbase table]}]
   (let [fn-name "sql-select-rows-from"]
     ;; (l/infod src fn-name "dbase" dbase)
     ;; (l/infod src fn-name "table" table)

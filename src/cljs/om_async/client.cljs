@@ -46,6 +46,8 @@
   (filter #(= kw (first (keys %)))
           vec-of-hash-maps))
 
+;; [{:keys [dbase table]}] is a special form for
+;; [{method :method, url :url, data :data, on-complete :on-complete]}]
 (defn edn-xhr
   "XMLHttpRequest: send HTTP/HTTPS async requests to a web server and load the
   server response data back into the script"
