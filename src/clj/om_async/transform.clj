@@ -92,7 +92,9 @@
 ;; every process-* function must call a function from om-async.db
 (defn process-sql [sql-fn dbase-obj idx]
   ;; TODO a hash-map with {:obj :table} should be passed to this fn
-  (encode-table (:table dbase-obj) (sql-fn dbase-obj) idx))
+  (let [fn-name "process-sql"]
+    ;; (l/infod src fn-name "dbase-obj" dbase-obj)
+    (encode-table (:table dbase-obj) (sql-fn dbase-obj) idx)))
 
 (defn process-select-rows-from [table-idx dbase table]
   "table-idx: the index in the keyword :table"

@@ -9,7 +9,7 @@
 (def src "logger.cljx")
 
 (def files
-  ["client.cljs" "transform.clj"]
+  ["client.cljs" "transform.clj" "db.clj"]
 ;;   ["client.cljs"]
 ;;   ["transform.clj"]
   )
@@ -27,11 +27,17 @@
 ;;                 "get-table-data"
 ;;                 "rows"
                 "convert-to-korks"
-;;                 "encode-table"
 ;;                 "f"
+
+                ;;;; "transform.clj"
                 ;; "process-request"
+                "process-sql"
                 "process-select-rows-from"
                 "fetch"
+;;                 "encode-table"
+
+                ;;;; db.clj
+                "sql-select-rows-from"
                 ])
 
 (defn infod [src fn-name def-name def-val]

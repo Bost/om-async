@@ -19,11 +19,12 @@
   ;; (entity-fields :table_schema :table_name :table_type :engine)
   )
 
-(defn sql-select-rows-from [db-table]
-  ;; TODO see pasing hash-map to a fn
-  (defdb db (mysql (db-connect (:dbase db-table))))
-  (select (:table db-table)
-          (limit 2)))
+(defn sql-select-rows-from [{dbase :dbase table :table}]
+  (let [fn-name "sql-select-rows-from"]
+    ;; (l/infod src fn-name "dbase" dbase)
+    ;; (l/infod src fn-name "table" table)
+    (defdb db (mysql (db-connect dbase)))
+    (select table (limit 2))))
 
 ;; (sql-select-rows-from u/e u/s)
 
