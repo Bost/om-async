@@ -115,14 +115,58 @@
 ;;             )})
         ))))
 
+(defn to-korks [f values]
+  (let [r (map-indexed (fn [idx value] {(f idx) value}) values)
+        rv (into [] r)]
+    (apply merge rv)))
+
+(defn convert-to-korks [f1 f2 vals-vec]
+  (let [fn-name "convert-to-korks"]
+    ;; (l/infod src fn-name "vals-vec" vals-vec)
+    (let [xs (map (fn [x] (to-korks f1 x)) vals-vec)
+          xs-seq (into [] xs)
+          ys (to-korks f2 xs-seq)]
+      ;; (l/infod src fn-name "xs" xs)
+      ;; (l/infod src fn-name "xs-seq" xs-seq)
+      ;; (l/infod src fn-name "ys" ys)
+      ys)))
+
+(defn row-vals-to-korks [vals-vec]
+  (convert-to-korks u/kw-col u/kw-row vals-vec))
+
+(defn col-vals-to-korks [vals-vec]
+  (convert-to-korks u/kw-row u/kw-col vals-vec))
+
+;; (def row-vec [["row-0-col0" "row-0-col-1" "row-0-col2"]])
+;; (row-vals-to-korks row-vec)
+;; {:row0 {:col0 row-0-col0, :col1 row-0-col-1, :col2 row-0-col2}}
+
+;; (def col-vec [["row-0-col0" "row-1-col-0" "row-2-col0"]])
+;; (col-vals-to-korks col-vec)
+;; {:col0 {:row0 row-0-col0, :row1 row-1-col-0, :row2 row-2-col0}}
+
+(def row-vals ["Customer Service" "d009"])
+(row-vals-to-korks row-vals)
+(to-korks u/kw-col row-vals)
+(def in-row-vals {:col0 "Customer Service", :col1 "d009"})
+(def i in-row-vals)
+
 (defn tr
   "Display table row. dom-cell-elem cound be dom/td or dom/th"
-  [owner dbase table column-vals dom-cell-elem row-vals css-class]
-  (let [fn-name "tr"]
-    ;; (l/infod src fn-name "table" table)
-    ;; (l/infod src fn-name "column-vals" column-vals)
-    ;; (l/infod src fn-name "dom-cell-elem" dom-cell-elem)
-    ;; (l/infod src fn-name "row-vals" row-vals)
+  [owner dbase table
+   column-vals dom-cell-elem row-vals css-class]
+  (let [fn-name "tr"
+        in-row-vals (to-korks u/kw-col row-vals)
+        new-row-vals (into [] (vals in-row-vals))
+        ]
+    (l/info src fn-name "----------")
+    (l/infod src fn-name "table" table)
+    (l/infod src fn-name "column-vals" column-vals)
+    (l/infod src fn-name "dom-cell-elem" dom-cell-elem)
+    (l/infod src fn-name "row-vals" row-vals)
+    (l/infod src fn-name "new-row-vals" new-row-vals)
+    (if (not= new-row-vals row-vals)
+      (l/info src fn-name "(not= new-row-vals row-vals)"))
     (apply dom/tr #js {:className css-class}
            (map #(dom-cell-elem
                   #js {:onClick (onClick owner dbase table %1 %2)}
@@ -133,16 +177,16 @@
 
 (defn get-table-data [vec-of-hash-maps korks]
   (let [fn-name "get-table-data"]
-    ;; (l/info src fn-name "----------")
-    ;; (l/infod src fn-name "vec-of-hash-maps" vec-of-hash-maps)
-    ;; (l/infod src fn-name "korks" korks)
+    (l/info src fn-name "----------")
+    (l/infod src fn-name "vec-of-hash-maps" vec-of-hash-maps)
+    (l/infod src fn-name "korks" korks)
     ;; (l/info src fn-name "(get-table-data vec-of-hash-maps korks)")
     (let [kw (first korks)
           m (filter-kw kw vec-of-hash-maps)
           r (get-in (first m) korks)]
       ;; (l/infod src fn-name "kw" kw)
       ;; (l/infod src fn-name "m" m)
-      ;; (l/infod src fn-name "r" r)
+      (l/infod src fn-name "r" r)
       r)))
 
 (defn key-vector [indexes]
@@ -150,10 +194,9 @@
 
 (defn rows [kw data col-indexes]
   (let [fn-name "rows"]
-    ;; (l/infod src fn-name "kw" kw)
-    ;; (l/infod src fn-name "data" data)
-    ;; (l/infod src fn-name "col-indexes" col-indexes)
-    ;; (l/info src fn-name "(rows kw data col-indexes)")
+    (l/infod src fn-name "kw" kw)
+    (l/infod src fn-name "data" data)
+    (l/infod src fn-name "col-indexes" col-indexes)
     (let [v (into []
                   (map #(get-table-data data [% kw])
                        (key-vector col-indexes)))
@@ -161,25 +204,27 @@
           r (apply map f v)
           ]
       ;; (l/infod src fn-name "v" v)
-      ;; (l/infod src fn-name "r" r)
+      (l/infod src fn-name "r" r)
       r)))
 
 (defn table-elem
   [owner dbase table
    data col-indexes kw dom-table-elem dom-cell-elem alt-row-css-class]
   (let [fn-name "table-elem"]
-    ;; (l/infod src fn-name "data" data)
-    ;; (l/infod src fn-name "col-indexes" col-indexes)
-    ;; (l/infod src fn-name "kw" kw)
-    ;; (l/info  src fn-name "(rows :name data col-indexes)")
-    ;; (l/info  src fn-name "(rows kw data col-indexes)")
-    (apply dom-table-elem nil
-           (map #(tr owner dbase table %1 dom-cell-elem %2 %3)
-                ;; TODO do (cycle [nil nil ...]) when processing table header
-                (cycle (rows :name data col-indexes))
-                (rows kw    data col-indexes)
-                (cycle ["" alt-row-css-class])
-                ))))
+;;     (l/infod src fn-name "data" data)
+;;     (l/infod src fn-name "col-indexes" col-indexes)
+;;     (l/infod src fn-name "kw" kw)
+;;     (l/info  src fn-name "(rows :name data col-indexes)")
+;;     (l/info  src fn-name "(rows kw data col-indexes)")
+    (let [row-vals (rows :name data col-indexes)]
+      (l/infod src fn-name "row-vals" row-vals)
+      (apply dom-table-elem nil
+             (map #(tr owner dbase table %1 dom-cell-elem %2 %3)
+                  ;; TODO do (cycle [nil nil ...]) when processing table header
+                  (cycle row-vals) ;; %1
+                  (rows kw    data col-indexes)
+                  (cycle ["" alt-row-css-class])
+                  )))))
 
 
 (defn display [show] ;; TODO get rid of 'if'
@@ -218,6 +263,7 @@
 
 (defn render-data [data owner dbase cnt-tables toggle]
   (let [fn-name "render-data"]
+    (l/infod src fn-name "data" data)
     (l/info src fn-name (str "Rendering data from dbase: " dbase))
     (let [all-tables       (into [] (range cnt-tables))
           displayed-tables (into [] (filter table-filter? all-tables))
@@ -275,10 +321,10 @@
                     ;; TODO the idx should be specified in transfer.clj
 ;;                     :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}
 ;;                                               {:dbase "employees" :table "employees"   :idx 1}]}
-;;                     :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}]}
+                    :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}]}
 ;;                     :data {:show-tables-from ["employees"]}
                     ;; :data {:show-tables-with-data-from [dbase]}
-                    :data {:show-tables-with-data-from [(first (get-in data [:dbase0 :name]))]}
+;;                     :data {:show-tables-with-data-from [(first (get-in data [:dbase0 :name]))]}
                     :on-complete #(om/transact! data [:dbase0 :vals] (fn [_] %))})
                   )
       om/IRenderState

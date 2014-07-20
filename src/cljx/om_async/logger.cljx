@@ -15,29 +15,35 @@
   )
 (def functions [
 ;;                 "view"
-                "construct-component"
-;;                 "onClick"
-;;                 "tr"
 ;;                 "create-table-for-columns"
 ;;                 "get-data"
 ;;                 "create-table"
 ;;                 "table-elem"
 ;;                 "table-vals"
 ;;                 "get-data"
-;;                 "get-table-data"
-;;                 "rows"
-                "convert-to-korks"
+;;                 "convert-to-korks"
 ;;                 "f"
+
+                ;;;; client.cljs
+;;                 "construct-component"
+;;                 "table-elem"
+;;                 "convert-to-korks"
+;;                 "rows"
+;;                 "get-table-data"
+;;                 "render-data"
+;;                 "onClick"
+                "tr"
 
                 ;;;; "transform.clj"
                 ;; "process-request"
-                "process-sql"
-                "process-select-rows-from"
-                "fetch"
+;;                 "process-sql"
+;;                 "process-select-rows-from"
+;;                 "process-show-tables-with-data-from"
+;;                 "fetch"
 ;;                 "encode-table"
 
                 ;;;; db.clj
-                "sql-select-rows-from"
+;;                 "sql-select-rows-from"
                 ])
 
 (defn infod [src fn-name def-name def-val]
@@ -52,6 +58,11 @@
     (if (u/contains-value? functions fn-name)
       (println (str src "; " fn-name "; " msg)))))
 
+(defn error [src fn-name msg]
+  (let [separator "=========="]
+    (info src fn-name separator)
+    (info src fn-name (str "ERROR: " msg))
+    (info src fn-name separator)))
 
 ;; (defmacro defnd
 ;;   "This macro is translated to clj file. In cljs files

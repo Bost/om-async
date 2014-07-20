@@ -31,33 +31,33 @@
       (l/infod src fn-name "result" result)
       result)))
 
-(defn to-korks [f values]
-  (let [r (map-indexed (fn [idx value] {(f idx) value}) values)
-        rv (into [] r)]
-    (apply merge rv)))
+;; (defn to-korks [f values]
+;;   (let [r (map-indexed (fn [idx value] {(f idx) value}) values)
+;;         rv (into [] r)]
+;;     (apply merge rv)))
 
-(defn convert-to-korks [vals-vec]
-  (let [fn-name "convert-to-korks"]
-    ;; (l/infod src fn-name "vals-vec" vals-vec)
-    (let [rows (map (fn [row] (to-korks u/kw-row row)) vals-vec)
-          rows-seq (into [] rows)
-          cols (to-korks u/kw-col rows-seq)]
-      ;; (l/infod src fn-name "rows" rows)
-      ;; (l/infod src fn-name "rows-seq" rows-seq)
-      (l/infod src fn-name "cols" cols)
-      cols)))
+;; (defn convert-to-korks [vals-vec]
+;;   (let [fn-name "convert-to-korks"]
+;;     ;; (l/infod src fn-name "vals-vec" vals-vec)
+;;     (let [rows (map (fn [row] (to-korks u/kw-row row)) vals-vec)
+;;           rows-seq (into [] rows)
+;;           cols (to-korks u/kw-col rows-seq)]
+;;       ;; (l/infod src fn-name "rows" rows)
+;;       ;; (l/infod src fn-name "rows-seq" rows-seq)
+;;       (l/infod src fn-name "cols" cols)
+;;       cols)))
 
-;; (def vals-vec
-;;   [["1987-06-26" "1986-06-26" "60117" "10001"]
-;;    ["1988-06-25" "1987-06-26" "62102" "10001"]])
-;; (convert-to-korks vals-vec)
+;; ;; (def vals-vec
+;; ;;   [["1987-06-26" "1986-06-26" "60117" "10001"]
+;; ;;    ["1988-06-25" "1987-06-26" "62102" "10001"]])
+;; ;; (convert-to-korks vals-vec)
 
-(defn to-vals [korks]
-  (into [] (vals korks)))
+;; (defn to-vals [korks]
+;;   (into [] (vals korks)))
 
-(defn convert-to-vals [korks]
-  (into []
-        (map #(into [] (vals %)) (to-vals korks))))
+;; (defn convert-to-vals [korks]
+;;   (into []
+;;         (map #(into [] (vals %)) (to-vals korks))))
 
 ;; (def cols
 ;;   {:col1 {:row3 "10001", :row2 "62102", :row1 "1987-06-26", :row0 "1988-06-25"}
@@ -82,12 +82,13 @@
                       indexes
                       all-cols
                       table-vals))
-          out-data (encode-entity idx :table table vals)]
+          encoded-data (encode-entity idx :table table vals)
+          ]
       ;; (l/infod src fn-name "table" table)
-      (l/infod src fn-name "data" data)
-      (l/infod src fn-name "out-data" out-data)
+      ;; (l/infod src fn-name "data" data)
+      (l/infod src fn-name "encoded-data" encoded-data)
       ;; (l/infod src fn-name "idx" idx)
-      out-data)))
+      encoded-data)))
 
 ;; every process-* function must call a function from om-async.db
 (defn process-sql [sql-fn {:keys [dbase table idx]}]
