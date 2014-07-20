@@ -261,8 +261,8 @@
       (create-table-for-columns toggle owner dbase db-table
                                 data displayed-cols))))
 
-(defn render-data [data owner dbase cnt-tables toggle]
-  (let [fn-name "render-data"]
+(defn old-render-data [data owner dbase cnt-tables toggle]
+  (let [fn-name "old-render-data"]
     (l/infod src fn-name "data" data)
     (l/info src fn-name (str "Rendering data from dbase: " dbase))
     (let [all-tables       (into [] (range cnt-tables))
@@ -280,8 +280,38 @@
                                            [(u/kw-prefix :table %) :vals])))
            displayed-tables))))
 
+(defn render-data [data owner]
+  (let [fn-name "render-data"]
+    (l/infod src fn-name "data" data)
+    (let [db-table (first (get-in data [:dbase0 :name]))
+          header (into [] (keys (first (get-in data [:dbase0 :vals]))))
+          rows   (into [] (vals (first (get-in data [:dbase0 :vals]))))
+          ]
+      (l/infod src fn-name "db-table" db-table)
+      (l/infod src fn-name "header" header)
+      (l/infod src fn-name "rows" rows)
+      (dom/div nil
+               db-table
+               (dom/div nil
+                        (dom/table nil
+                                   (dom/thead nil
+                                              (dom/tr nil
+                                                      (dom/th nil "th")))
+                                   (dom/tbody nil
+                                              (dom/tr nil
+                                                      (dom/td nil "td"))
+                                              )
+                                   )
+                        )
+               )
+      )
+    )
+  )
+
+
 (defn construct-component [data owner {:keys [toggle] :as opts}]
   (let [fn-name "construct-component"]
+    (l/infod src fn-name "data" data)
     ;; (l/infod src fn-name "owner" owner)
     (reify
       om/IInitState (init-state [_]
@@ -295,8 +325,18 @@
                     (let [dbase (first (get-in data [:dbase0 :name]))]
                       ;; TODO get rid of 'if'
                       ;; (l/infod src fn-name "dbase" dbase)
-                      (l/infod src fn-name "data" data)
-                      (apply dom/div nil
+;;                       (apply dom/div nil
+;;                              (let [tables (get-in data [:dbase0 :vals])
+;;                                    cnt-tables (count tables)]
+;;                                ;; (l/infod src fn-name "tables" tables)
+;;                                ;; (l/infod src fn-name "cnt-tables" cnt-tables)
+;;                                (if (= 0 cnt-tables)
+;;                                  (let [msg (str "Fetching data from dbase: " dbase)]
+;;                                    (l/info src fn-name msg)
+;;                                    msg)
+;;                                  (render-data data owner dbase cnt-tables toggle))
+;;                                )
+                      (dom/div nil
                              (let [tables (get-in data [:dbase0 :vals])
                                    cnt-tables (count tables)]
                                ;; (l/infod src fn-name "tables" tables)
@@ -305,11 +345,14 @@
                                  (let [msg (str "Fetching data from dbase: " dbase)]
                                    (l/info src fn-name msg)
                                    msg)
-                                 (render-data data owner dbase cnt-tables toggle)))))))))
+                                 (render-data data owner))
+                               )
+
+                             ))))))
 
 (defn view [data owner]
   (let [fn-name "view"]
-;;     (l/infod src fn-name "data" data)
+    (l/infod src fn-name "data" data)
 ;;     (l/infod src fn-name "owner" owner)
     (reify
       om/IWillMount

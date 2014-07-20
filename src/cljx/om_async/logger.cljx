@@ -14,7 +14,8 @@
 ;;   ["transform.clj"]
   )
 (def functions [
-;;                 "view"
+                ;;;; client.cljs
+                "view"
 ;;                 "create-table-for-columns"
 ;;                 "get-data"
 ;;                 "create-table"
@@ -23,16 +24,14 @@
 ;;                 "get-data"
 ;;                 "convert-to-korks"
 ;;                 "f"
-
-                ;;;; client.cljs
 ;;                 "construct-component"
 ;;                 "table-elem"
 ;;                 "convert-to-korks"
 ;;                 "rows"
 ;;                 "get-table-data"
-;;                 "render-data"
+                "render-data"
 ;;                 "onClick"
-                "tr"
+;;                 "tr"
 
                 ;;;; "transform.clj"
                 ;; "process-request"

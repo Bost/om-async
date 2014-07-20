@@ -74,6 +74,8 @@
 
 (defn encode-table [table data idx]
   (let [fn-name "encode-table"]
+;;     (l/infod src fn-name "table" table)
+;;     (l/infod src fn-name "data" data)
     (let [vals (let [all-vals (table-vals data)
                      all-cols (table-cols data)
                      indexes (range (count all-cols))
@@ -82,13 +84,11 @@
                       indexes
                       all-cols
                       table-vals))
-          encoded-data (encode-entity idx :table table vals)
+          encoded-table data ;;(encode-entity idx :table table vals)
           ]
-      ;; (l/infod src fn-name "table" table)
-      ;; (l/infod src fn-name "data" data)
-      (l/infod src fn-name "encoded-data" encoded-data)
+      (l/infod src fn-name "encoded-table" encoded-table)
       ;; (l/infod src fn-name "idx" idx)
-      encoded-data)))
+      encoded-table)))
 
 ;; every process-* function must call a function from om-async.db
 (defn process-sql [sql-fn {:keys [dbase table idx]}]
@@ -102,7 +102,9 @@
 (defn process-select-rows-from [obj]
   (let [fn-name "process-select-rows-from"]
     (l/infod src fn-name "obj" obj)
-    (process-sql db/sql-select-rows-from obj)))
+    (let [r (process-sql db/sql-select-rows-from obj)]
+      (l/infod src fn-name "r" r)
+      r)))
 
 ;; TODO paredit grow right should jump over comment
 
@@ -134,14 +136,26 @@
                 :request                    process-request
                 })
 
-(def manipulator-fns {:select-rows-from            (fn [p] (into [] p)) ;; working with multiple tables
-                                                   ;; identity          ;; working with a single table
-                      :show-tables-from            (fn [p] (into [] p)) ;; working with multiple dbases
-                                                   ;; identity          ;; working with a single dbase
-                      :show-tables-with-data-from  ;;first
-                                                   (fn [p] (into [] (first p)))
-                      :request                     (fn [p] (into [] p)) ;; working with multiple dbases
-                                                   ;; identity          ;; working with a single dbase
+(defn m-select-rows-from [p]
+  (identity ;; into []
+   p))
+
+(defn m-show-tables-from [p]
+  (identity ;; into []
+   p))
+
+(defn m-show-tables-with-data-from [p]
+  (identity ;;into []
+   (first p)))
+
+(defn m-request [p]
+  (identity ;; into []
+   p))
+
+(def manipulator-fns {:select-rows-from            m-select-rows-from
+                      :show-tables-from            m-show-tables-from
+                      :show-tables-with-data-from  m-show-tables-with-data-from
+                      :request                     m-request
                       })
 
 (defn fetch [edn-params]
@@ -155,11 +169,13 @@
       (l/infod src fn-name "fetch-fn" fetch-fn)
       (l/infod src fn-name "manipulator-fn" manipulator-fn)
       (l/infod src fn-name "params" params)
-      (let [fetch-result (map #(fetch-fn %) params)
-            data (manipulator-fn fetch-result)]
+      (let [raw-data (first ;; the mp fn returns a sequence
+                      (map #(fetch-fn %) params))
+            fetch-result raw-data ;; (manipulator-fn raw-data)
+            ]
+        (l/infod src fn-name "raw-data" raw-data)
         (l/infod src fn-name "fetch-result" fetch-result)
-        (l/infod src fn-name "data" data)
-        data))))
+        fetch-result))))
 
 (defn request [edn-params]
   (let [fn-name "request"]
