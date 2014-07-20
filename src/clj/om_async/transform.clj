@@ -96,14 +96,12 @@
     ;; (l/infod src fn-name "dbase-obj" dbase-obj)
     (encode-table (:table dbase-obj) (sql-fn dbase-obj) idx)))
 
-(defn process-select-rows-from [table-idx dbase table]
-  "table-idx: the index in the keyword :table"
+(defn process-select-rows-from [table-idx db-table]
+  "table-idx: the index for the keyword :table in the returned hash-map"
   (let [fn-name "process-select-rows-from"]
-    (let [dbase-table {:dbase dbase :table table}]
-      (l/infod src fn-name "dbase-table" dbase-table)
-      ;; TODO pass dbase and table inside a hash-map
+      (l/infod src fn-name "db-table" db-table)
       ;; TODO the table-idx param could be replaced by usind map-indexed
-      (process-sql db/sql-select-rows-from dbase-table table-idx))))
+    (process-sql db/sql-select-rows-from db-table table-idx)))
 
 ;; TODO paredit grow right should jump over comment
 
@@ -157,7 +155,7 @@
       (let [r
             ;; (map #(fetch-fn %) params)
             ;; this works only for the request: select-rows-from
-            (map #(fetch-fn 0 "employees" %) params)
+            (map #(fetch-fn 0 %) params)
             ]
         ;; (l/infod src fn-name "r" r)
         (let [data (manipulator-fn r)]
