@@ -272,9 +272,9 @@
                   (edn-xhr
                    {:method :put
                     :url "fetch"
-                    :data {:select-rows-from [{:dbase "employees" :table "departments"}
-                                              {:dbase "employees" :table "employees"}]}
-;;                     :data {:select-rows-from [{:dbase "employees" :table "departments"}]}
+                    :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}
+                                              {:dbase "employees" :table "employees"   :idx 1}]}
+;;                     :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}]}
 ;;                     :data {:show-tables-from ["employees"]}
                     ;; :data {:show-tables-with-data-from [dbase]}
 ;;                     :data {:show-tables-with-data-from [(first (get-in data [:dbase0 :name]))]}

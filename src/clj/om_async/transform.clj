@@ -90,18 +90,18 @@
       out-data)))
 
 ;; every process-* function must call a function from om-async.db
-(defn process-sql [sql-fn dbase-obj idx]
-  "dbase-obj is a hash map with structure transparent to this fn"
+(defn process-sql [sql-fn {:keys [dbase table idx]}]
+  "idx is index for the keyword :table in the returned hash-map"
   (let [fn-name "process-sql"]
-    ;; (l/infod src fn-name "dbase-obj" dbase-obj)
-    (encode-table (:table dbase-obj) (sql-fn dbase-obj) idx)))
+    ;; (l/infod src fn-name "dbase" dbase)
+    ;; (l/infod src fn-name "table" table)
+    ;; (l/infod src fn-name "idx" idx)
+    (encode-table table (sql-fn {:dbase dbase :table table}) idx)))
 
-(defn process-select-rows-from [table-idx db-table]
-  "table-idx: the index for the keyword :table in the returned hash-map"
+(defn process-select-rows-from [obj]
   (let [fn-name "process-select-rows-from"]
-      (l/infod src fn-name "db-table" db-table)
-      ;; TODO the table-idx param could be replaced by usind map-indexed
-    (process-sql db/sql-select-rows-from db-table table-idx)))
+    ;; (l/infod src fn-name "obj" obj)
+    (process-sql db/sql-select-rows-from obj)))
 
 ;; TODO paredit grow right should jump over comment
 
@@ -155,7 +155,7 @@
       (let [r
             ;; (map #(fetch-fn %) params)
             ;; this works only for the request: select-rows-from
-            (map #(fetch-fn 0 %) params)
+            (map #(fetch-fn %) params)
             ]
         ;; (l/infod src fn-name "r" r)
         (let [data (manipulator-fn r)]
