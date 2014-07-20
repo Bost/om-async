@@ -100,7 +100,7 @@
 
 (defn process-select-rows-from [obj]
   (let [fn-name "process-select-rows-from"]
-    ;; (l/infod src fn-name "obj" obj)
+    (l/infod src fn-name "obj" obj)
     (process-sql db/sql-select-rows-from obj)))
 
 ;; TODO paredit grow right should jump over comment
@@ -109,13 +109,15 @@
   (process-sql db/sql-show-tables-from dbase 0))
 
 (defn process-show-tables-with-data-from [dbase]
-  (let [list-tables (map first (table-vals (db/show-tables-from dbase)))
-        tables (into [] list-tables)
-        count-tables (count tables)]
-    ;; (l/infod src "process-show-tables-with-data-from" "tables: " tables)
-    (map #(process-select-rows-from dbase %1 %2)
-         tables
-         (into [] (range count-tables)))))
+  (let [fn-name "process-show-tables-with-data-from"]
+    (l/infod src fn-name "dbase" dbase)
+    (let [list-tables (map first (table-vals (db/show-tables-from dbase)))
+          tables (into [] list-tables)
+          count-tables (count tables)]
+      ;; (l/infod src "process-show-tables-with-data-from" "tables: " tables)
+      (map #(process-select-rows-from {:dbase dbase :table %1 :idx %2})
+           tables
+           (into [] (range count-tables))))))
 
 (defn process-request [params idx]
   (let [fn-name "process-request"]
@@ -143,24 +145,20 @@
 
 (defn fetch [edn-params]
   (let [fn-name "fetch"]
-    (let [kw-fetch-fn (nth (keys edn-params) 0)
+    (let [;; TODO get the content of N-th key? this could be done better
+          kw-fetch-fn (nth (keys edn-params) 0)
           fetch-fn (kw-fetch-fn fetch-fns)
           manipulator-fn (kw-fetch-fn manipulator-fns)
-          params (kw-fetch-fn edn-params)
-          ]
+          params (kw-fetch-fn edn-params)]
       (l/infod src fn-name "kw-fetch-fn" kw-fetch-fn)
       (l/infod src fn-name "fetch-fn" fetch-fn)
       (l/infod src fn-name "manipulator-fn" manipulator-fn)
       (l/infod src fn-name "params" params)
-      (let [r
-            ;; (map #(fetch-fn %) params)
-            ;; this works only for the request: select-rows-from
-            (map #(fetch-fn %) params)
-            ]
-        ;; (l/infod src fn-name "r" r)
-        (let [data (manipulator-fn r)]
-          ;; (l/infod src fn-name "data" data)
-          data)))))
+      (let [fetch-result (map #(fetch-fn %) params)
+            data (manipulator-fn fetch-result)]
+        (l/infod src fn-name "fetch-result" fetch-result)
+        (l/infod src fn-name "data" data)
+        data))))
 
 (defn request [edn-params]
   (let [fn-name "request"]
