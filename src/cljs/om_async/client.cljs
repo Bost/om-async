@@ -280,34 +280,35 @@
                                            [(u/kw-prefix :table %) :vals])))
            displayed-tables))))
 
-(defn render-data [data owner]
-  (let [fn-name "render-data"]
-    (l/infod src fn-name "data" data)
-    (let [db-table (first (get-in data [:dbase0 :name]))
-          header (into [] (keys (first (get-in data [:dbase0 :vals]))))
-          rows   (into [] (vals (first (get-in data [:dbase0 :vals]))))
-          ]
-      (l/infod src fn-name "db-table" db-table)
+(defn render-row [row]
+  (apply dom/tr nil
+         (map #(dom/td nil (str %)) row)))
+
+(defn render-table [tname tdata]
+  (let [fn-name "render-table"]
+    (l/infod src fn-name "tdata" tdata)
+    (let [header (into [] (keys (first tdata)))
+          rows   (into [] (map #(into [] (vals (nth tdata %)))
+                               (range (count tdata))))]
+      (l/infod src fn-name "tname" tname)
       (l/infod src fn-name "header" header)
       (l/infod src fn-name "rows" rows)
       (dom/div nil
-               db-table
+               tname
                (dom/div nil
                         (dom/table nil
                                    (dom/thead nil
-                                              (dom/tr nil
-                                                      (dom/th nil "th")))
-                                   (dom/tbody nil
-                                              (dom/tr nil
-                                                      (dom/td nil "td"))
-                                              )
-                                   )
-                        )
-               )
-      )
-    )
-  )
+                                              (apply dom/tr nil
+                                                     (map #(dom/th nil (str %)) header)))
+                                   (apply dom/tbody nil
+                                          (map render-row rows))))))))
 
+(defn render-data [data owner]
+  (let [fn-name "render-data"]
+    (l/infod src fn-name "data" data)
+    (let [tname (first (get-in data [:dbase0 :name]))
+          tdata (get-in data [:dbase0 :vals])]
+      (render-table tname tdata))))
 
 (defn construct-component [data owner {:keys [toggle] :as opts}]
   (let [fn-name "construct-component"]
@@ -325,17 +326,6 @@
                     (let [dbase (first (get-in data [:dbase0 :name]))]
                       ;; TODO get rid of 'if'
                       ;; (l/infod src fn-name "dbase" dbase)
-;;                       (apply dom/div nil
-;;                              (let [tables (get-in data [:dbase0 :vals])
-;;                                    cnt-tables (count tables)]
-;;                                ;; (l/infod src fn-name "tables" tables)
-;;                                ;; (l/infod src fn-name "cnt-tables" cnt-tables)
-;;                                (if (= 0 cnt-tables)
-;;                                  (let [msg (str "Fetching data from dbase: " dbase)]
-;;                                    (l/info src fn-name msg)
-;;                                    msg)
-;;                                  (render-data data owner dbase cnt-tables toggle))
-;;                                )
                       (dom/div nil
                              (let [tables (get-in data [:dbase0 :vals])
                                    cnt-tables (count tables)]
@@ -345,6 +335,7 @@
                                  (let [msg (str "Fetching data from dbase: " dbase)]
                                    (l/info src fn-name msg)
                                    msg)
+                                 ;; (render-data data owner dbase cnt-tables toggle)
                                  (render-data data owner))
                                )
 

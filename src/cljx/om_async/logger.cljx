@@ -30,6 +30,7 @@
 ;;                 "rows"
 ;;                 "get-table-data"
                 "render-data"
+                "render-table"
 ;;                 "onClick"
 ;;                 "tr"
 
