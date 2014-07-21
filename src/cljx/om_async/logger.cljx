@@ -39,8 +39,9 @@
 ;;                 "process-sql"
 ;;                 "process-select-rows-from"
 ;;                 "process-show-tables-with-data-from"
-;;                 "fetch"
+                "fetch"
 ;;                 "encode-table"
+                "m-select-rows-from"
 
                 ;;;; db.clj
 ;;                 "sql-select-rows-from"

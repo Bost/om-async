@@ -136,21 +136,21 @@
                 :request                    process-request
                 })
 
-(defn m-select-rows-from [p]
-  (identity ;; into []
-   p))
+(defn m-select-rows-from [params data]
+  (let [fn-name "m-select-rows-from"]
+  (let [cnt (range (count params))
+        r (merge (map #(nth params %) cnt) {:vals []})]
+      (l/infod src fn-name "r" )
+    )))
 
 (defn m-show-tables-from [p]
-  (identity ;; into []
-   p))
+  (into [] p))
 
 (defn m-show-tables-with-data-from [p]
-  (identity ;;into []
-   (first p)))
+  (into [] (first p)))
 
 (defn m-request [p]
-  (identity ;; into []
-   p))
+  (into [] p))
 
 (def manipulator-fns {:select-rows-from            m-select-rows-from
                       :show-tables-from            m-show-tables-from
@@ -169,9 +169,8 @@
       (l/infod src fn-name "fetch-fn" fetch-fn)
       (l/infod src fn-name "manipulator-fn" manipulator-fn)
       (l/infod src fn-name "params" params)
-      (let [raw-data (first ;; the mp fn returns a sequence
-                      (map #(fetch-fn %) params))
-            fetch-result raw-data ;; (manipulator-fn raw-data)
+      (let [raw-data (into [] (map #(fetch-fn %) params))
+            fetch-result (manipulator-fn params raw-data)
             ]
         (l/infod src fn-name "raw-data" raw-data)
         (l/infod src fn-name "fetch-result" fetch-result)

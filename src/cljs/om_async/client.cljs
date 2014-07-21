@@ -353,9 +353,9 @@
                    {:method :put
                     :url "fetch"
                     ;; TODO the idx should be specified in transfer.clj
-;;                     :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}
-;;                                               {:dbase "employees" :table "employees"   :idx 1}]}
-                    :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}]}
+                    :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}
+                                              {:dbase "employees" :table "employees"   :idx 1}]}
+;;                     :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}]}
 ;;                     :data {:show-tables-from ["employees"]}
                     ;; :data {:show-tables-with-data-from [dbase]}
 ;;                     :data {:show-tables-with-data-from [(first (get-in data [:dbase0 :name]))]}
