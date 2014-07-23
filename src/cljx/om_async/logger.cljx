@@ -13,6 +13,7 @@
 ;;   ["client.cljs"]
 ;;   ["transform.clj"]
   )
+
 (def functions [
                 ;;;; client.cljs
                 "view"
@@ -24,13 +25,14 @@
 ;;                 "get-data"
 ;;                 "convert-to-korks"
 ;;                 "f"
-;;                 "construct-component"
+                "construct-component"
 ;;                 "table-elem"
 ;;                 "convert-to-korks"
 ;;                 "rows"
 ;;                 "get-table-data"
                 "render-data"
-                "render-table"
+;;                 "render-table"
+;;                 "render-row"
 ;;                 "onClick"
 ;;                 "tr"
 

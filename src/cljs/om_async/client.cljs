@@ -35,7 +35,7 @@
 (def app-state
   (atom {
 ;;          :dbase0 {}
-         :dbase0 {:toggle {:in "in-val"} :name ["employees"] :vals []} ;; TODO create dbase0 by transfer.clj
+;;          :dbase0 {:toggle {:in "in-val"} :name ["employees"] :vals []} ;; TODO create dbase0 by transfer.clj
 ;;          :toggle #{nil}
          }))
 
@@ -115,48 +115,12 @@
 ;;             )})
         ))))
 
-(defn to-korks [f values]
-  (let [r (map-indexed (fn [idx value] {(f idx) value}) values)
-        rv (into [] r)]
-    (apply merge rv)))
-
-(defn convert-to-korks [f1 f2 vals-vec]
-  (let [fn-name "convert-to-korks"]
-    ;; (l/infod src fn-name "vals-vec" vals-vec)
-    (let [xs (map (fn [x] (to-korks f1 x)) vals-vec)
-          xs-seq (into [] xs)
-          ys (to-korks f2 xs-seq)]
-      ;; (l/infod src fn-name "xs" xs)
-      ;; (l/infod src fn-name "xs-seq" xs-seq)
-      ;; (l/infod src fn-name "ys" ys)
-      ys)))
-
-(defn row-vals-to-korks [vals-vec]
-  (convert-to-korks u/kw-col u/kw-row vals-vec))
-
-(defn col-vals-to-korks [vals-vec]
-  (convert-to-korks u/kw-row u/kw-col vals-vec))
-
-;; (def row-vec [["row-0-col0" "row-0-col-1" "row-0-col2"]])
-;; (row-vals-to-korks row-vec)
-;; {:row0 {:col0 row-0-col0, :col1 row-0-col-1, :col2 row-0-col2}}
-
-;; (def col-vec [["row-0-col0" "row-1-col-0" "row-2-col0"]])
-;; (col-vals-to-korks col-vec)
-;; {:col0 {:row0 row-0-col0, :row1 row-1-col-0, :row2 row-2-col0}}
-
-(def row-vals ["Customer Service" "d009"])
-(row-vals-to-korks row-vals)
-(to-korks u/kw-col row-vals)
-(def in-row-vals {:col0 "Customer Service", :col1 "d009"})
-(def i in-row-vals)
-
 (defn tr
   "Display table row. dom-cell-elem cound be dom/td or dom/th"
   [owner dbase table
    column-vals dom-cell-elem row-vals css-class]
   (let [fn-name "tr"
-        in-row-vals (to-korks u/kw-col row-vals)
+        in-row-vals (u/to-korks u/kw-col row-vals)
         new-row-vals (into [] (vals in-row-vals))
         ]
     (l/info src fn-name "----------")
@@ -280,35 +244,54 @@
                                            [(u/kw-prefix :table %) :vals])))
            displayed-tables))))
 
-(defn render-row [row]
-  (apply dom/tr nil
-         (map #(dom/td nil (str %)) row)))
+(defn render-row [css row]
+  (let [fn-name "render-row"]
+    (l/infod src fn-name "css" css)
+    (l/infod src fn-name "row" row)
+    (apply dom/tr #js {:className css}
+           (map #(dom/td nil (str %)) row))))
 
 (defn render-table [tname tdata]
   (let [fn-name "render-table"]
+    (l/infod src fn-name "tname" tname)
     (l/infod src fn-name "tdata" tdata)
-    (let [header (into [] (keys (first tdata)))
-          rows   (into [] (map #(into [] (vals (nth tdata %)))
-                               (range (count tdata))))]
-      (l/infod src fn-name "tname" tname)
+    (let [header (into [] (keys (first tdata)))]
       (l/infod src fn-name "header" header)
-      (l/infod src fn-name "rows" rows)
-      (dom/div nil
-               tname
-               (dom/div nil
-                        (dom/table nil
-                                   (dom/thead nil
-                                              (apply dom/tr nil
-                                                     (map #(dom/th nil (str %)) header)))
-                                   (apply dom/tbody nil
-                                          (map render-row rows))))))))
+      (let [rows (into [] (map #(into [] (vals (nth tdata %)))
+                               (range (count tdata))))]
+        (l/infod src fn-name "rows" rows)
+        (dom/div nil
+                 tname
+                 (dom/div nil
+                          (dom/table nil
+                                     (dom/thead nil
+                                                (apply dom/tr nil
+                                                       (map #(dom/th nil (str %)) header)))
+                                     (apply dom/tbody nil
+                                            (map #(render-row %1 %2)
+                                                 (cycle ["" "odd"])
+                                                 rows)))))))))
 
 (defn render-data [data owner]
   (let [fn-name "render-data"]
-    (l/infod src fn-name "data" data)
-    (let [tname (first (get-in data [:dbase0 :name]))
-          tdata (get-in data [:dbase0 :vals])]
-      (render-table tname tdata))))
+    (let [
+;;           data
+;;           {:row0 {:col1 {:dept_name "Development", :dept_no "d005"},
+;;                   :col0 {:dept_name "Customer Service", :dept_no "d009"}},
+;;            :dbase "employees",
+;;            :table "departments",
+;;            :idx 0}
+          ]
+      (l/infod src fn-name "data" data)
+      (let [dbname (get-in data [:dbase])
+            tname (get-in data [:table])
+            fq-name (str dbname "." tname)
+            tdata (vals (get-in data [:row0]))
+            ]
+        (l/infod src fn-name "tname" tname)
+        (l/infod src fn-name "tdata" tdata)
+        (render-table fq-name tdata)))))
+
 
 (defn construct-component [data owner {:keys [toggle] :as opts}]
   (let [fn-name "construct-component"]
@@ -323,13 +306,13 @@
                                 )
       om/IRenderState
       (render-state [_ {:keys [toggle]}]
-                    (let [dbase (first (get-in data [:dbase0 :name]))]
+                    (let [dbase (first (get-in data [:dbase]))]
                       ;; TODO get rid of 'if'
                       ;; (l/infod src fn-name "dbase" dbase)
                       (dom/div nil
-                             (let [tables (get-in data [:dbase0 :vals])
+                             (let [tables (get-in data [])
                                    cnt-tables (count tables)]
-                               ;; (l/infod src fn-name "tables" tables)
+                               (l/infod src fn-name "tables" tables)
                                ;; (l/infod src fn-name "cnt-tables" cnt-tables)
                                (if (= 0 cnt-tables)
                                  (let [msg (str "Fetching data from dbase: " dbase)]
@@ -338,7 +321,6 @@
                                  ;; (render-data data owner dbase cnt-tables toggle)
                                  (render-data data owner))
                                )
-
                              ))))))
 
 (defn view [data owner]
@@ -353,13 +335,16 @@
                    {:method :put
                     :url "fetch"
                     ;; TODO the idx should be specified in transfer.clj
-                    :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}
-                                              {:dbase "employees" :table "employees"   :idx 1}]}
+                    :data {:select-rows-from [
+;;                                               {:dbase "employees" :table "departments" :idx 0}
+                                              {:dbase "employees" :table "employees"   :idx 1}
+                                              ]}
 ;;                     :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}]}
 ;;                     :data {:show-tables-from ["employees"]}
                     ;; :data {:show-tables-with-data-from [dbase]}
 ;;                     :data {:show-tables-with-data-from [(first (get-in data [:dbase0 :name]))]}
-                    :on-complete #(om/transact! data [:dbase0 :vals] (fn [_] %))})
+                    :on-complete #(om/transact! data [;;:dbase0 :
+                                                      ] (fn [_] %))})
                   )
       om/IRenderState
       (render-state [_ {:keys [err-msg]}]

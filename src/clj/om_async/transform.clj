@@ -31,39 +31,6 @@
       (l/infod src fn-name "result" result)
       result)))
 
-;; (defn to-korks [f values]
-;;   (let [r (map-indexed (fn [idx value] {(f idx) value}) values)
-;;         rv (into [] r)]
-;;     (apply merge rv)))
-
-;; (defn convert-to-korks [vals-vec]
-;;   (let [fn-name "convert-to-korks"]
-;;     ;; (l/infod src fn-name "vals-vec" vals-vec)
-;;     (let [rows (map (fn [row] (to-korks u/kw-row row)) vals-vec)
-;;           rows-seq (into [] rows)
-;;           cols (to-korks u/kw-col rows-seq)]
-;;       ;; (l/infod src fn-name "rows" rows)
-;;       ;; (l/infod src fn-name "rows-seq" rows-seq)
-;;       (l/infod src fn-name "cols" cols)
-;;       cols)))
-
-;; ;; (def vals-vec
-;; ;;   [["1987-06-26" "1986-06-26" "60117" "10001"]
-;; ;;    ["1988-06-25" "1987-06-26" "62102" "10001"]])
-;; ;; (convert-to-korks vals-vec)
-
-;; (defn to-vals [korks]
-;;   (into [] (vals korks)))
-
-;; (defn convert-to-vals [korks]
-;;   (into []
-;;         (map #(into [] (vals %)) (to-vals korks))))
-
-;; (def cols
-;;   {:col1 {:row3 "10001", :row2 "62102", :row1 "1987-06-26", :row0 "1988-06-25"}
-;;    :col0 {:row3 "10001", :row2 "60117", :row1 "1986-06-26", :row0 "1987-06-26"}})
-;; (convert-to-vals cols)
-
 (defn nth-from [all-vals idx]
   (map #(nth % idx) all-vals))
 
@@ -138,10 +105,20 @@
 
 (defn m-select-rows-from [params data]
   (let [fn-name "m-select-rows-from"]
-  (let [cnt (range (count params))
-        r (merge (map #(nth params %) cnt) {:vals []})]
-      (l/infod src fn-name "r" )
-    )))
+    (l/infod src fn-name "params" params)
+    (l/infod src fn-name "data" data)
+    (let [
+          ;; cnt (into [] (range (count params)))
+          ;; vals-vec (map u/row-vals-to-korks data)
+          ;; nr (merge (map #(nth params %) cnt) vals-vec)
+
+          vals-vec (u/row-vals-to-korks data)
+          nr (merge (first params) vals-vec)
+          ]
+      (l/infod src fn-name "cnt" cnt)
+      (l/infod src fn-name "vals-vec" vals-vec)
+      (l/infod src fn-name "nr" nr)
+      nr)))
 
 (defn m-show-tables-from [p]
   (into [] p))
