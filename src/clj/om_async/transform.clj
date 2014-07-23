@@ -103,22 +103,43 @@
                 :request                    process-request
                 })
 
+
+(defn m-x [params data]
+  (let [fn-name "m-x"]
+    (l/infod src fn-name "params" params)
+    (l/infod src fn-name "data" data)
+    (let [vals-vec (u/row-vals-to-korks data)
+          r (merge params vals-vec)]
+      (l/infod src fn-name "vals-vec" vals-vec)
+      (l/infod src fn-name "rx" r)
+      r)))
+
+(def params [{:p1 1} {:p2 2}])
+(def data [
+           [{:p1r1 11} {:p1r2 12}]
+           [{:p2r1 21} {:p2r2 22}]])
+(for [ [p d] params data]
+  (str p " " [d])
+  )
+(map #(str %1 " " [%2]) params data)
+
 (defn m-select-rows-from [params data]
   (let [fn-name "m-select-rows-from"]
     (l/infod src fn-name "params" params)
     (l/infod src fn-name "data" data)
     (let [
-          ;; cnt (into [] (range (count params)))
-          ;; vals-vec (map u/row-vals-to-korks data)
-          ;; nr (merge (map #(nth params %) cnt) vals-vec)
-
-          vals-vec (u/row-vals-to-korks data)
-          nr (merge (first params) vals-vec)
+          cnt (into [] (range (count params)))
+          i 0
+          datai [(nth data i)]
+          paramsi (nth params i)
           ]
-      (l/infod src fn-name "cnt" cnt)
-      (l/infod src fn-name "vals-vec" vals-vec)
-      (l/infod src fn-name "nr" nr)
-      nr)))
+;;     (l/infod src fn-name "paramsi" paramsi)
+;;     (l/infod src fn-name "dataix" datai)
+      (for [ [p d] params data]
+         (m-x p [d])
+        )
+;;       (m-x paramsi datai)
+      )))
 
 (defn m-show-tables-from [p]
   (into [] p))

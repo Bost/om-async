@@ -336,7 +336,7 @@
                     :url "fetch"
                     ;; TODO the idx should be specified in transfer.clj
                     :data {:select-rows-from [
-;;                                               {:dbase "employees" :table "departments" :idx 0}
+                                              {:dbase "employees" :table "departments" :idx 0}
                                               {:dbase "employees" :table "employees"   :idx 1}
                                               ]}
 ;;                     :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}]}

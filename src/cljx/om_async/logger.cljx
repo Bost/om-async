@@ -9,9 +9,9 @@
 (def src "logger.cljx")
 
 (def files
-  ["client.cljs" "transform.clj" "db.clj"]
+;;   ["client.cljs" "transform.clj" "db.clj"]
 ;;   ["client.cljs"]
-;;   ["transform.clj"]
+  ["transform.clj"]
   )
 
 (def functions [
@@ -41,9 +41,10 @@
 ;;                 "process-sql"
 ;;                 "process-select-rows-from"
 ;;                 "process-show-tables-with-data-from"
-                "fetch"
+;;                 "fetch"
 ;;                 "encode-table"
                 "m-select-rows-from"
+                "m-x"
 
                 ;;;; db.clj
 ;;                 "sql-select-rows-from"
