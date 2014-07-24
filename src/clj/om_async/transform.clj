@@ -104,42 +104,37 @@
                 })
 
 
+;; TODO m-x is buggy
 (defn m-x [params data]
   (let [fn-name "m-x"]
     (l/infod src fn-name "params" params)
     (l/infod src fn-name "data" data)
     (let [vals-vec (u/row-vals-to-korks data)
-          r (merge params vals-vec)]
+          rx (merge params vals-vec)]
       (l/infod src fn-name "vals-vec" vals-vec)
-      (l/infod src fn-name "rx" r)
-      r)))
-
-(def params [{:p1 1} {:p2 2}])
-(def data [
-           [{:p1r1 11} {:p1r2 12}]
-           [{:p2r1 21} {:p2r2 22}]])
-(for [ [p d] params data]
-  (str p " " [d])
-  )
-(map #(str %1 " " [%2]) params data)
+      (l/infod src fn-name "rx" rx)
+      rx)))
 
 (defn m-select-rows-from [params data]
   (let [fn-name "m-select-rows-from"]
     (l/infod src fn-name "params" params)
     (l/infod src fn-name "data" data)
-    (let [
-          cnt (into [] (range (count params)))
-          i 0
-          datai [(nth data i)]
-          paramsi (nth params i)
+    (let [r
+;;           (doall [[p d] (map list params data)]
+;;             (l/infod src fn-name "p" p)
+;;             (l/infod src fn-name "[d]" [d])
+;;             (m-x p [d]))
+            (doall (map (fn [p d] (m-x p [d]))
+                        params data))
           ]
-;;     (l/infod src fn-name "paramsi" paramsi)
-;;     (l/infod src fn-name "dataix" datai)
-      (for [ [p d] params data]
-         (m-x p [d])
-        )
-;;       (m-x paramsi datai)
-      )))
+;;       (l/infod src fn-name "r" r)
+      r)
+    ;;     (let [px (nth params 1)
+    ;;           dx [(nth data 1)]]
+    ;; ;;       (l/infod src fn-name "px" px)
+    ;;       (l/infod src fn-name "dx" dx)
+    ;;       (m-x px dx))
+    ))
 
 (defn m-show-tables-from [p]
   (into [] p))
