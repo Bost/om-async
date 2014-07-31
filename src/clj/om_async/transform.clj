@@ -104,14 +104,29 @@
                 :request                    process-request
                 })
 
+;; (def x {:a {:a1 1 :a2 2} :b {:b1 1 :b2 2}})
+;; (merge {:c "c" :d "d"} x)
 
 (defn m-x [params data]
   (let [fn-name "m-x"]
     (l/infod src fn-name "params" params)
     (l/infod src fn-name "data" data)
-    (let [vals-vec (u/row-vals-to-korks data)
-          rx (merge params vals-vec)]
-;;       (l/infod src fn-name "vals-vec" vals-vec)
+    (let [
+          vals-vec (u/convert-to-korks u/kw-row
+                    ;;u/to-korks u/kw-row
+                    ;;u/row-vals-to-korks
+                    data)
+          vals-vec-1st (;;identity
+                         first
+                         vals-vec)
+          rm (merge params vals-vec-1st)
+          rx
+;;           nil
+          (merge params vals-vec-1st)
+          ]
+      (l/infod src fn-name "vals-vec" vals-vec)
+      (l/infod src fn-name "vals-vec-1st" vals-vec-1st)
+      (l/infod src fn-name "rm" rm)
       (l/infod src fn-name "rx" rx)
       rx)))
 
@@ -122,7 +137,7 @@
     (let [rlist
             (doall (map (fn [p d] (m-x p [d]))
                         params data))
-          r (into [] rlist) ]
+          r (into [] rlist)]
       (l/infod src fn-name "r" r)
       r)))
 

@@ -158,36 +158,40 @@
     (l/infod src fn-name "tdata" tdata)
     (let [header (into [] (keys (first tdata)))]
       (l/infod src fn-name "header" header)
-      (let [rows (into [] (map #(into [] (vals (nth tdata %)))
-                               (range (count tdata))))]
-        (l/infod src fn-name "rows" rows)
-        (dom/div nil
-                 tname
-                 (dom/div nil
-                          (dom/table nil
-                                     (dom/thead nil
-                                                (apply dom/tr nil
-                                                       (map #(dom/th nil (str %)) header)))
-                                     (apply dom/tbody nil
-                                            (map #(render-row %1 %2)
-                                                 (cycle ["" "odd"])
-                                                 rows)))))))))
+;;       (let [rows (into [] (map #(into [] (vals (nth tdata %)))
+;;                                (range (count tdata))))]
+;;         (l/infod src fn-name "rows" rows)
+;;         (dom/div nil
+;;                  tname
+;;                  (dom/div nil
+;;                           (dom/table nil
+;;                                      (dom/thead nil
+;;                                                 (apply dom/tr nil
+;;                                                        (map #(dom/th nil (str %)) header)))
+;;                                      (apply dom/tbody nil
+;;                                             (map #(render-row %1 %2)
+;;                                                  (cycle ["" "odd"])
+;;                                                  rows))))))
+      )))
 
 (defn render-data [data owner]
   (let [fn-name "render-data"]
-    ;; (l/infod src fn-name "data" data)
+    (l/infod src fn-name "data" data)
     (let [dbname (get-in data [:dbase])
           tname (get-in data [:table])
           fq-name (str dbname "." tname)
-          tdata (vals (get-in data [:row0]))
+          tdata [[
+                       ;;vals
+                       (get-in data [:row0])]]
+;;                       (vals (get-in data [:row1]))
           ]
-      ;; (l/infod src fn-name "tname" tname)
-      ;; (l/infod src fn-name "tdata" tdata)
+      (l/infod src fn-name "tname" tname)
+      (l/infod src fn-name "tdata" tdata)
       (render-table fq-name tdata))))
 
 (defn render-data-vec [data owner]
   (let [fn-name "render-data-vec"]
-    ;; (l/infod src fn-name "data" data)
+    (l/infod src fn-name "data" data)
     (let [r (into [] (map #(render-data % owner) data))]
       (l/infod src fn-name "r" r)
       (apply dom/div nil r))))
