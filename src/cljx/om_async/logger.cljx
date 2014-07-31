@@ -30,6 +30,7 @@
 ;;                 "convert-to-korks"
 ;;                 "rows"
 ;;                 "get-table-data"
+                "vrender-data"
                 "render-data"
 ;;                 "render-table"
 ;;                 "render-row"
@@ -44,7 +45,7 @@
 ;;                 "fetch"
 ;;                 "encode-table"
 ;;                 "m-select-rows-from"
-                "m-x"
+;;                 "m-x"
 
                 ;;;; db.clj
 ;;                 "sql-select-rows-from"

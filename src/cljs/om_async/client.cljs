@@ -18,18 +18,13 @@
 
 (enable-console-print!)
 
-
 ;; (l/defnd f [x y z]
 ;;   (println "l/defnd f:")
 ;;   (+ x y z))
 
 ;; (f 1 2 3)
 
-(def ^:private http-req-methods
-  {:get "GET"
-   :put "PUT"
-   :post "POST"
-   :delete "DELETE"})
+(def ^:private http-req-methods {:get "GET" :put "PUT" :post "POST" :delete "DELETE"})
 
 ;; TODO change vectors to hash-maps
 (def app-state
@@ -115,33 +110,9 @@
 ;;             )})
         ))))
 
-(defn tr
-  "Display table row. dom-cell-elem cound be dom/td or dom/th"
-  [owner dbase table
-   column-vals dom-cell-elem row-vals css-class]
-  (let [fn-name "tr"
-        in-row-vals (u/to-korks u/kw-col row-vals)
-        new-row-vals (into [] (vals in-row-vals))
-        ]
-    (l/info src fn-name "----------")
-    (l/infod src fn-name "table" table)
-    (l/infod src fn-name "column-vals" column-vals)
-    (l/infod src fn-name "dom-cell-elem" dom-cell-elem)
-    (l/infod src fn-name "row-vals" row-vals)
-    (l/infod src fn-name "new-row-vals" new-row-vals)
-    (if (not= new-row-vals row-vals)
-      (l/info src fn-name "(not= new-row-vals row-vals)"))
-    (apply dom/tr #js {:className css-class}
-           (map #(dom-cell-elem
-                  #js {:onClick (onClick owner dbase table %1 %2)}
-                  %2)
-                column-vals
-                row-vals
-                ))))
-
 (defn get-table-data [vec-of-hash-maps korks]
   (let [fn-name "get-table-data"]
-    (l/info src fn-name "----------")
+    ;; (l/info src fn-name "----------")
     (l/infod src fn-name "vec-of-hash-maps" vec-of-hash-maps)
     (l/infod src fn-name "korks" korks)
     ;; (l/info src fn-name "(get-table-data vec-of-hash-maps korks)")
@@ -165,84 +136,14 @@
                   (map #(get-table-data data [% kw])
                        (key-vector col-indexes)))
           f (fn [& args] (into [] args))
-          r (apply map f v)
-          ]
+          r (apply map f v)]
       ;; (l/infod src fn-name "v" v)
-      (l/infod src fn-name "r" r)
+      ;; (l/infod src fn-name "r" r)
       r)))
-
-(defn table-elem
-  [owner dbase table
-   data col-indexes kw dom-table-elem dom-cell-elem alt-row-css-class]
-  (let [fn-name "table-elem"]
-;;     (l/infod src fn-name "data" data)
-;;     (l/infod src fn-name "col-indexes" col-indexes)
-;;     (l/infod src fn-name "kw" kw)
-;;     (l/info  src fn-name "(rows :name data col-indexes)")
-;;     (l/info  src fn-name "(rows kw data col-indexes)")
-    (let [row-vals (rows :name data col-indexes)]
-      (l/infod src fn-name "row-vals" row-vals)
-      (apply dom-table-elem nil
-             (map #(tr owner dbase table %1 dom-cell-elem %2 %3)
-                  ;; TODO do (cycle [nil nil ...]) when processing table header
-                  (cycle row-vals) ;; %1
-                  (rows kw    data col-indexes)
-                  (cycle ["" alt-row-css-class])
-                  )))))
-
-
-(defn display [show] ;; TODO get rid of 'if'
-  (if show
-    #js {}
-    #js {:display "none"}))
-
-(defn create-table-for-columns [toggle owner dbase db-table data col-indexes]
-  (let [fn-name "create-table-for-columns"]
-    ;; (l/infod src fn-name "data" data)
-    ;; (l/info (str src "create-table-for-columns: col-indexes: " col-indexes))
-    (dom/div nil
-             ;;(str "toggle: " toggle)
-             db-table
-             (dom/div nil (dom/table nil
-                                     (table-elem owner dbase db-table
-                                                 data col-indexes :name dom/thead dom/th "")
-                                     (table-elem owner dbase db-table
-                                                 data col-indexes :vals dom/tbody dom/td "odd")
-                                     )))))
 
 (defn column-filter? [elem-idx] true) ;; no element is filtered out
 (defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no element is filtered out
 ;; (defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no element is filtered out
-
-(defn create-table [toggle owner dbase db-table data]
-  (let [fn-name "create-table"]
-    ;; (l/infod src fn-name "dbase" dbase)
-    ;; (l/infod src fn-name "db-table" db-table)
-    ;; (l/infod src fn-name "data" data)
-    (let [all-cols       (into [] (range (count data)))
-          displayed-cols (into [] (filter column-filter? all-cols))]
-      ;; (l/infod src fn-name "displayed-cols" displayed-cols)
-      (create-table-for-columns toggle owner dbase db-table
-                                data displayed-cols))))
-
-(defn old-render-data [data owner dbase cnt-tables toggle]
-  (let [fn-name "old-render-data"]
-    (l/infod src fn-name "data" data)
-    (l/info src fn-name (str "Rendering data from dbase: " dbase))
-    (let [all-tables       (into [] (range cnt-tables))
-          displayed-tables (into [] (filter table-filter? all-tables))
-          vec-of-hash-maps (get-in data [:dbase0 :vals])
-          ]
-      ;; (l/infod src fn-name "all-tables" all-tables)
-      ;; (l/infod src fn-name "displayed-tables" displayed-tables)
-      (map #(create-table toggle owner dbase
-                          (first
-                           (get-table-data vec-of-hash-maps
-                                           [(u/kw-prefix :table %) :name]))
-                          (identity
-                           (get-table-data vec-of-hash-maps
-                                           [(u/kw-prefix :table %) :vals])))
-           displayed-tables))))
 
 (defn render-row [css row]
   (let [fn-name "render-row"]
@@ -274,24 +175,22 @@
 
 (defn render-data [data owner]
   (let [fn-name "render-data"]
-    (let [
-;;           data
-;;           {:row0 {:col1 {:dept_name "Development", :dept_no "d005"},
-;;                   :col0 {:dept_name "Customer Service", :dept_no "d009"}},
-;;            :dbase "employees",
-;;            :table "departments",
-;;            :idx 0}
+    ;; (l/infod src fn-name "data" data)
+    (let [dbname (get-in data [:dbase])
+          tname (get-in data [:table])
+          fq-name (str dbname "." tname)
+          tdata (vals (get-in data [:row0]))
           ]
-      (l/infod src fn-name "data" data)
-      (let [dbname (get-in data [:dbase])
-            tname (get-in data [:table])
-            fq-name (str dbname "." tname)
-            tdata (vals (get-in data [:row0]))
-            ]
-        (l/infod src fn-name "tname" tname)
-        (l/infod src fn-name "tdata" tdata)
-        (render-table fq-name tdata)))))
+      ;; (l/infod src fn-name "tname" tname)
+      ;; (l/infod src fn-name "tdata" tdata)
+      (render-table fq-name tdata))))
 
+(defn render-data-vec [data owner]
+  (let [fn-name "render-data-vec"]
+    ;; (l/infod src fn-name "data" data)
+    (let [r (into [] (map #(render-data % owner) data))]
+      (l/infod src fn-name "r" r)
+      (apply dom/div nil r))))
 
 (defn construct-component [data owner {:keys [toggle] :as opts}]
   (let [fn-name "construct-component"]
@@ -318,10 +217,7 @@
                                  (let [msg (str "Fetching data from dbase: " dbase)]
                                    (l/info src fn-name msg)
                                    msg)
-                                 ;; (render-data data owner dbase cnt-tables toggle)
-                                 (render-data data owner))
-                               )
-                             ))))))
+                                 (render-data-vec data owner)))))))))
 
 (defn view [data owner]
   (let [fn-name "view"]
@@ -335,8 +231,7 @@
                    {:method :put
                     :url "fetch"
                     ;; TODO the idx should be specified in transfer.clj
-                    :data {:select-rows-from [
-                                              {:dbase "employees" :table "departments" :idx 0}
+                    :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}
                                               {:dbase "employees" :table "employees"   :idx 1}
                                               ]}
 ;;                     :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}]}
@@ -370,4 +265,3 @@
 ;;   (om/transact! app :toggle
 ;;                 (fn [] [{:color "red"}]))
 ;;   (println "color executed"))
-

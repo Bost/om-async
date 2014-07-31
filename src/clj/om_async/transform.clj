@@ -111,7 +111,7 @@
     (l/infod src fn-name "data" data)
     (let [vals-vec (u/row-vals-to-korks data)
           rx (merge params vals-vec)]
-      (l/infod src fn-name "vals-vec" vals-vec)
+;;       (l/infod src fn-name "vals-vec" vals-vec)
       (l/infod src fn-name "rx" rx)
       rx)))
 
@@ -119,21 +119,22 @@
   (let [fn-name "m-select-rows-from"]
     (l/infod src fn-name "params" params)
     (l/infod src fn-name "data" data)
-    (let [r
-;;           (doall [[p d] (map list params data)]
-;;             (l/infod src fn-name "p" p)
-;;             (l/infod src fn-name "[d]" [d])
-;;             (m-x p [d]))
-            (doall (map (fn [p d] (m-x p [d]))
+    (let [rlist
+            (doall (map (fn [p d]
+                          (l/infod src fn-name "p" p)
+                          (l/infod src fn-name "[d]" [d])
+                          (m-x p [d]))
                         params data))
+          r (into [] ;;second
+             rlist)
+;;         (let [px (nth params 0)
+;;               dx (nth data 0)]
+;;           (l/infod src fn-name "px" px)
+;;           (l/infod src fn-name "dx" dx)
+;;           (m-x px [dx]))
           ]
-;;       (l/infod src fn-name "r" r)
+      (l/infod src fn-name "r" r)
       r)
-    ;;     (let [px (nth params 1)
-    ;;           dx [(nth data 1)]]
-    ;; ;;       (l/infod src fn-name "px" px)
-    ;;       (l/infod src fn-name "dx" dx)
-    ;;       (m-x px dx))
     ))
 
 (defn m-show-tables-from [p]
