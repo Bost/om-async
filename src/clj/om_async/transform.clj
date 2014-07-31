@@ -42,15 +42,16 @@
 (defn encode-table [table data idx]
   (let [fn-name "encode-table"]
 ;;     (l/infod src fn-name "table" table)
-;;     (l/infod src fn-name "data" data)
-    (let [vals (let [all-vals (table-vals data)
-                     all-cols (table-cols data)
-                     indexes (range (count all-cols))
-                     table-vals (map #(nth-from all-vals %) indexes)]
-                 (map #(encode-entity %1 :col %2 %3)
-                      indexes
-                      all-cols
-                      table-vals))
+    (l/infod src fn-name "data" data)
+    (let [
+;;           vals (let [all-vals (table-vals data)
+;;                      all-cols (table-cols data)
+;;                      indexes (range (count all-cols))
+;;                      table-vals (map #(nth-from all-vals %) indexes)]
+;;                  (map #(encode-entity %1 :col %2 %3)
+;;                       indexes
+;;                       all-cols
+;;                       table-vals))
           encoded-table data ;;(encode-entity idx :table table vals)
           ]
       (l/infod src fn-name "encoded-table" encoded-table)
@@ -104,7 +105,6 @@
                 })
 
 
-;; TODO m-x is buggy
 (defn m-x [params data]
   (let [fn-name "m-x"]
     (l/infod src fn-name "params" params)
@@ -120,22 +120,11 @@
     (l/infod src fn-name "params" params)
     (l/infod src fn-name "data" data)
     (let [rlist
-            (doall (map (fn [p d]
-                          (l/infod src fn-name "p" p)
-                          (l/infod src fn-name "[d]" [d])
-                          (m-x p [d]))
+            (doall (map (fn [p d] (m-x p [d]))
                         params data))
-          r (into [] ;;second
-             rlist)
-;;         (let [px (nth params 0)
-;;               dx (nth data 0)]
-;;           (l/infod src fn-name "px" px)
-;;           (l/infod src fn-name "dx" dx)
-;;           (m-x px [dx]))
-          ]
+          r (into [] rlist) ]
       (l/infod src fn-name "r" r)
-      r)
-    ))
+      r)))
 
 (defn m-show-tables-from [p]
   (into [] p))
