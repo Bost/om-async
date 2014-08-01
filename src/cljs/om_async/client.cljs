@@ -109,37 +109,6 @@
 ;;             )})
         ))))
 
-(defn get-table-data [vec-of-hash-maps korks]
-  (let [fn-name "get-table-data"]
-    ;; (l/info src fn-name "----------")
-    (l/infod src fn-name "vec-of-hash-maps" vec-of-hash-maps)
-    (l/infod src fn-name "korks" korks)
-    ;; (l/info src fn-name "(get-table-data vec-of-hash-maps korks)")
-    (let [kw (first korks)
-          m (filter-kw kw vec-of-hash-maps)
-          r (get-in (first m) korks)]
-      ;; (l/infod src fn-name "kw" kw)
-      ;; (l/infod src fn-name "m" m)
-      (l/infod src fn-name "r" r)
-      r)))
-
-(defn key-vector [indexes]
-  (into [] (map #(u/kw :col nil %) indexes)))
-
-(defn rows [kw data col-indexes]
-  (let [fn-name "rows"]
-    (l/infod src fn-name "kw" kw)
-    (l/infod src fn-name "data" data)
-    (l/infod src fn-name "col-indexes" col-indexes)
-    (let [v (into []
-                  (map #(get-table-data data [% kw])
-                       (key-vector col-indexes)))
-          f (fn [& args] (into [] args))
-          r (apply map f v)]
-      ;; (l/infod src fn-name "v" v)
-      ;; (l/infod src fn-name "r" r)
-      r)))
-
 (defn column-filter? [elem-idx] true) ;; no element is filtered out
 (defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no element is filtered out
 ;; (defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no element is filtered out
