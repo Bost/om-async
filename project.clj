@@ -15,7 +15,7 @@
                  [fogus/ring-edn "0.2.0"]
                  ;; [com.datomic/datomic-free "0.9.4699"]
 
-                 [org.clojure/java.jdbc "0.3.4"]
+                 [org.clojure/java.jdbc "0.3.5"]
                  [mysql/mysql-connector-java "5.1.25"]
 
                  [korma "0.3.3"] ;; sql for clojure
