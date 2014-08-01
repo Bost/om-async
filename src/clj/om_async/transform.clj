@@ -3,11 +3,24 @@
             [om-async.db :as db]
             [om-async.logger :as l]
             [clj-time.format :as tf]
+            [clj-time.coerce :as tc]
             ))
 
 ;; Transformation layer between Ring and DB access functions here.
 
 (def src "transform.clj")
+
+(defn table-vals [data]
+  (let [fn-name "table-vals"]
+    (l/infod src fn-name "data" data)
+    (let [result
+          (map (fn [v]
+                 ;; TODO convert only dates to strings
+                 (into [] (map str
+                               (into [] (vals v)))))
+               data)]
+      (l/infod src fn-name "result" result)
+      result)))
 
 (defn nth-from [all-vals idx]
   (map #(nth % idx) all-vals))
@@ -20,9 +33,11 @@
 (def built-in-formatter (tf/formatters :mysql))
 
 (defn convert-val [v]
-  (if (instance? java.util.Date v)
-    (tf/unparse built-in-formatter jd)
-    v))
+  (let [fn-name "convert-val"]
+    ;; (l/infod src fn-name "v" v)
+    (if (instance? java.util.Date v)
+      (tf/unparse built-in-formatter (tc/from-date v))
+      v)))
 
 (defn convert-hashmap [m]
   "Apply convert-val on each value of hash-map m"
