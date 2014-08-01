@@ -157,29 +157,21 @@
     (l/infod src fn-name "tdata" tdata)
     (let [header (into [] (keys (first tdata)))]
       (l/infod src fn-name "header" header)
-;;       (let [rows (into [] (map #(into [] (vals (nth tdata %)))
-;;                                (range (count tdata))))]
-;;         (l/infod src fn-name "rows" rows)
-;;         (dom/div nil
-;;                  tname
-;;                  (dom/div nil
-;;                           (dom/table nil
-;;                                      (dom/thead nil
-;;                                                 (apply dom/tr nil
-;;                                                        (map #(dom/th nil (str %)) header)))
-;;                                      (apply dom/tbody nil
-;;                                             (map #(render-row %1 %2)
-;;                                                  (cycle ["" "odd"])
-;;                                                  rows))))))
+      (let [rows (into [] (map #(into [] (vals (nth tdata %)))
+                               (range (count tdata))))]
+        (l/infod src fn-name "rows" rows)
+        (dom/div nil
+                 tname
+                 (dom/div nil
+                          (dom/table nil
+                                     (dom/thead nil
+                                                (apply dom/tr nil
+                                                       (map #(dom/th nil (str %)) header)))
+                                     (apply dom/tbody nil
+                                            (map #(render-row %1 %2)
+                                                 (cycle ["" "odd"])
+                                                 rows))))))
       )))
-(def data
-  [{:table "departments", :dbase "employees", :idx 0,
-    :data {:row0 {:dept_name "Customer Service", :dept_no "d009"},
-           :row1 {:dept_name "Development", :dept_no "d005"}}}
-   {:table "employees", :dbase "employees", :idx 1, :data
-    {:row0 {:first_name "Georgi", :emp_no 10001, :birth_date #inst "1953-09-01T23:00:00.000-00:00", :last_name "Facello", :hire_date #inst "1986-06-25T22:00:00.000-00:00", :gender "M"},
-     :row1 {:first_name "Bezalel", :emp_no 10002, :birth_date #inst "1964-06-01T23:00:00.000-00:00", :last_name "Simmel", :hire_date #inst "1985-11-20T23:00:00.000-00:00", :gender "F"}}}])
-(into [] (vals (get-in (first data) [:data])))
 
 (defn render-data [data owner]
   (let [fn-name "render-data"]
@@ -187,11 +179,7 @@
     (let [dbname (get-in data [:dbase])
           tname (get-in data [:table])
           fq-name (str dbname "." tname)
-          tdata
-          (into [] (vals (get-in (first data) [:data])))
-;;           [{:dept_name Customer Service, :dept_no d009}
-;;            {:dept_name Development, :dept_no d005}]
-          ]
+          tdata (into [] (vals (get-in data [:data])))]
       (l/infod src fn-name "tname" tname)
       (l/infod src fn-name "tdata" tdata)
       (render-table fq-name tdata))))
@@ -244,6 +232,7 @@
                     ;; TODO the idx should be specified in transfer.clj
                     :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}
                                               {:dbase "employees" :table "employees"   :idx 1}
+                                              {:dbase "employees" :table "salaries"    :idx 2}
                                               ]}
 ;;                     :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}]}
 ;;                     :data {:show-tables-from ["employees"]}

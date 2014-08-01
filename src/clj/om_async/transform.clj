@@ -41,20 +41,10 @@
 
 (defn encode-table [table data idx]
   (let [fn-name "encode-table"]
-;;     (l/infod src fn-name "table" table)
-    (l/infod src fn-name "data" data)
-    (let [
-;;           vals (let [all-vals (table-vals data)
-;;                      all-cols (table-cols data)
-;;                      indexes (range (count all-cols))
-;;                      table-vals (map #(nth-from all-vals %) indexes)]
-;;                  (map #(encode-entity %1 :col %2 %3)
-;;                       indexes
-;;                       all-cols
-;;                       table-vals))
-          encoded-table data ;;(encode-entity idx :table table vals)
-          ]
-      (l/infod src fn-name "encoded-table" encoded-table)
+    ;; (l/infod src fn-name "table" table)
+    ;; (l/infod src fn-name "data" data)
+    (let [encoded-table data]
+      ;; (l/infod src fn-name "encoded-table" encoded-table)
       ;; (l/infod src fn-name "idx" idx)
       encoded-table)))
 
@@ -108,13 +98,8 @@
   (let [fn-name "m-x"]
     (l/infod src fn-name "params" params)
     (l/infod src fn-name "data" data)
-    (let [
-          vals-vec (u/convert-to-korks u/kw-row
-                    ;;u/to-korks u/kw-row
-                    ;;u/row-vals-to-korks
-                    data)
-          rx (first vals-vec)
-          ]
+    (let [vals-vec (u/convert-to-korks u/kw-row data)
+          rx (first vals-vec)]
       (l/infod src fn-name "vals-vec" vals-vec)
       (l/infod src fn-name "rx" rx)
       rx)))

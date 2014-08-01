@@ -9,9 +9,10 @@
 (def src "logger.cljx")
 
 (def files
-  ["client.cljs" "transform.clj" "db.clj" "utils"]
+;;   ["client.cljs" "transform.clj" "db.clj" "utils"]
 ;;   ["client.cljs"]
 ;;   ["transform.clj"]
+  nil
   )
 
 (def functions [
@@ -29,9 +30,9 @@
 ;;                 "table-elem"
 ;;                 "rows"
 ;;                 "get-table-data"
-                "render-data-vec"
-                "render-data"
-                "render-table"
+;;                 "render-data-vec"
+;;                 "render-data"
+;;                 "render-table"
 ;;                 "render-row"
 ;;                 "onClick"
 ;;                 "tr"
