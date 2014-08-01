@@ -2,34 +2,12 @@
   (:require [om-async.utils :as u]
             [om-async.db :as db]
             [om-async.logger :as l]
+            [clj-time.format :as tf]
             ))
 
 ;; Transformation layer between Ring and DB access functions here.
 
 (def src "transform.clj")
-
-(defn table-cols [raw-data]
-  (let [vx (into [] raw-data)
-        ;; since the table structure is the same operate only on the first row
-        ;; TODO modify relevant select to return just one row.
-        row (nth vx 0)
-        k (keys row)
-        kv (into [] k)
-        n (map #(name %) kv)
-        nv (into [] n)]
-    nv))
-
-(defn table-vals [data]
-  (let [fn-name "table-vals"]
-    (l/infod src fn-name "data" data)
-    (let [result
-          (map (fn [v]
-                 ;; TODO convert only dates to strings
-                 (into [] (map str
-                               (into [] (vals v)))))
-               data)]
-      (l/infod src fn-name "result" result)
-      result)))
 
 (defn nth-from [all-vals idx]
   (map #(nth % idx) all-vals))
@@ -39,11 +17,23 @@
    ;; TODO don't transfer a vector containing a single name
    {:name [name] :vals (into [] vals)}})
 
+(def built-in-formatter (tf/formatters :mysql))
+
+(defn convert-val [v]
+  (if (instance? java.util.Date v)
+    (tf/unparse built-in-formatter jd)
+    v))
+
+(defn convert-hashmap [m]
+  "Apply convert-val on each value of hash-map m"
+  (reduce-kv (fn [m k v]
+               (assoc m k (convert-val v))) {} m))
+
 (defn encode-table [table data idx]
   (let [fn-name "encode-table"]
     ;; (l/infod src fn-name "table" table)
     ;; (l/infod src fn-name "data" data)
-    (let [encoded-table data]
+    (let [encoded-table (map #(convert-hashmap %) data)]
       ;; (l/infod src fn-name "encoded-table" encoded-table)
       ;; (l/infod src fn-name "idx" idx)
       encoded-table)))
