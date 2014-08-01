@@ -10,19 +10,18 @@
                  [org.clojure/clojurescript "0.0-2277"]
                  [ring/ring "1.3.0"]
                  [org.clojure/core.async "0.1.303.0-886421-alpha"]
-                 [om "0.6.5"]
+                 [om "0.7.0"]
                  [compojure "1.1.8"]
                  [fogus/ring-edn "0.2.0"]
                  ;; [com.datomic/datomic-free "0.9.4699"]
 
-                 [org.clojure/java.jdbc "0.3.3"]
+                 [org.clojure/java.jdbc "0.3.4"]
                  [mysql/mysql-connector-java "5.1.25"]
 
-
-                 [korma "0.3.2"] ;; sql for clojure
+                 [korma "0.3.3"] ;; sql for clojure
 
                  ;; logging
-                 [com.taoensso/timbre "3.2.1"]
+                 ;; [com.taoensso/timbre "3.2.1"]
 
                  ;; [org.clojure/tools.logging "0.3.0"]
                  ;; [org.slf4j/slf4j-log4j12 "1.7.7"]
