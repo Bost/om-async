@@ -26,7 +26,6 @@
 
 (def ^:private http-req-methods {:get "GET" :put "PUT" :post "POST" :delete "DELETE"})
 
-;; TODO change vectors to hash-maps
 (def app-state
   (atom {
 ;;          :dbase0 {}
@@ -173,6 +172,14 @@
 ;;                                                  (cycle ["" "odd"])
 ;;                                                  rows))))))
       )))
+(def data
+  [{:table "departments", :dbase "employees", :idx 0,
+    :data {:row0 {:dept_name "Customer Service", :dept_no "d009"},
+           :row1 {:dept_name "Development", :dept_no "d005"}}}
+   {:table "employees", :dbase "employees", :idx 1, :data
+    {:row0 {:first_name "Georgi", :emp_no 10001, :birth_date #inst "1953-09-01T23:00:00.000-00:00", :last_name "Facello", :hire_date #inst "1986-06-25T22:00:00.000-00:00", :gender "M"},
+     :row1 {:first_name "Bezalel", :emp_no 10002, :birth_date #inst "1964-06-01T23:00:00.000-00:00", :last_name "Simmel", :hire_date #inst "1985-11-20T23:00:00.000-00:00", :gender "F"}}}])
+(into [] (vals (get-in (first data) [:data])))
 
 (defn render-data [data owner]
   (let [fn-name "render-data"]
@@ -180,10 +187,10 @@
     (let [dbname (get-in data [:dbase])
           tname (get-in data [:table])
           fq-name (str dbname "." tname)
-          tdata [[
-                       ;;vals
-                       (get-in data [:row0])]]
-;;                       (vals (get-in data [:row1]))
+          tdata
+          (into [] (vals (get-in (first data) [:data])))
+;;           [{:dept_name Customer Service, :dept_no d009}
+;;            {:dept_name Development, :dept_no d005}]
           ]
       (l/infod src fn-name "tname" tname)
       (l/infod src fn-name "tdata" tdata)

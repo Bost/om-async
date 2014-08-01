@@ -43,7 +43,7 @@
 ;;                 "process-show-tables-with-data-from"
 ;;                 "fetch"
 ;;                 "encode-table"
-;;                 "m-select-rows-from"
+                "m-select-rows-from"
 ;;                 "m-x"
 
                 ;;;; db.clj
