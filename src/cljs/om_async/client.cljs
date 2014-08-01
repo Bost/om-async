@@ -54,7 +54,13 @@
       (send url (http-req-methods method) (when data (pr-str data))
         #js {"Content-Type" "application/edn"}))))
 
-(defn onClick [owner dbase table col row-value]
+(defn onClick [v]
+  (let [fn-name "onClick"]
+    (fn [e]
+      (l/infod src fn-name "v" v)
+      v)))
+
+(defn onClick-orig [owner dbase table col row-value]
   (let [fn-name "onClick"]
     (fn [e]
       (let [idx 0
@@ -118,7 +124,10 @@
     (l/infod src fn-name "css" css)
     (l/infod src fn-name "row" row)
     (apply dom/tr #js {:className css}
-           (map #(dom/td nil (str %)) row))))
+           (map #(dom/td
+                  #js {:onClick (onClick (str %))}
+                  ;; #js {:onClick (onClick owner dbase table %1 %2)}
+                  (str %)) row))))
 
 (defn render-table [tname tdata]
   (let [fn-name "render-table"]
@@ -139,8 +148,7 @@
                                      (apply dom/tbody nil
                                             (map #(render-row %1 %2)
                                                  (cycle ["" "odd"])
-                                                 rows))))))
-      )))
+                                                 rows)))))))))
 
 (defn render-data [data owner]
   (let [fn-name "render-data"]
@@ -159,6 +167,37 @@
     (let [r (into [] (map #(render-data % owner) data))]
       (l/infod src fn-name "r" r)
       (apply dom/div nil r))))
+
+(defn extend [m]
+  "Turns {:a 1, :b 2} to {:a {:val 1, :active false}, :b {:val 2, :active false}}"
+  (reduce-kv (fn [m k v]
+               (assoc m k
+                 {:val v :active false}
+                 )) {} m))
+
+(defn ff [m k v] (assoc m k (extend v)))
+
+(defn extend-table [t]
+  (let [fn-name "extend-table"]
+    (l/infod src fn-name "t" t)
+    (let [rows (get-in t [:data])]
+      (l/infod src fn-name "rows" rows)
+      (let [r (assoc t :data
+                (reduce-kv ff {} rows))]
+        (l/infod src fn-name "r" r)
+        r))))
+
+;; (def t
+;;   {:table "employees", :dbase "employees", :idx 1,
+;;    :data
+;;    {:row0 {:first_name "Georgi", :emp_no 10001, :birth_date "1953-09-01 23:00:00", :last_name "Facello", :hire_date "1986-06-25 22:00:00", :gender "M"},
+;;     :row1 {:first_name "Bezalel", :emp_no 10002, :birth_date "1964-06-01 23:00:00", :last_name "Simmel", :hire_date "1985-11-20 23:00:00", :gender "F"}}})
+
+;; (def x {:table "employees", :dbase "employees", :idx 1, :data {:row0 {:first_name "Georgi", :emp_no 10001, :birth_date "1953-09-01 23:00:00", :last_name "Facello", :hire_date "1986-06-25 22:00:00", :gender "M"}, :row1 {:first_name "Bezalel", :emp_no 10002, :birth_date "1964-06-01 23:00:00", :last_name "Simmel", :hire_date "1985-11-20 23:00:00", :gender "F"}}})
+;; (extend-table x)
+;; (def data [{:table "employees", :dbase "employees", :idx 1, :data {:row0 {:first_name "Georgi", :emp_no 10001, :birth_date "1953-09-01 23:00:00", :last_name "Facello", :hire_date "1986-06-25 22:00:00", :gender "M"}, :row1 {:first_name "Bezalel", :emp_no 10002, :birth_date "1964-06-01 23:00:00", :last_name "Simmel", :hire_date "1985-11-20 23:00:00", :gender "F"}}}])
+;; (map #(extend-table %) data)
+;; ({:table employees, :dbase employees, :idx 1, :data {:row0 {:first_name {:val Georgi, :active false}, :emp_no {:val 10001, :active false}, :birth_date {:val 1953-09-01 23:00:00, :active false}, :last_name {:val Facello, :active false}, :hire_date {:val 1986-06-25 22:00:00, :active false}, :gender {:val M, :active false}}, :row1 {:first_name {:val Bezalel, :active false}, :emp_no {:val 10002, :active false}, :birth_date {:val 1964-06-01 23:00:00, :active false}, :last_name {:val Simmel, :active false}, :hire_date {:val 1985-11-20 23:00:00, :active false}, :gender {:val F, :active false}}}})
 
 (defn construct-component [data owner {:keys [toggle] :as opts}]
   (let [fn-name "construct-component"]
@@ -185,7 +224,27 @@
                                  (let [msg (str "Fetching data from dbase: " dbase)]
                                    (l/info src fn-name msg)
                                    msg)
-                                 (render-data-vec data owner)))))))))
+                                 (let [extended-data
+                                       ;; data
+                                       [{:table "employees", :dbase "employees", :idx 1, :data
+                                         {:row0 {:first_name {:val "Georgi",  :active false},
+                                                 :emp_no {:val 10001, :active false},
+                                                 :birth_date {:val "1953-09-01 23:00:00", :active false},
+                                                 :last_name {:val "Facello", :active false}, :hire_date {:val "1986-06-25 22:00:00", :active false},
+                                                 :gender {:val "M", :active false}},
+                                          :row1 {:first_name {:val "Bezalel", :active false},
+                                                 :emp_no {:val 10002, :active false},
+                                                 :birth_date {:val "1964-06-01 23:00:00", :active false},
+                                                 :last_name {:val "Simmel",  :active false},
+                                                 :hire_date {:val "1985-11-20 23:00:00", :active false},
+                                                 :gender {:val "F", :active false}}}}]
+                                       ;; (into [] (first  (map #(extend-table %) data)))
+                                       ;;x (map #(extend-table %) data)
+                                       ]
+                                   (l/infod src fn-name "data" data)
+                                   ;;(l/infod src fn-name "x" x)
+                                   (l/infod src fn-name "extended-data" extended-data)
+                                   (render-data-vec extended-data owner))))))))))
 
 (defn view [data owner]
   (let [fn-name "view"]
@@ -199,9 +258,9 @@
                    {:method :put
                     :url "fetch"
                     ;; TODO the idx should be specified in transfer.clj
-                    :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}
+                    :data {:select-rows-from [;; {:dbase "employees" :table "departments" :idx 0}
                                               {:dbase "employees" :table "employees"   :idx 1}
-                                              {:dbase "employees" :table "salaries"    :idx 2}
+;;                                               {:dbase "employees" :table "salaries"    :idx 2}
                                               ]}
 ;;                     :data {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}]}
 ;;                     :data {:show-tables-from ["employees"]}

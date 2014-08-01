@@ -9,10 +9,10 @@
 (def src "logger.cljx")
 
 (def files
-;;   ["client.cljs" "transform.clj" "db.clj" "utils"]
+  ["client.cljs" "transform.clj" "db.clj" "utils"]
 ;;   ["client.cljs"]
 ;;   ["transform.clj"]
-  nil
+;;   nil
   )
 
 (def functions [
@@ -22,19 +22,17 @@
 ;;                 "get-data"
 ;;                 "create-table"
 ;;                 "table-elem"
-;;                 "table-vals"
 ;;                 "get-data"
 ;;                 "convert-to-korks"
 ;;                 "f"
-;;                 "construct-component"
+                "construct-component"
+                "extend-table"
 ;;                 "table-elem"
-;;                 "rows"
-;;                 "get-table-data"
 ;;                 "render-data-vec"
 ;;                 "render-data"
 ;;                 "render-table"
 ;;                 "render-row"
-;;                 "onClick"
+                "onClick"
 ;;                 "tr"
 
                 ;;;; "transform.clj"
@@ -44,14 +42,15 @@
 ;;                 "process-show-tables-with-data-from"
 ;;                 "fetch"
 ;;                 "encode-table"
-                "m-select-rows-from"
+;;                 "convert-val"
+;;                 "m-select-rows-from"
 ;;                 "m-x"
 
                 ;;;; db.clj
 ;;                 "sql-select-rows-from"
 
                 ;;;; utils
-                "convert-to-korks"
+;;                 "convert-to-korks"
                 ])
 
 (defn infod [src fn-name def-name def-val]
