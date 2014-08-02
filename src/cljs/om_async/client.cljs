@@ -33,13 +33,6 @@
 ;;          :toggle #{nil}
          }))
 
-(defn filter-kw
-  "Returns a hash-map from the vector of hash-maps m where the first
-  key of the returned hashmap equals to kw"
-  [kw vec-of-hash-maps]
-  (filter #(= kw (first (keys %)))
-          vec-of-hash-maps))
-
 ;; [{:keys [dbase table]}] is a special form for
 ;; [{method :method, url :url, data :data, on-complete :on-complete]}]
 (defn edn-xhr
@@ -54,11 +47,27 @@
       (send url (http-req-methods method) (when data (pr-str data))
         #js {"Content-Type" "application/edn"}))))
 
-(defn onClick [v]
+(defn onClick [v idx row col]
   (let [fn-name "onClick"]
+;;     (l/infod src fn-name "v" v)
+;;     (l/infod src fn-name "idx" idx)
+;;     (l/infod src fn-name "row" row)
+;;     (l/infod src fn-name "col" col)
     (fn [e]
       (l/infod src fn-name "v" v)
-      v)))
+      (let [korks
+            [:data row col]
+            ]
+        (l/infod src fn-name "korks" korks)
+        (l/infod src fn-name "@app-state" @app-state)
+        (let [
+              d [(get-in @app-state [:table0])]
+              ev (
+                  ;;om/get-state
+                  get-in d korks)
+              ]
+          (l/infod src fn-name "ev" ev)
+          v)))))
 
 (defn onClick-orig [owner dbase table col row-value]
   (let [fn-name "onClick"]
@@ -116,8 +125,14 @@
         ))))
 
 (defn column-filter? [elem-idx] true) ;; no element is filtered out
+;; (let [m {:a 1 :b 2 :c 1}]
+;;   (select-keys m (for [[k v] m :when (= v 1)] k)))
+
 (defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no element is filtered out
 ;; (defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no element is filtered out
+
+(defn get-val [m]
+  (get-in m [:val]))
 
 (defn render-row [css row]
   (let [fn-name "render-row"]
@@ -125,9 +140,9 @@
     (l/infod src fn-name "row" row)
     (apply dom/tr #js {:className css}
            (map #(dom/td
-                  #js {:onClick (onClick (str %))}
+                  #js {:onClick (onClick (get-val %) 1 :row0 :gender)}
                   ;; #js {:onClick (onClick owner dbase table %1 %2)}
-                  (str %)) row))))
+                  (get-val %)) row))))
 
 (defn render-table [tname tdata]
   (let [fn-name "render-table"]
@@ -168,37 +183,6 @@
       (l/infod src fn-name "r" r)
       (apply dom/div nil r))))
 
-(defn extend [m]
-  "Turns {:a 1, :b 2} to {:a {:val 1, :active false}, :b {:val 2, :active false}}"
-  (reduce-kv (fn [m k v]
-               (assoc m k
-                 {:val v :active false}
-                 )) {} m))
-
-(defn ff [m k v] (assoc m k (extend v)))
-
-(defn extend-table [t]
-  (let [fn-name "extend-table"]
-    (l/infod src fn-name "t" t)
-    (let [rows (get-in t [:data])]
-      (l/infod src fn-name "rows" rows)
-      (let [r (assoc t :data
-                (reduce-kv ff {} rows))]
-        (l/infod src fn-name "r" r)
-        r))))
-
-;; (def t
-;;   {:table "employees", :dbase "employees", :idx 1,
-;;    :data
-;;    {:row0 {:first_name "Georgi", :emp_no 10001, :birth_date "1953-09-01 23:00:00", :last_name "Facello", :hire_date "1986-06-25 22:00:00", :gender "M"},
-;;     :row1 {:first_name "Bezalel", :emp_no 10002, :birth_date "1964-06-01 23:00:00", :last_name "Simmel", :hire_date "1985-11-20 23:00:00", :gender "F"}}})
-
-;; (def x {:table "employees", :dbase "employees", :idx 1, :data {:row0 {:first_name "Georgi", :emp_no 10001, :birth_date "1953-09-01 23:00:00", :last_name "Facello", :hire_date "1986-06-25 22:00:00", :gender "M"}, :row1 {:first_name "Bezalel", :emp_no 10002, :birth_date "1964-06-01 23:00:00", :last_name "Simmel", :hire_date "1985-11-20 23:00:00", :gender "F"}}})
-;; (extend-table x)
-;; (def data [{:table "employees", :dbase "employees", :idx 1, :data {:row0 {:first_name "Georgi", :emp_no 10001, :birth_date "1953-09-01 23:00:00", :last_name "Facello", :hire_date "1986-06-25 22:00:00", :gender "M"}, :row1 {:first_name "Bezalel", :emp_no 10002, :birth_date "1964-06-01 23:00:00", :last_name "Simmel", :hire_date "1985-11-20 23:00:00", :gender "F"}}}])
-;; (map #(extend-table %) data)
-;; ({:table employees, :dbase employees, :idx 1, :data {:row0 {:first_name {:val Georgi, :active false}, :emp_no {:val 10001, :active false}, :birth_date {:val 1953-09-01 23:00:00, :active false}, :last_name {:val Facello, :active false}, :hire_date {:val 1986-06-25 22:00:00, :active false}, :gender {:val M, :active false}}, :row1 {:first_name {:val Bezalel, :active false}, :emp_no {:val 10002, :active false}, :birth_date {:val 1964-06-01 23:00:00, :active false}, :last_name {:val Simmel, :active false}, :hire_date {:val 1985-11-20 23:00:00, :active false}, :gender {:val F, :active false}}}})
-
 (defn construct-component [data owner {:keys [toggle] :as opts}]
   (let [fn-name "construct-component"]
     (l/infod src fn-name "data" data)
@@ -218,31 +202,31 @@
                       (dom/div nil
                              (let [tables (get-in data [])
                                    cnt-tables (count tables)]
-                               (l/infod src fn-name "tables" tables)
+                               ;; (l/infod src fn-name "tables" tables)
                                ;; (l/infod src fn-name "cnt-tables" cnt-tables)
                                (if (= 0 cnt-tables)
                                  (let [msg (str "Fetching data from dbase: " dbase)]
                                    (l/info src fn-name msg)
                                    msg)
                                  (let [extended-data
-                                       ;; data
-                                       [{:table "employees", :dbase "employees", :idx 1, :data
-                                         {:row0 {:first_name {:val "Georgi",  :active false},
-                                                 :emp_no {:val 10001, :active false},
-                                                 :birth_date {:val "1953-09-01 23:00:00", :active false},
-                                                 :last_name {:val "Facello", :active false}, :hire_date {:val "1986-06-25 22:00:00", :active false},
-                                                 :gender {:val "M", :active false}},
-                                          :row1 {:first_name {:val "Bezalel", :active false},
-                                                 :emp_no {:val 10002, :active false},
-                                                 :birth_date {:val "1964-06-01 23:00:00", :active false},
-                                                 :last_name {:val "Simmel",  :active false},
-                                                 :hire_date {:val "1985-11-20 23:00:00", :active false},
-                                                 :gender {:val "F", :active false}}}}]
-                                       ;; (into [] (first  (map #(extend-table %) data)))
-                                       ;;x (map #(extend-table %) data)
+;;                                        [{:table "employees", :dbase "employees", :idx 1, :data
+;;                                          {:row0 {:first_name {:val "Georgi",  :active false},
+;;                                                  :emp_no {:val 10001, :active false},
+;;                                                  :birth_date {:val "1953-09-01 23:00:00", :active false},
+;;                                                  :last_name {:val "Facello", :active false},
+;;                                                  :hire_date {:val "1986-06-25 22:00:00", :active false},
+;;                                                  :gender {:val "M", :active false}},
+;;                                           :row1 {:first_name {:val "Bezalel", :active false},
+;;                                                  :emp_no {:val 10002, :active false},
+;;                                                  :birth_date {:val "1964-06-01 23:00:00", :active false},
+;;                                                  :last_name {:val "Simmel",  :active false},
+;;                                                  :hire_date {:val "1985-11-20 23:00:00", :active false},
+;;                                                  :gender {:val "F", :active false}}}}]
+;; ;;                                        (into [] (first  (map #(extend-table %) data)))
+;;                                        d [(get-in data [:table0])]
+;; ;;                                        x (into [] (map #(extend-table %) d))
+                                       data
                                        ]
-                                   (l/infod src fn-name "data" data)
-                                   ;;(l/infod src fn-name "x" x)
                                    (l/infod src fn-name "extended-data" extended-data)
                                    (render-data-vec extended-data owner))))))))))
 

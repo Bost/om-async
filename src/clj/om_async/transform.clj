@@ -109,6 +109,31 @@
       (l/infod src fn-name "rx" rx)
       rx)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; {
+;; this part belongs to client.cljs
+
+(defn extend [m]
+  "Turns {:a 1, :b 2} to {:a {:val 1, :active false}, :b {:val 2, :active false}}"
+  (reduce-kv (fn [m k v]
+               (assoc m k {:val v :active false}))
+             {} m))
+
+(defn ff [m k v] (assoc m k (extend v)))
+
+(defn extend-table [t]
+  (let [fn-name "extend-table"]
+    (l/infod src fn-name "t" t)
+    (let [rows (get-in t [:data])]
+      ;;(l/infod src fn-name "rows" rows) ;; (type rows) => om.core/MapCursor
+      (l/infod src fn-name "rows" rows)
+      ;;(l/infod src fn-name "(type rows)" (type rows))
+      (let [ff-rows (reduce-kv ff {} rows)]
+        ;; (l/infod src fn-name "ff-rows" ff-rows)
+        (let [r (assoc t :data ff-rows)]
+          ;; (l/infod src fn-name "r" r)
+          r)))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; }
+
 (defn m-select-rows-from [params data]
   (let [fn-name "m-select-rows-from"]
     (l/infod src fn-name "params" params)
@@ -116,14 +141,19 @@
     (let [rlist
             (doall (map (fn [p d]
                           (merge p
-                                 {:data
-                                 (m-x p [d])}
-                                 ))
+                                 {:data (m-x p [d])}))
                         params data))
-          r (into [] rlist)
+          rvec (into [] rlist)
+          ks (into [] (map #(keyword (str "table" %)) (range (count rvec))))
+          rdata (zipmap ks rvec)
+          ;; TODO extend-table must be done in the client.cljs
+          d [(get-in rdata [:table0])]
           ]
-      (l/infod src fn-name "r" r)
-      r)))
+      ;; (l/infod src fn-name "rdata" rdata)
+      ;; (l/infod src fn-name "d" d)
+      (let [r (into [] (map #(extend-table %) d))]
+        (l/infod src fn-name "r" r)
+        r))))
 
 (defn m-show-tables-from [p]
   (into [] p))
