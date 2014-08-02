@@ -208,26 +208,8 @@
                                  (let [msg (str "Fetching data from dbase: " dbase)]
                                    (l/info src fn-name msg)
                                    msg)
-                                 (let [extended-data
-;;                                        [{:table "employees", :dbase "employees", :idx 1, :data
-;;                                          {:row0 {:first_name {:val "Georgi",  :active false},
-;;                                                  :emp_no {:val 10001, :active false},
-;;                                                  :birth_date {:val "1953-09-01 23:00:00", :active false},
-;;                                                  :last_name {:val "Facello", :active false},
-;;                                                  :hire_date {:val "1986-06-25 22:00:00", :active false},
-;;                                                  :gender {:val "M", :active false}},
-;;                                           :row1 {:first_name {:val "Bezalel", :active false},
-;;                                                  :emp_no {:val 10002, :active false},
-;;                                                  :birth_date {:val "1964-06-01 23:00:00", :active false},
-;;                                                  :last_name {:val "Simmel",  :active false},
-;;                                                  :hire_date {:val "1985-11-20 23:00:00", :active false},
-;;                                                  :gender {:val "F", :active false}}}}]
-;; ;;                                        (into [] (first  (map #(extend-table %) data)))
-;;                                        d [(get-in data [:table0])]
-;; ;;                                        x (into [] (map #(extend-table %) d))
-                                       data
-                                       ]
-                                   (l/infod src fn-name "extended-data" extended-data)
+                                 (let [extended-data data]
+                                   ;; (l/infod src fn-name "extended-data" extended-data)
                                    (render-data-vec extended-data owner))))))))))
 
 (defn view [data owner]
@@ -242,7 +224,8 @@
                    {:method :put
                     :url "fetch"
                     ;; TODO the idx should be specified in transfer.clj
-                    :data {:select-rows-from [;; {:dbase "employees" :table "departments" :idx 0}
+                    :data {:select-rows-from [
+                                              {:dbase "employees" :table "departments" :idx 0}
                                               {:dbase "employees" :table "employees"   :idx 1}
 ;;                                               {:dbase "employees" :table "salaries"    :idx 2}
                                               ]}
