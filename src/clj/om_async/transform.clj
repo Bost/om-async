@@ -143,8 +143,6 @@
           ;; (l/infod src fn-name "r" r)
           r)))))
 
-(def r01 [{:data {:row0 {:dept_name {:val "Customer Service", :active false}, :dept_no {:val "d009", :active false}}, :row1 {:dept_name {:val "Development", :active false}, :dept_no {:val "d005", :active false}}}, :dbase "employees", :table "departments", :idx 0} {:data {:row0 {:hire_date {:val "1986-06-25 22:00:00", :active false}, :gender {:val "M", :active false}, :last_name {:val "Facello", :active false}, :first_name {:val "Georgi", :active false}, :birth_date {:val "1953-09-01 23:00:00", :active false}, :emp_no {:val 10001, :active false}}, :row1 {:hire_date {:val "1985-11-20 23:00:00", :active false}, :gender {:val "F", :active false}, :last_name {:val "Simmel", :active false}, :first_name {:val "Bezalel", :active false}, :birth_date {:val "1964-06-01 23:00:00", :active false}, :emp_no {:val 10002, :active false}}}, :dbase "employees", :table "employees", :idx 1}])
-
 (defn xtable [tfull k]
   (let [fn-name "xtable"]
     ;; (l/infod src fn-name "tfull" tfull)
@@ -157,25 +155,12 @@
 
 (defn extend-all [tfull]
   (let [fn-name "extend-all"]
-    (let [
-          ks (into [] (keys tfull))
+    (let [ks (into [] (keys tfull))
           rks (map #(xtable tfull %) ks)
-          rksv (into [] rks)
-          r ;; (into [] concat rks)
-          (into [] (apply concat rks))
-
-          r0 (xtable tfull :table0)
-          r1 (xtable tfull :table1)
-          r01 (apply merge r0 r1)
+          r (into [] (apply concat (into [] rks)))
           ]
-      (l/infod src fn-name "r0" r0)
-      (l/infod src fn-name "r1" r1)
-      (l/infod src fn-name "r" r)
-      (l/infod src fn-name "rks" rks)
-      (l/infod src fn-name "rksv" rksv)
-      (l/infod src fn-name "r01" r01)
-      (l/infod src fn-name "(= r r01)" (= r r01))
-      r01)))
+      ;; (l/infod src fn-name "r" r)
+      r)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; }
 
 (defn m-select-rows-from [params data]
