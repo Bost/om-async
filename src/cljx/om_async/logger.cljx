@@ -30,11 +30,11 @@
 ;;    "table-elem"
 ;;    "render-data-vec"
 ;;    "render-data"
-;;    "render-table"
+   "render-table"
 ;;    "render-row"
 ;;    "init"
 ;;    "render"
-   "render-td"
+;;    "render-td"
    "onClick"
 ;;    "tr"
 
@@ -46,7 +46,7 @@
 ;;    "process-sql"
 ;;    "process-select-rows-from"
 ;;    "process-show-tables-with-data-from"
-;;    "fetch"
+   "fetch"
 ;;    "encode-table"
 ;;    "convert-val"
 ;;    "m-select-rows-from"
@@ -69,7 +69,9 @@
 (defn info [src fn-name msg]
   (if (u/contains-value? files src)
     (if (u/contains-value? functions fn-name)
-      (println (str src "; " fn-name "; " msg)))))
+      (clojure.pprint/pprint
+       ;;println
+       (str src "; " fn-name "; " msg)))))
 
 (defn error [src fn-name msg]
   (let [separator "=========="]

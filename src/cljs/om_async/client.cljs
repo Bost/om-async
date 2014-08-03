@@ -90,7 +90,6 @@
 
       (dom/td
        #js {:onClick (fn [e] (onClick app owner [:data :row0 :emp_no]))}
-       ;; #js {:onClick (onClick owner dbase table %1 %2)}
        gvx))))
 
 (defn render-row [app owner css row]
@@ -102,16 +101,24 @@
     (apply dom/tr #js {:className css}
            (map #(render-td app owner %) row))))
 
-(defn render-table [app owner tname tdata]
+(def rows [[{:val 10001, :active false} {:val "1986-06-25 22:00:00", :active false} {:val "1987-06-25 22:00:00", :active false} {:val 60117, :active false}] [{:val 10001, :active false} {:val "1987-06-25 22:00:00", :active false} {:val "1988-06-24 22:00:00", :active false} {:val 62102, :active false}]])
+(defn render-table [app owner tname tdata ks]
   (let [fn-name "render-table"]
     ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "owner" owner)
     ;; (l/infod src fn-name "tname" tname)
-    ;; (l/infod src fn-name "tdata" tdata)
+    (l/infod src fn-name "tdata" tdata)
+    (l/infod src fn-name "ks" ks)
     (let [header (into [] (keys (first tdata)))]
       (l/infod src fn-name "header" header)
-      (let [rows (into [] (map #(into [] (vals (nth tdata %)))
-                               (range (count tdata))))]
+      (let [indexed-tdata (map-indexed vector tdata)
+;;             nrows (into [] (map #(into [] (vals (nth tdata %)))
+;;                                indexed-tdata
+;;                                ))
+            rows (into [] (map #(into [] (vals (nth tdata %)))
+                               (range (count tdata))
+                               ))
+            ]
         (l/infod src fn-name "rows" rows)
         (dom/div nil
                  tname
@@ -129,15 +136,19 @@
   (let [fn-name "render-data"]
     ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "owner" owner)
-    (l/infod src fn-name "table-idx" table-idx)
-    (l/infod src fn-name "tdata" tdata)
+    ;; (l/infod src fn-name "table-idx" table-idx)
+    ;; (l/infod src fn-name "tdata" tdata)
     (let [dbname (get-in tdata [:dbase])
           tname (get-in dbname [:table])
           fq-name (str dbname "." tname)
-          rows (into [] (vals (get-in tdata [:data])))]
+          data (get-in tdata [:data])
+          rows (into [] (vals data))
+          ks (into [] (keys data))
+          ]
       ;; (l/infod src fn-name "tname" tname)
       ;; (l/infod src fn-name "rows" rows)
-      (render-table app owner fq-name rows))))
+      (l/infod src fn-name "ks" ks)
+      (render-table app owner fq-name rows ks))))
 
 (defn render-data-vec [app owner extended-data]
   (let [fn-name "render-data-vec"]
@@ -145,12 +156,12 @@
     ;; (l/infod src fn-name "owner" owner)
     ;; (l/infod src fn-name "extended-data" extended-data)
     (let [id (into [] (map-indexed vector extended-data))
-          r (into []
-                  (map #(render-data app owner
-                                        (first %)
-                                        (second %)) id))]
-      (l/infod src fn-name "r" r)
-      (apply dom/div nil r))))
+          rd (map #(render-data app owner
+                                (keyword (first %))
+                                (second %)) id)
+          r (apply dom/div nil (into [] rd))]
+      ;; (l/infod src fn-name "r" r)
+      r)))
 
 (defn init [_]
   (let [fn-name "init"]

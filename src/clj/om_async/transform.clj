@@ -181,7 +181,8 @@
       (l/infod src fn-name "rvec" rvec)
       (l/infod src fn-name "rdata" rdata)
       ;; (l/infod src fn-name "d" d)
-      (let [r (extend-all rdata)]
+      (let [er (extend-all rdata)
+            r (into []  er)]
         (l/infod src fn-name "r" r)
         r))))
 
@@ -212,7 +213,9 @@
       (l/infod src fn-name "manipulator-fn" manipulator-fn)
       (l/infod src fn-name "params" params)
       (let [raw-data (into [] (map #(fetch-fn %) params))
-            r (first (manipulator-fn params raw-data))
+            r (identity
+               ;;first
+               (manipulator-fn params raw-data))
             ]
         (l/infod src fn-name "raw-data" raw-data)
         (l/infod src fn-name "r" r)
