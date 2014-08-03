@@ -212,7 +212,7 @@
       (l/infod src fn-name "manipulator-fn" manipulator-fn)
       (l/infod src fn-name "params" params)
       (let [raw-data (into [] (map #(fetch-fn %) params))
-            r (manipulator-fn params raw-data)
+            r (first (manipulator-fn params raw-data))
             ]
         (l/infod src fn-name "raw-data" raw-data)
         (l/infod src fn-name "r" r)

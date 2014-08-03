@@ -28,6 +28,7 @@
 
 (def app-state
   (atom {
+         :x ["def-state"]
 ;;          :dbase0 {}
 ;;          :dbase0 {:toggle {:in "in-val"} :name ["employees"] :vals []} ;; TODO create dbase0 by transfer.clj
 ;;          :toggle #{nil}
@@ -47,26 +48,42 @@
       (send url (http-req-methods method) (when data (pr-str data))
         #js {"Content-Type" "application/edn"}))))
 
-(defn onClick [v idx row col]
+(defn onClick [v owner idx row col]
   (let [fn-name "onClick"]
 ;;     (l/infod src fn-name "v" v)
+;;     (l/infod src fn-name "owner" owner)
 ;;     (l/infod src fn-name "idx" idx)
 ;;     (l/infod src fn-name "row" row)
 ;;     (l/infod src fn-name "col" col)
     (fn [e]
       (l/infod src fn-name "v" v)
       (let [korks
-            [:data row col]
+;;             [:x :data row col :active]
+            [:x]
+            as @app-state
             ]
         (l/infod src fn-name "korks" korks)
-        (l/infod src fn-name "@app-state" @app-state)
+        (l/infod src fn-name "as" as)
+        (l/infod src fn-name "(type owner)" (type owner))
         (let [
-              d [(get-in @app-state [:table0])]
-              ev (
-                  ;;om/get-state
-                  get-in d korks)
+              ;; ev (get-in as korks)
+              ev (om/get-state owner korks)
               ]
           (l/infod src fn-name "ev" ev)
+;;           (let [
+;;                 e1 (om/get-state owner korks)
+;;                 e2 (om/set-state! owner korks true)
+;; ;;                 toggled-elems-2 (om/transact! data :toggle (fn [_] true))
+;;                 e3 (om/get-state owner korks)
+;; ;;                 isIn (u/contains-value? toggled-elems data)
+;;                 ]
+
+;;             (l/infod src fn-name "e1" e1)
+;; ;;             (l/infod src fn-name "e2" e2)
+;;             (l/infod src fn-name "e3" e3)
+;;             )
+
+
           v)))))
 
 (defn onClick-orig [owner dbase table col row-value]
@@ -112,7 +129,8 @@
             ;; (if (isIn)
             ;;   ;; TODO serch if om has some 'state-remove' function
             ;;   (om/set-state! owner :toggle data))
-            ))
+            )
+          )
 
 ;;         (edn-xhr
 ;;          {:method :put
@@ -134,17 +152,17 @@
 (defn get-val [m]
   (get-in m [:val]))
 
-(defn render-row [css row]
+(defn render-row [owner css row]
   (let [fn-name "render-row"]
     (l/infod src fn-name "css" css)
     (l/infod src fn-name "row" row)
     (apply dom/tr #js {:className css}
            (map #(dom/td
-                  #js {:onClick (onClick (get-val %) 1 :row0 :gender)}
+                  #js {:onClick (onClick (get-val %) owner 1 :row0 :gender)}
                   ;; #js {:onClick (onClick owner dbase table %1 %2)}
                   (get-val %)) row))))
 
-(defn render-table [tname tdata]
+(defn render-table [owner tname tdata]
   (let [fn-name "render-table"]
     (l/infod src fn-name "tname" tname)
     (l/infod src fn-name "tdata" tdata)
@@ -161,11 +179,11 @@
                                                 (apply dom/tr nil
                                                        (map #(dom/th nil (str %)) header)))
                                      (apply dom/tbody nil
-                                            (map #(render-row %1 %2)
+                                            (map #(render-row owner %1 %2)
                                                  (cycle ["" "odd"])
                                                  rows)))))))))
 
-(defn render-data [data owner]
+(defn render-data [owner data]
   (let [fn-name "render-data"]
     (l/infod src fn-name "data" data)
     (let [dbname (get-in data [:dbase])
@@ -174,12 +192,12 @@
           tdata (into [] (vals (get-in data [:data])))]
       (l/infod src fn-name "tname" tname)
       (l/infod src fn-name "tdata" tdata)
-      (render-table fq-name tdata))))
+      (render-table owner fq-name tdata))))
 
-(defn render-data-vec [data owner]
+(defn render-data-vec [owner data]
   (let [fn-name "render-data-vec"]
     (l/infod src fn-name "data" data)
-    (let [r (into [] (map #(render-data % owner) data))]
+    (let [r (into [] (map #(render-data owner %) data))]
       (l/infod src fn-name "r" r)
       (apply dom/div nil r))))
 
@@ -190,17 +208,16 @@
     (reify
       om/IInitState (init-state [_]
                                 (l/infod src fn-name "_" _)
-;;                                 {:toggle "foo"}
 ;;                                 {:dbase0 {:name ["employees"] :vals ["init-val"]}}
-                                {:dbase0 {:toggle {:in "in-init-val"}}}
+                                {:x ["init-state"]}
                                 )
       om/IRenderState
       (render-state [_ {:keys [toggle]}]
-                    (let [dbase (first (get-in data [:dbase]))]
+                    (let [dbase (first (get-in data [:x :dbase]))]
                       ;; TODO get rid of 'if'
-                      ;; (l/infod src fn-name "dbase" dbase)
+                      (l/infod src fn-name "dbase" dbase)
                       (dom/div nil
-                             (let [tables (get-in data [])
+                             (let [tables (get-in data [:x])
                                    cnt-tables (count tables)]
                                ;; (l/infod src fn-name "tables" tables)
                                ;; (l/infod src fn-name "cnt-tables" cnt-tables)
@@ -208,9 +225,24 @@
                                  (let [msg (str "Fetching data from dbase: " dbase)]
                                    (l/info src fn-name msg)
                                    msg)
-                                 (let [extended-data data]
+                                 (let [extended-data
+                                       ;; [data]
+                                       [(get-in data [:x])]
+                                       ]
                                    ;; (l/infod src fn-name "extended-data" extended-data)
-                                   (render-data-vec extended-data owner))))))))))
+                                   (let [r (render-data-vec owner extended-data)
+;;                                          s0 (om/get-state owner [:x])
+;;                                          s1 (om/set-state! owner [:x] {:a 1})
+                                         s1 (om/set-state! owner data)
+                                         s2 (om/get-state owner [:x])
+                                         ]
+                                     (l/infod src fn-name "(type data)" (type data))
+                                     (l/infod src fn-name "(type owner)" (type owner))
+;;                                      (l/infod src fn-name "s0" s0)
+                                     (l/infod src fn-name "s1" s1)
+                                     (l/infod src fn-name "s2" s2)
+                                     r)
+                                   )))))))))
 
 (defn view [data owner]
   (let [fn-name "view"]
@@ -233,8 +265,7 @@
 ;;                     :data {:show-tables-from ["employees"]}
                     ;; :data {:show-tables-with-data-from [dbase]}
 ;;                     :data {:show-tables-with-data-from [(first (get-in data [:dbase0 :name]))]}
-                    :on-complete #(om/transact! data [;;:dbase0 :
-                                                      ] (fn [_] %))})
+                    :on-complete #(om/transact! data [:x] (fn [_] %))})
                   )
       om/IRenderState
       (render-state [_ {:keys [err-msg]}]
