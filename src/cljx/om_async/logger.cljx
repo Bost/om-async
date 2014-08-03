@@ -15,45 +15,49 @@
 ;;   nil
   )
 
-(def functions [
-                ;;;; client.cljs
-;;                 "view"
-;;                 "create-table-for-columns"
-;;                 "get-data"
-;;                 "create-table"
-;;                 "table-elem"
-;;                 "get-data"
-;;                 "convert-to-korks"
-;;                 "f"
-                "construct-component"
-;;                 "table-elem"
-;;                 "render-data-vec"
-;;                 "render-data"
-;;                 "render-table"
-;;                 "render-row"
-                "onClick"
-;;                 "tr"
+(def functions
+  [
+   ;;;; client.cljs
+;;    "view"
+;;    "create-table-for-columns"
+;;    "get-data"
+;;    "create-table"
+;;    "table-elem"
+;;    "get-data"
+;;    "convert-to-korks"
+;;    "f"
+;;    "construct-component"
+;;    "table-elem"
+;;    "render-data-vec"
+;;    "render-data"
+;;    "render-table"
+;;    "render-row"
+;;    "init"
+;;    "render"
+   "render-td"
+   "onClick"
+;;    "tr"
 
-                ;;;; "transform.clj"
-;;                 "extend-table"
-;;                 "xtable"
-;;                 "extend-all"
-                ;; "process-request"
-;;                 "process-sql"
-;;                 "process-select-rows-from"
-;;                 "process-show-tables-with-data-from"
-;;                 "fetch"
-;;                 "encode-table"
-;;                 "convert-val"
-;;                 "m-select-rows-from"
-;;                 "m-x"
+   ;;;; "transform.clj"
+;;    "extend-table"
+;;    "xtable"
+;;    "extend-all"
+;;    "process-request"
+;;    "process-sql"
+;;    "process-select-rows-from"
+;;    "process-show-tables-with-data-from"
+;;    "fetch"
+;;    "encode-table"
+;;    "convert-val"
+;;    "m-select-rows-from"
+;;    "m-x"
 
-                ;;;; db.clj
-;;                 "sql-select-rows-from"
+   ;;;; db.clj
+;;    "sql-select-rows-from"
 
-                ;;;; utils
-;;                 "convert-to-korks"
-                ])
+   ;;;; utils
+;;    "convert-to-korks"
+   ])
 
 (defn infod [src fn-name def-name def-val]
   (if (u/contains-value? files src)
