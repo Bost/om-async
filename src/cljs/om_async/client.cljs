@@ -53,14 +53,14 @@
 (defn get-val [m]
   (get-in m [:val]))
 
-(defn onClick [data owner korks]
+(defn onClick [app owner korks]
   (let [fn-name "onClick"]
-;;     (l/infod src fn-name "data" data)
+;;     (l/infod src fn-name "app" app)
 ;;     (l/infod src fn-name "(type data)" (type data))
 ;;     (l/infod src fn-name "owner" owner)
 ;;     (l/infod src fn-name "korks" korks)
     (let [s (str korks)
-          r (om/transact! data korks
+          r (om/transact! app korks
                   (fn [] {:val s :active true}))]
 ;;       (l/infod src fn-name "r" r)
   ;; we're not allowed to use cursors outside of the render phase as
@@ -75,36 +75,36 @@
   ;;             )})
       r)))
 
-(defn render-td [data owner vx]
+(defn render-td [app owner vx]
   (let [fn-name "render-td"]
-;;     (l/infod src fn-name "data" data)
+;;     (l/infod src fn-name "app" app)
 ;;     (l/infod src fn-name "(type data)" (type data))
 ;;     (l/infod src fn-name "owner" owner)
 ;;     (l/infod src fn-name "vx" vx)
     (let [
           gvx (get-val vx)
-          korks [:x :data :row0 :emp_no]
-          vy (get-in data korks)
+          korks [:data :row0 :emp_no]
+          vy (get-in app korks)
           gvy (get-val vy)
           ]
 
       (dom/td
-       #js {:onClick (fn [e] (onClick data owner [:x :data :row0 :emp_no]))}
+       #js {:onClick (fn [e] (onClick app owner [:data :row0 :emp_no]))}
        ;; #js {:onClick (onClick owner dbase table %1 %2)}
        gvx))))
 
-(defn render-row [data owner css row]
+(defn render-row [app owner css row]
   (let [fn-name "render-row"]
-    ;; (l/infod src fn-name "data" data)
+    ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "owner" owner)
     ;; (l/infod src fn-name "css" css)
     ;; (l/infod src fn-name "row" row)
     (apply dom/tr #js {:className css}
-           (map #(render-td data owner %) row))))
+           (map #(render-td app owner %) row))))
 
-(defn render-table [data owner tname tdata]
+(defn render-table [app owner tname tdata]
   (let [fn-name "render-table"]
-    ;; (l/infod src fn-name "data" data)
+    ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "owner" owner)
     ;; (l/infod src fn-name "tname" tname)
     ;; (l/infod src fn-name "tdata" tdata)
@@ -121,48 +121,53 @@
                                                 (apply dom/tr nil
                                                        (map #(dom/th nil (str %)) header)))
                                      (apply dom/tbody nil
-                                            (map #(render-row data owner %1 %2)
+                                            (map #(render-row app owner %1 %2)
                                                  (cycle ["" "odd"])
                                                  rows)))))))))
 
-(defn render-data [data owner extended-data]
+(defn render-data [app owner table-idx tdata]
   (let [fn-name "render-data"]
-    ;; (l/infod src fn-name "data" data)
+    ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "owner" owner)
-    ;; (l/infod src fn-name "extended-data" extended-data)
-    (let [dbname (get-in extended-data [:dbase])
+    (l/infod src fn-name "table-idx" table-idx)
+    (l/infod src fn-name "tdata" tdata)
+    (let [dbname (get-in tdata [:dbase])
           tname (get-in dbname [:table])
           fq-name (str dbname "." tname)
-          tdata (into [] (vals (get-in extended-data [:data])))]
+          rows (into [] (vals (get-in tdata [:data])))]
       ;; (l/infod src fn-name "tname" tname)
-      ;; (l/infod src fn-name "tdata" tdata)
-      (render-table data owner fq-name tdata))))
+      ;; (l/infod src fn-name "rows" rows)
+      (render-table app owner fq-name rows))))
 
-(defn render-data-vec [data owner extended-data]
+(defn render-data-vec [app owner extended-data]
   (let [fn-name "render-data-vec"]
-    ;; (l/infod src fn-name "data" data)
+    ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "owner" owner)
     ;; (l/infod src fn-name "extended-data" extended-data)
-    (let [r (into [] (map #(render-data data owner %) extended-data))]
+    (let [id (into [] (map-indexed vector extended-data))
+          r (into []
+                  (map #(render-data app owner
+                                        (first %)
+                                        (second %)) id))]
       (l/infod src fn-name "r" r)
       (apply dom/div nil r))))
 
 (defn init [_]
   (let [fn-name "init"]
     ;; (l/infod src fn-name "_" _)
-    ;; {:dbase0 {:name ["employees"] :vals ["init-val"]}}
-    {:x ["init-state"]}))
+    {}))
 
-(defn render [_ data owner]
+(defn render [_ app owner]
   (let [fn-name "render"]
     ;; (l/infod src fn-name "_" _)
-    ;; (l/infod src fn-name "data" data)
+    ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "owner" owner)
-    (let [dbase (get-in data [:x :dbase])]
+    (let [dbase (get-in app [:dbase])
+          korks []]
       ;; TODO get rid of 'if'
       ;; (l/infod src fn-name "dbase" dbase)
       (dom/div nil
-               (let [tables (get-in data [:x])
+               (let [tables (get-in app korks)
                      cnt-tables (count tables)]
                  ;; (l/infod src fn-name "tables" tables)
                  ;; (l/infod src fn-name "cnt-tables" cnt-tables)
@@ -172,32 +177,29 @@
                        (l/info src fn-name msg)
                        msg))
                    (do
-                     (let [extended-data
-                           ;; [data]
-                           [(get-in data [:x])]
-                           ]
+                     (let [extended-data [(get-in app korks)]]
                        ;; (l/infod src fn-name "extended-data" extended-data)
-                       (let [r (render-data-vec data owner extended-data)]
+                       (let [r (render-data-vec app owner extended-data)]
                          ;; (l/infod src fn-name "(type data)" (type data))
                          ;; (l/infod src fn-name "(type owner)" (type owner))
                          r)))))))))
 
-(defn construct-component [data owner {:keys [toggle] :as opts}]
+(defn construct-component [app owner {:keys [toggle] :as opts}]
   (let [fn-name "construct-component"]
-    ;; (l/infod src fn-name "data" data)
+    ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "owner" owner)
     (reify
       om/IInitState
       (init-state [_] (init _))
       om/IRenderState
-      (render-state [_ {:keys [toggle]}] (render _ data owner)))))
+      (render-state [_ {:keys [toggle]}] (render _ app owner)))))
 
 (defn view
   "data - application state data (a cursor); owner - backing React component
   returns an Om-component, i.e. a model of om/IRender interface"
-  [data owner]
+  [app owner]
   (let [fn-name "view"]
-    ;; (l/infod src fn-name "data" data)
+    ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "owner" owner)
     (reify
       om/IWillMount
@@ -221,17 +223,17 @@
                  ;; {:show-tables-with-data-from [dbase]}
 
                  ;; {:show-tables-with-data-from
-                 ;;  [(first (get-in data [:dbase0 :name]))]}
+                 ;;  [(first (get-in app [:dbase0 :name]))]}
 
                     ;; om/transact! propagates changes back to the original atom
-                    :on-complete #(om/transact! data [:x] (fn [_] %))})
+                    :on-complete #(om/transact! app [] (fn [_] %))})
                   )
       om/IRenderState
       (render-state [_ {:keys [err-msg]}]
                     ;; (l/info src fn-name "render-state")
                     ;; om.core/build     - build single component
                     ;; om.core/build-all - build many components
-                    (om/build construct-component data)
+                    (om/build construct-component app)
                     ))))
 
 ;; Rendering loop on a the "dbase0" DOM element
