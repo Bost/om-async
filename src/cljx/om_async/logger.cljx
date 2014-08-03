@@ -38,23 +38,6 @@
    "onClick"
 ;;    "tr"
 
-   ;;;; "transform.clj"
-;;    "extend-table"
-;;    "xtable"
-;;    "extend-all"
-;;    "process-request"
-;;    "process-sql"
-;;    "process-select-rows-from"
-;;    "process-show-tables-with-data-from"
-   "fetch"
-;;    "encode-table"
-;;    "convert-val"
-;;    "m-select-rows-from"
-;;    "m-x"
-
-   ;;;; db.clj
-;;    "sql-select-rows-from"
-
    ;;;; utils
 ;;    "convert-to-korks"
    ])
@@ -66,11 +49,12 @@
        (str src "; " fn-name "; "
             "(def " def-name " " (pr-str def-val) ")")))))
 
+;; TODO macro: choose between clojure.pprint/pprint (clj) & println (cljs)
+;; TODO see (JSON/stringify obj nil 2)
 (defn info [src fn-name msg]
   (if (u/contains-value? files src)
     (if (u/contains-value? functions fn-name)
-      (clojure.pprint/pprint
-       ;;println
+      (println
        (str src "; " fn-name "; " msg)))))
 
 (defn error [src fn-name msg]

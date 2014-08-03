@@ -1,6 +1,6 @@
 (ns om-async.db
   (:require [clojure.java.jdbc :as sql]
-            [om-async.logger :as l]
+            [om-async.logger-pprint :as l]
             [om-async.utils :as u]
             )
   (:use [korma.db]

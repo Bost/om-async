@@ -1,7 +1,7 @@
 (ns om-async.transform
   (:require [om-async.utils :as u]
             [om-async.db :as db]
-            [om-async.logger :as l]
+            [om-async.logger-pprint :as l]
             [clj-time.format :as tf]
             [clj-time.coerce :as tc]
             ))
