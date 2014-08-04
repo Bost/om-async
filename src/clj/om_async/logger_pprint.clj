@@ -34,18 +34,26 @@
    ;;;; utils
 ;;    "convert-to-korks"
    ])
-(defn info [src fn-name msg]
+
+(defn print-fn [& k]
+  (if (nil? k)
+    println
+    (k {:p println :pp clojure.pprint/pprint})))
+
+(defn info
+  "TODO test if print-fn is either println or clojure.pprint/pprint"
+  [src fn-name msg & print-k]
   (if (u/contains-value? files src)
     (if (u/contains-value? functions fn-name)
       (binding [*print-length* 130]
-        (clojure.pprint/pprint
+        ((print-fn print-k)
          (str src "; " fn-name "; " msg))))))
 
-(defn infod [src fn-name def-name def-val]
+(defn infod [src fn-name def-name def-val & print-k]
   (if (u/contains-value? files src)
     (if (u/contains-value? functions fn-name)
       (println
        (str src "; " fn-name "; "
             "(def " def-name " "
             (binding [*print-length* 130]
-              (clojure.pprint/pprint def-val)) ")")))))
+              ((print-fn print-k) def-val)) ")")))))
