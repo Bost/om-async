@@ -218,6 +218,7 @@
                (manipulator-fn params raw-data))
             ]
         (l/infod src fn-name "raw-data" raw-data)
+        (l/infod src fn-name "---" nil)
         (l/infod src fn-name "r" r)
         r))))
 

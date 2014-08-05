@@ -195,6 +195,21 @@
                          ;; (l/infod src fn-name "(type owner)" (type owner))
                          r)))))))))
 
+
+(defn render-multi [_ app owner]
+  (let [fn-name "render-multi"]
+    (let [cnt (count app)]
+      ;; (map #(render _ % owner) app)
+      (l/infod src fn-name "(count app)" cnt)
+      (map #(l/infod src fn-name "aaa"
+                     (str (first %) ": " (second %))
+                     )
+           (into [] (map-indexed vector app)))
+      ;; (render _ app owner)
+      ))
+  (dom/div nil "foo")
+  )
+
 (defn construct-component [app owner {:keys [toggle] :as opts}]
   (let [fn-name "construct-component"]
     ;; (l/infod src fn-name "app" app)
@@ -203,7 +218,7 @@
       om/IInitState
       (init-state [_] (init _))
       om/IRenderState
-      (render-state [_ {:keys [toggle]}] (render _ app owner)))))
+      (render-state [_ {:keys [toggle]}] (render-multi _ app owner)))))
 
 (defn view
   "data - application state data (a cursor); owner - backing React component
