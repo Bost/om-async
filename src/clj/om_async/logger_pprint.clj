@@ -36,8 +36,7 @@
    ])
 
 (defn print-fn [& k]
-  (if (nil? k)
-    println
+  (let [k (if (nil? k) :p :pp)]
     (k {:p println :pp clojure.pprint/pprint})))
 
 (defn info
