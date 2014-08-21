@@ -198,17 +198,15 @@
 
 (defn render-multi [_ app owner]
   (let [fn-name "render-multi"]
-    (let [cnt (count app)]
+    (let [cnt (count app)
+          app-vec (into [] (map-indexed vector app))]
       ;; (map #(render _ % owner) app)
       (l/infod src fn-name "(count app)" cnt)
-      (map #(l/infod src fn-name "aaa"
-                     (str (first %) ": " (second %))
-                     )
-           (into [] (map-indexed vector app)))
-      ;; (render _ app owner)
-      ))
-  (dom/div nil "foo")
-  )
+      ;; (l/infod src fn-name "app-vec" app-vec)
+      (apply dom/div nil
+             (map #(render _ (second %) owner)
+                  app-vec))
+      )))
 
 (defn construct-component [app owner {:keys [toggle] :as opts}]
   (let [fn-name "construct-component"]
