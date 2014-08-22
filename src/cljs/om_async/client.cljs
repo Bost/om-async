@@ -53,7 +53,7 @@
 (defn get-val [m]
   (get-in m [:val]))
 
-(defn onClick [app owner korks]
+(defn onClick [app owner korks idx-table]
   (let [fn-name "onClick"]
 ;;     (l/infod src fn-name "app" app)
 ;;     (l/infod src fn-name "(type data)" (type data))
@@ -75,34 +75,41 @@
   ;;             )})
       r)))
 
-(defn render-td [app owner vx]
+(defn render-td [app owner vx idx-table idx-row]
   (let [fn-name "render-td"]
 ;;     (l/infod src fn-name "app" app)
 ;;     (l/infod src fn-name "(type data)" (type data))
 ;;     (l/infod src fn-name "owner" owner)
 ;;     (l/infod src fn-name "vx" vx)
+    (l/infod src fn-name "idx-table" idx-table)
+    ;; TODO (keyword "row" idx-row)
+    (l/infod src fn-name "idx-row" idx-row)
     (let [
           gvx (get-val vx)
           korks [:data :row0 :emp_no]
           vy (get-in app korks)
           gvy (get-val vy)
           ]
+;;     (l/infod src fn-name "vx" vx)
+;;     (l/infod src fn-name "vy" vy)
 
       (dom/td
-       #js {:onClick (fn [e] (onClick app owner [:data :row0 :emp_no]))}
+       #js {:onClick (fn [e] (onClick app owner korks idx-table))}
        gvx))))
 
-(defn render-row [app owner css row]
+(defn render-row [app owner css row idx-table]
   (let [fn-name "render-row"]
     ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "owner" owner)
     ;; (l/infod src fn-name "css" css)
     ;; (l/infod src fn-name "row" row)
-    (apply dom/tr #js {:className css}
-           (map #(render-td app owner %) row))))
+    (let [row-vec (into [] (map-indexed vector row))
+          ]
+      (l/infod src fn-name "row-vec" row-vec)
+      (apply dom/tr #js {:className css}
+             (map #(render-td app owner (second %) idx-table (first %)) row-vec)))))
 
-(def rows [[{:val 10001, :active false} {:val "1986-06-25 22:00:00", :active false} {:val "1987-06-25 22:00:00", :active false} {:val 60117, :active false}] [{:val 10001, :active false} {:val "1987-06-25 22:00:00", :active false} {:val "1988-06-24 22:00:00", :active false} {:val 62102, :active false}]])
-(defn render-table [app owner tname tdata ks]
+(defn render-table [app owner tname tdata ks idx-table]
   (let [fn-name "render-table"]
     ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "owner" owner)
@@ -128,16 +135,17 @@
                                                 (apply dom/tr nil
                                                        (map #(dom/th nil (str %)) header)))
                                      (apply dom/tbody nil
-                                            (map #(render-row app owner %1 %2)
+                                            (map #(render-row app owner %1 %2 idx-table)
                                                  (cycle ["" "odd"])
                                                  rows)))))))))
 
-(defn render-data [app owner table-idx tdata]
+(defn render-data [app owner table-idx tdata idx-table]
   (let [fn-name "render-data"]
     ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "owner" owner)
-    ;; (l/infod src fn-name "table-idx" table-idx)
+    (l/infod src fn-name "table-idx" table-idx)
     ;; (l/infod src fn-name "tdata" tdata)
+    (l/infod src fn-name "idx-table" idx-table)
     (let [dbname (get-in tdata [:dbase])
           tname (get-in dbname [:table])
           fq-name (str dbname "." tname)
@@ -148,9 +156,9 @@
       ;; (l/infod src fn-name "tname" tname)
       ;; (l/infod src fn-name "rows" rows)
       (l/infod src fn-name "ks" ks)
-      (render-table app owner fq-name rows ks))))
+      (render-table app owner fq-name rows ks idx-table))))
 
-(defn render-data-vec [app owner extended-data]
+(defn render-data-vec [app owner extended-data idx-table]
   (let [fn-name "render-data-vec"]
     ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "owner" owner)
@@ -158,7 +166,8 @@
     (let [id (into [] (map-indexed vector extended-data))
           rd (map #(render-data app owner
                                 (keyword (first %))
-                                (second %)) id)
+                                (second %)
+                                idx-table) id)
           r (apply dom/div nil (into [] rd))]
       ;; (l/infod src fn-name "r" r)
       r)))
@@ -168,12 +177,13 @@
     ;; (l/infod src fn-name "_" _)
     {}))
 
-(defn render [_ app owner]
+(defn render [_ app owner idx-table]
   (let [fn-name "render"]
     ;; (l/infod src fn-name "_" _)
-    ;; (l/infod src fn-name "app" app)
+    (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "owner" owner)
-    (let [dbase (get-in app [:dbase])
+    (let [
+          dbase (get-in app [:dbase])
           korks []]
       ;; TODO get rid of 'if'
       ;; (l/infod src fn-name "dbase" dbase)
@@ -188,9 +198,10 @@
                        (l/info src fn-name msg)
                        msg))
                    (do
-                     (let [extended-data [(get-in app korks)]]
+                     (let [extended-data [(get-in app korks)]
+                           ]
                        ;; (l/infod src fn-name "extended-data" extended-data)
-                       (let [r (render-data-vec app owner extended-data)]
+                       (let [r (render-data-vec app owner extended-data idx-table)]
                          ;; (l/infod src fn-name "(type data)" (type data))
                          ;; (l/infod src fn-name "(type owner)" (type owner))
                          r)))))))))
@@ -204,7 +215,7 @@
       (l/infod src fn-name "(count app)" cnt)
       ;; (l/infod src fn-name "app-vec" app-vec)
       (apply dom/div nil
-             (map #(render _ (second %) owner)
+             (map #(render _ (second %) owner (first %))
                   app-vec))
       )))
 
@@ -236,8 +247,8 @@
                     :data
                     {:select-rows-from
                      [{:dbase "employees" :table "departments" :idx 0}
-                      {:dbase "employees" :table "employees"   :idx 1}
-                      {:dbase "employees" :table "salaries"    :idx 2}
+;;                       {:dbase "employees" :table "employees"   :idx 1}
+;;                       {:dbase "employees" :table "salaries"    :idx 2}
                       ]}
                  ;; {:select-rows-from
                  ;;  [{:dbase "employees" :table "departments" :idx 0}]}

@@ -30,13 +30,13 @@
 ;;    "table-elem"
 ;;    "render-data-vec"
 ;;    "render-data"
-   "render-table"
-   "render-multi"
-;;    "render-row"
+;;    "render-table"
+;;    "render-multi"
+   "render-row"
 ;;    "init"
 ;;    "render"
-;;    "render-td"
-   "onClick"
+   "render-td"
+;;    "onClick"
 ;;    "tr"
 
    ;;;; utils
