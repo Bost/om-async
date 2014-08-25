@@ -53,16 +53,18 @@
 (defn get-val [m]
   (get-in m [:val]))
 
-(defn onClick [app owner korks idx-table]
+(defn onClick [app owner korks idx-table valx css]
   (let [fn-name "onClick"]
 ;;     (l/infod src fn-name "app" app)
 ;;     (l/infod src fn-name "(type data)" (type data))
 ;;     (l/infod src fn-name "owner" owner)
     (l/infod src fn-name "korks" korks)
-    (let [s (str korks)
-          r (om/transact! app korks
-                  (fn [] {:val s :active true}))]
-;;       (l/infod src fn-name "r" r)
+    (let [
+          s (str valx " clicked")
+          r (om/transact! app korks (fn [] {:val s :active true}))
+;;           r (om/transact! app {} (fn [] {:color "red"} ))
+          ]
+      (l/infod src fn-name "r" r)
   ;; we're not allowed to use cursors outside of the render phase as
   ;; this is almost certainly a concurrency bug!
   ;;         (edn-xhr
@@ -75,7 +77,7 @@
   ;;             )})
       r)))
 
-(defn render-td [app owner vx idx-table idx-row column]
+(defn render-td [app owner vx idx-table idx-row column css]
   (let [fn-name "render-td"]
 ;;     (l/infod src fn-name "app" app)
 ;;     (l/infod src fn-name "(type data)" (type data))
@@ -84,22 +86,13 @@
     (l/infod src fn-name "idx-table" idx-table)
     (l/infod src fn-name "idx-row" idx-row)
     (l/infod src fn-name "column" column)
-    (let [
-          gvx (get-val vx)
+    (let [valx (get-val vx)
           korks [:data
                  (keyword (str "row" idx-row))
-;;                  :emp_no
-                 column
-                 ]
-          vy (get-in app korks)
-          gvy (get-val vy)
-          ]
-;;     (l/infod src fn-name "vx" vx)
-;;     (l/infod src fn-name "vy" vy)
-
+                 column]]
       (dom/td
-       #js {:onClick (fn [e] (onClick app owner korks idx-table))}
-       gvx))))
+       #js {:onClick (fn [e] (onClick app owner korks idx-table valx css))}
+       valx))))
 
 (defn render-row [app owner css row idx-table idx-row columns]
   (let [fn-name "render-row"]
@@ -110,7 +103,7 @@
     (let [ column nil ]
       (l/infod src fn-name "idx-row" idx-row)
       (apply dom/tr #js {:className css}
-             (map #(render-td app owner %1 idx-table idx-row %2)
+             (map #(render-td app owner %1 idx-table idx-row %2 css)
                   row
                   (cycle columns)
                   )))))
@@ -132,15 +125,9 @@
     (l/infod src fn-name "ks" ks)
     (let [header (into [] (keys (first tdata)))]
       (l/infod src fn-name "header" header)
-      (let [indexed-tdata (map-indexed vector tdata)
-;;             nrows (into [] (map #(into [] (vals (nth tdata %)))
-;;                                indexed-tdata
-;;                                ))
-            rows (into [] (map #(into [] (vals (nth tdata %)))
+      (let [rows (into [] (map #(into [] (vals (nth tdata %)))
                                (range (count tdata))))
-
-            row-indexes (into [] (range (count rows)))
-            ]
+            row-indexes (into [] (range (count rows)))]
 ;;         (l/infod src fn-name "rows" rows)
 ;;         (l/infod src fn-name "rows-vec" rows-vec)
         (dom/div nil
@@ -262,8 +249,8 @@
                     :data
                     {:select-rows-from
                      [
-;;                       {:dbase "employees" :table "departments" :idx 0}
-                      {:dbase "employees" :table "employees"   :idx 1}
+;;                       {:dbase "employees" :table "employees"   :idx 0}
+                      {:dbase "employees" :table "departments" :idx 1}
 ;;                       {:dbase "employees" :table "salaries"    :idx 2}
                       ]}
                  ;; {:select-rows-from
