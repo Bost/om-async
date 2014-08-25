@@ -30,9 +30,10 @@
 ;;    "table-elem"
 ;;    "render-data-vec"
 ;;    "render-data"
-;;    "render-table"
+   "render-table"
 ;;    "render-multi"
 ;;    "render-row"
+;;    "render-indexed-row"
 ;;    "init"
 ;;    "render"
 ;;    "render-td"
@@ -59,7 +60,7 @@
        (str src "; " fn-name "; " msg)))))
 
 (defn error [src fn-name msg]
-  (let [separator "=========="]
+  (let [separator "========="]
     (info src fn-name separator)
     (info src fn-name (str "ERROR: " msg))
     (info src fn-name separator)))

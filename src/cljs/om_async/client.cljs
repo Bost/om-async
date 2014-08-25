@@ -75,21 +75,21 @@
   ;;             )})
       r)))
 
-(defn render-td [app owner vx idx-table idx-row idx-column]
+(defn render-td [app owner vx idx-table idx-row column]
   (let [fn-name "render-td"]
 ;;     (l/infod src fn-name "app" app)
 ;;     (l/infod src fn-name "(type data)" (type data))
 ;;     (l/infod src fn-name "owner" owner)
 ;;     (l/infod src fn-name "vx" vx)
-;;     (l/infod src fn-name "idx-table" idx-table)
-;;     (l/infod src fn-name "idx-column" idx-column)
+    (l/infod src fn-name "idx-table" idx-table)
+    (l/infod src fn-name "idx-row" idx-row)
+    (l/infod src fn-name "column" column)
     (let [
           gvx (get-val vx)
           korks [:data
-;;                  :row0
                  (keyword (str "row" idx-row))
-                 (keyword (str "col" idx-column))
-                 ;;:emp_no
+;;                  :emp_no
+                 column
                  ]
           vy (get-in app korks)
           gvy (get-val vy)
@@ -101,24 +101,34 @@
        #js {:onClick (fn [e] (onClick app owner korks idx-table))}
        gvx))))
 
-(defn render-row [app owner css row idx-table idx-row]
+(defn render-row [app owner css row idx-table idx-row columns]
   (let [fn-name "render-row"]
     ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "owner" owner)
     ;; (l/infod src fn-name "css" css)
     ;; (l/infod src fn-name "row" row)
-    (let [row-vec (into [] (map-indexed vector row))
-          ]
-      (l/infod src fn-name "row-vec" row-vec)
+    (let [ column nil ]
+      (l/infod src fn-name "idx-row" idx-row)
       (apply dom/tr #js {:className css}
-             (map #(render-td app owner (second %) idx-table idx-row (first %)) row-vec)))))
+             (map #(render-td app owner %1 idx-table idx-row %2)
+                  row
+                  (cycle columns)
+                  )))))
+
+(defn render-indexed-row [app owner idx-table rows row-indexes columns]
+  (let [fn-name "render-indexed-row"]
+    (map (fn [css row row-index]
+           (render-row app owner css row idx-table row-index columns))
+         (cycle ["" "odd"]) ;; gives the css
+         rows               ;; gives the row
+         row-indexes)))
 
 (defn render-table [app owner tname tdata ks idx-table]
   (let [fn-name "render-table"]
     ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "owner" owner)
     ;; (l/infod src fn-name "tname" tname)
-    (l/infod src fn-name "tdata" tdata)
+    ;; (l/infod src fn-name "tdata" tdata)
     (l/infod src fn-name "ks" ks)
     (let [header (into [] (keys (first tdata)))]
       (l/infod src fn-name "header" header)
@@ -127,11 +137,12 @@
 ;;                                indexed-tdata
 ;;                                ))
             rows (into [] (map #(into [] (vals (nth tdata %)))
-                               (range (count tdata))
-                               ))
-            rows-vec (into [] (map-indexed vector rows))
+                               (range (count tdata))))
+
+            row-indexes (into [] (range (count rows)))
             ]
-        (l/infod src fn-name "rows" rows)
+;;         (l/infod src fn-name "rows" rows)
+;;         (l/infod src fn-name "rows-vec" rows-vec)
         (dom/div nil
                  tname
                  (dom/div nil
@@ -140,11 +151,8 @@
                                                 (apply dom/tr nil
                                                        (map #(dom/th nil (str %)) header)))
                                      (apply dom/tbody nil
-                                            (map #(render-row app owner %1 %2 idx-table
-                                                              ;; TODO replace 2 with idx-row
-                                                              2)
-                                                 (cycle ["" "odd"])
-                                                 rows)))))))))
+                                            (render-indexed-row app owner idx-table rows row-indexes header)
+                                            ))))))))
 
 (defn render-data [app owner table-idx tdata idx-table]
   (let [fn-name "render-data"]
