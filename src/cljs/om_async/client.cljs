@@ -58,7 +58,7 @@
 ;;     (l/infod src fn-name "app" app)
 ;;     (l/infod src fn-name "(type data)" (type data))
 ;;     (l/infod src fn-name "owner" owner)
-;;     (l/infod src fn-name "korks" korks)
+    (l/infod src fn-name "korks" korks)
     (let [s (str korks)
           r (om/transact! app korks
                   (fn [] {:val s :active true}))]
@@ -75,18 +75,22 @@
   ;;             )})
       r)))
 
-(defn render-td [app owner vx idx-table idx-row]
+(defn render-td [app owner vx idx-table idx-row idx-column]
   (let [fn-name "render-td"]
 ;;     (l/infod src fn-name "app" app)
 ;;     (l/infod src fn-name "(type data)" (type data))
 ;;     (l/infod src fn-name "owner" owner)
 ;;     (l/infod src fn-name "vx" vx)
-    (l/infod src fn-name "idx-table" idx-table)
-    ;; TODO (keyword "row" idx-row)
-    (l/infod src fn-name "idx-row" idx-row)
+;;     (l/infod src fn-name "idx-table" idx-table)
+;;     (l/infod src fn-name "idx-column" idx-column)
     (let [
           gvx (get-val vx)
-          korks [:data :row0 :emp_no]
+          korks [:data
+;;                  :row0
+                 (keyword (str "row" idx-row))
+                 (keyword (str "col" idx-column))
+                 ;;:emp_no
+                 ]
           vy (get-in app korks)
           gvy (get-val vy)
           ]
@@ -97,7 +101,7 @@
        #js {:onClick (fn [e] (onClick app owner korks idx-table))}
        gvx))))
 
-(defn render-row [app owner css row idx-table]
+(defn render-row [app owner css row idx-table idx-row]
   (let [fn-name "render-row"]
     ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "owner" owner)
@@ -107,7 +111,7 @@
           ]
       (l/infod src fn-name "row-vec" row-vec)
       (apply dom/tr #js {:className css}
-             (map #(render-td app owner (second %) idx-table (first %)) row-vec)))))
+             (map #(render-td app owner (second %) idx-table idx-row (first %)) row-vec)))))
 
 (defn render-table [app owner tname tdata ks idx-table]
   (let [fn-name "render-table"]
@@ -125,6 +129,7 @@
             rows (into [] (map #(into [] (vals (nth tdata %)))
                                (range (count tdata))
                                ))
+            rows-vec (into [] (map-indexed vector rows))
             ]
         (l/infod src fn-name "rows" rows)
         (dom/div nil
@@ -135,7 +140,9 @@
                                                 (apply dom/tr nil
                                                        (map #(dom/th nil (str %)) header)))
                                      (apply dom/tbody nil
-                                            (map #(render-row app owner %1 %2 idx-table)
+                                            (map #(render-row app owner %1 %2 idx-table
+                                                              ;; TODO replace 2 with idx-row
+                                                              2)
                                                  (cycle ["" "odd"])
                                                  rows)))))))))
 
@@ -246,8 +253,9 @@
                     ;; TODO the idx should be specified in transfer.clj
                     :data
                     {:select-rows-from
-                     [{:dbase "employees" :table "departments" :idx 0}
-;;                       {:dbase "employees" :table "employees"   :idx 1}
+                     [
+;;                       {:dbase "employees" :table "departments" :idx 0}
+                      {:dbase "employees" :table "employees"   :idx 1}
 ;;                       {:dbase "employees" :table "salaries"    :idx 2}
                       ]}
                  ;; {:select-rows-from

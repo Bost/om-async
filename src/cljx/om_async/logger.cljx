@@ -32,11 +32,11 @@
 ;;    "render-data"
 ;;    "render-table"
 ;;    "render-multi"
-   "render-row"
+;;    "render-row"
 ;;    "init"
 ;;    "render"
-   "render-td"
-;;    "onClick"
+;;    "render-td"
+   "onClick"
 ;;    "tr"
 
    ;;;; utils
