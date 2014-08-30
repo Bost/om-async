@@ -71,9 +71,6 @@
 
 (defn render-td [app owner vx idx-table idx-row column css]
   (let [fn-name "render-td"]
-    (l/infod src fn-name "idx-table" idx-table)
-    (l/infod src fn-name "idx-row" idx-row)
-    (l/infod src fn-name "column" column)
     (let [valx (get-val vx)
           korks [:data
                  (keyword (str "row" idx-row))
@@ -85,7 +82,6 @@
 (defn render-row [app owner css row idx-table idx-row columns]
   (let [fn-name "render-row"]
     (let [ column nil ]
-      (l/infod src fn-name "idx-row" idx-row)
       (apply dom/tr #js {:className css}
              (map #(render-td app owner %1 idx-table idx-row %2 css)
                   row
@@ -100,6 +96,11 @@
          rows               ;; gives the row
          row-indexes)))
 
+(defn color [app owner]
+  (om/transact! app :toggle
+                  (fn [] [{:color "red"}]))
+  (println "color executed"))
+
 (defn render-table [app owner tname tdata ks idx-table]
   (let [fn-name "render-table"]
     (l/infod src fn-name "ks" ks)
@@ -110,6 +111,11 @@
             row-indexes (into [] (range (count rows)))]
         (dom/div nil
                  tname
+                 (dom/div #js
+                          {:id "foo"
+                           :style #js {:backgroundColor "blue"}}
+                          "text: blue")
+                 (dom/button #js {:onClick #(color app owner)} "btn color")
                  (dom/div nil
                           (dom/table nil
                                      (dom/thead nil
@@ -117,7 +123,8 @@
                                                        (map #(dom/th nil (str %)) header)))
                                      (apply dom/tbody nil
                                             (render-indexed-row app owner idx-table rows row-indexes header)
-                                            ))))))))
+                                            )))
+                 )))))
 
 (defn render-data [app owner table-idx tdata idx-table]
   (let [fn-name "render-data"]
@@ -162,13 +169,8 @@
                        (l/info src fn-name msg)
                        msg))
                    (do
-                     (let [extended-data [(get-in app korks)]
-                           ]
-                       ;; (l/infod src fn-name "extended-data" extended-data)
-                       (let [r (render-data-vec app owner extended-data idx-table)]
-                         ;; (l/infod src fn-name "(type data)" (type data))
-                         ;; (l/infod src fn-name "(type owner)" (type owner))
-                         r)))))))))
+                     (let [extended-data [(get-in app korks)]]
+                       (render-data-vec app owner extended-data idx-table)))))))))
 
 
 (defn render-multi [_ app owner]
@@ -178,8 +180,7 @@
       ;; (map #(render _ % owner) app)
       (apply dom/div nil
              (map #(render _ (second %) owner (first %))
-                  app-vec))
-      )))
+                  app-vec)))))
 
 ;; 3rd param is a map, associate symbol toggle with the value of the
 ;; :toggle keyword and "put" it in the opts map
@@ -222,7 +223,8 @@
                  ;;  [(first (get-in app [:dbase0 :name]))]}
 
                     ;; om/transact! propagates changes back to the original atom
-                    :on-complete #(om/transact! app [] (fn [_] %))})
+                    :on-complete #(om/transact! app [] (fn [_] %))
+                    })
                   )
       om/IRenderState
       (render-state [_ {:keys [err-msg]}]

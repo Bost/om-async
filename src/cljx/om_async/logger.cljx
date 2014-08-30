@@ -26,7 +26,7 @@
 ;;    "get-data"
 ;;    "convert-to-korks"
 ;;    "f"
-   "construct-component"
+;;    "construct-component"
 ;;    "table-elem"
 ;;    "render-data-vec"
 ;;    "render-data"
@@ -42,7 +42,7 @@
 
 
    ;;;; db.clj
-   "fname"
+   "fn-name"
 
    ;;;; utils
 ;;    "convert-to-korks"
