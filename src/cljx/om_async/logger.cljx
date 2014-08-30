@@ -26,11 +26,11 @@
 ;;    "get-data"
 ;;    "convert-to-korks"
 ;;    "f"
-;;    "construct-component"
+   "construct-component"
 ;;    "table-elem"
 ;;    "render-data-vec"
 ;;    "render-data"
-   "render-table"
+;;    "render-table"
 ;;    "render-multi"
 ;;    "render-row"
 ;;    "render-indexed-row"
@@ -40,10 +40,15 @@
    "onClick"
 ;;    "tr"
 
+
+   ;;;; db.clj
+   "fname"
+
    ;;;; utils
 ;;    "convert-to-korks"
    ])
 
+;; TODO use (partial ..)
 (defn infod [src fn-name def-name def-val]
   (if (u/contains-value? files src)
     (if (u/contains-value? functions fn-name)
@@ -65,15 +70,24 @@
     (info src fn-name (str "ERROR: " msg))
     (info src fn-name separator)))
 
-;; (defmacro defnd
-;;   "This macro is translated to clj file. In cljs files
-;;   (:require-macros [om-async.logger :as l]) and then l/defnd
-;;   must be used."
-;;   [fname params & body]
-;;   `(defn ~fname ~params
-;;      (do
-;;        (info ~'src '~fname "msgx")
-;;        ~@body)))
+(defn encode-name-val [n v]
+  (str "(def " n " "
+       (if (string? v)
+         (str "\"" v "\"")
+         v) ")"))
+
+(defmacro defnd
+  "This macro is translated to clj file. In cljs files
+  (:require-macros [om-async.logger :as l]) and then l/defnd
+  must be used."
+  [fname params & body]
+  `(defn ~fname ~params
+     (do
+       (print
+        (map #(str ~'src " " '~fname " "
+                   (encode-name-val %1 %2) "\n")
+             '~params ~params))
+       ~@body)))
 
 ;; (defnd f [x y z]
 ;;   (println "defnd f:"
