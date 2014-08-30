@@ -43,6 +43,7 @@
       (send url (http-req-methods method) (when data (pr-str data))
         #js {"Content-Type" "application/edn"}))))
 
+;; TODO consider using take-while/drop-while to increase performance
 (defn column-filter? [elem-idx] true) ;; no element is filtered out
 ;; (let [m {:a 1 :b 2 :c 1}]
 ;;   (select-keys m (for [[k v] m :when (= v 1)] k)))
@@ -53,36 +54,29 @@
 (defn get-val [m]
   (get-in m [:val]))
 
-(defn onClick [app owner korks idx-table valx css]
+(l/defnd onClick [app owner korks idx-table valx css]
   (let [fn-name "onClick"]
-;;     (l/infod src fn-name "app" app)
-;;     (l/infod src fn-name "(type data)" (type data))
-;;     (l/infod src fn-name "owner" owner)
-    (l/infod src fn-name "korks" korks)
+    ;; TODO (js* "debugger;") seems to cause LightTable freeze
     (let [
           s (str valx " clicked")
           r (om/transact! app korks (fn [] {:val s :active true}))
-;;           r (om/transact! app {} (fn [] {:color "red"} ))
+          ;; r (om/transact! app {} (fn [] {:color "red"} ))
           ]
-      (l/infod src fn-name "r" r)
-  ;; we're not allowed to use cursors outside of the render phase as
-  ;; this is almost certainly a concurrency bug!
-  ;;         (edn-xhr
-  ;;          {:method :put
-  ;;           :url (str "select/id0")
-  ;;           :data {:request data}
-  ;;           :on-complete
-  ;;           (fn [response]
-  ;;             ;; (l/info src fn-name (str "Server response: " response))
-  ;;             )})
+      ;; (l/infod src fn-name "r" r)
+      ;; we're not allowed to use cursors outside of the render phase as
+      ;; this is almost certainly a concurrency bug!
+      ;; (edn-xhr
+      ;;  {:method :put
+      ;;   :url (str "select/id0")
+      ;;   :data {:request data}
+      ;;   :on-complete
+      ;;   (fn [response]
+      ;;     ;; (l/info src fn-name (str "Server response: " response))
+      ;;     )})
       r)))
 
 (defn render-td [app owner vx idx-table idx-row column css]
   (let [fn-name "render-td"]
-;;     (l/infod src fn-name "app" app)
-;;     (l/infod src fn-name "(type data)" (type data))
-;;     (l/infod src fn-name "owner" owner)
-;;     (l/infod src fn-name "vx" vx)
     (l/infod src fn-name "idx-table" idx-table)
     (l/infod src fn-name "idx-row" idx-row)
     (l/infod src fn-name "column" column)
@@ -96,10 +90,6 @@
 
 (defn render-row [app owner css row idx-table idx-row columns]
   (let [fn-name "render-row"]
-    ;; (l/infod src fn-name "app" app)
-    ;; (l/infod src fn-name "owner" owner)
-    ;; (l/infod src fn-name "css" css)
-    ;; (l/infod src fn-name "row" row)
     (let [ column nil ]
       (l/infod src fn-name "idx-row" idx-row)
       (apply dom/tr #js {:className css}
@@ -118,18 +108,12 @@
 
 (defn render-table [app owner tname tdata ks idx-table]
   (let [fn-name "render-table"]
-    ;; (l/infod src fn-name "app" app)
-    ;; (l/infod src fn-name "owner" owner)
-    ;; (l/infod src fn-name "tname" tname)
-    ;; (l/infod src fn-name "tdata" tdata)
     (l/infod src fn-name "ks" ks)
     (let [header (into [] (keys (first tdata)))]
       (l/infod src fn-name "header" header)
       (let [rows (into [] (map #(into [] (vals (nth tdata %)))
                                (range (count tdata))))
             row-indexes (into [] (range (count rows)))]
-;;         (l/infod src fn-name "rows" rows)
-;;         (l/infod src fn-name "rows-vec" rows-vec)
         (dom/div nil
                  tname
                  (dom/div nil
@@ -143,11 +127,6 @@
 
 (defn render-data [app owner table-idx tdata idx-table]
   (let [fn-name "render-data"]
-    ;; (l/infod src fn-name "app" app)
-    ;; (l/infod src fn-name "owner" owner)
-    (l/infod src fn-name "table-idx" table-idx)
-    ;; (l/infod src fn-name "tdata" tdata)
-    (l/infod src fn-name "idx-table" idx-table)
     (let [dbname (get-in tdata [:dbase])
           tname (get-in dbname [:table])
           fq-name (str dbname "." tname)
@@ -155,16 +134,11 @@
           rows (into [] (vals data))
           ks (into [] (keys data))
           ]
-      ;; (l/infod src fn-name "tname" tname)
-      ;; (l/infod src fn-name "rows" rows)
       (l/infod src fn-name "ks" ks)
       (render-table app owner fq-name rows ks idx-table))))
 
 (defn render-data-vec [app owner extended-data idx-table]
   (let [fn-name "render-data-vec"]
-    ;; (l/infod src fn-name "app" app)
-    ;; (l/infod src fn-name "owner" owner)
-    ;; (l/infod src fn-name "extended-data" extended-data)
     (let [id (into [] (map-indexed vector extended-data))
           rd (map #(render-data app owner
                                 (keyword (first %))
@@ -181,19 +155,13 @@
 
 (defn render [_ app owner idx-table]
   (let [fn-name "render"]
-    ;; (l/infod src fn-name "_" _)
-    (l/infod src fn-name "app" app)
-    ;; (l/infod src fn-name "owner" owner)
     (let [
           dbase (get-in app [:dbase])
           korks []]
       ;; TODO get rid of 'if'
-      ;; (l/infod src fn-name "dbase" dbase)
       (dom/div nil
                (let [tables (get-in app korks)
                      cnt-tables (count tables)]
-                 ;; (l/infod src fn-name "tables" tables)
-                 ;; (l/infod src fn-name "cnt-tables" cnt-tables)
                  (if (= 0 cnt-tables)
                    (do
                      (let [msg (str "Fetching data from dbase: " dbase)]
@@ -214,17 +182,15 @@
     (let [cnt (count app)
           app-vec (into [] (map-indexed vector app))]
       ;; (map #(render _ % owner) app)
-      (l/infod src fn-name "(count app)" cnt)
-      ;; (l/infod src fn-name "app-vec" app-vec)
       (apply dom/div nil
              (map #(render _ (second %) owner (first %))
                   app-vec))
       )))
 
+;; 3rd param is a map, associate symbol toggle with the value of the
+;; :toggle keyword and "put" it in the opts map
 (defn construct-component [app owner {:keys [toggle] :as opts}]
   (let [fn-name "construct-component"]
-    ;; (l/infod src fn-name "app" app)
-    ;; (l/infod src fn-name "owner" owner)
     (reify
       om/IInitState
       (init-state [_] (init _))
@@ -236,8 +202,6 @@
   returns an Om-component, i.e. a model of om/IRender interface"
   [app owner]
   (let [fn-name "view"]
-    ;; (l/infod src fn-name "app" app)
-    ;; (l/infod src fn-name "owner" owner)
     (reify
       om/IWillMount
       (will-mount [_]
