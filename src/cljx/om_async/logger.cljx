@@ -83,8 +83,8 @@
   [fname params & body]
   `(defn ~fname ~params
      (do
-       (print
-        (map #(str ~'src " " '~fname " "
+       (println
+        (map #(str ~'src "; " '~fname "; "
                    (encode-name-val %1 %2) "\n")
              '~params ~params))
        ~@body)))

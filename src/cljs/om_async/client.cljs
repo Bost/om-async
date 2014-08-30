@@ -18,12 +18,6 @@
 
 (enable-console-print!)
 
-;; (l/defnd f [x y z]
-;;   (println "l/defnd f:")
-;;   (+ x y z))
-
-;; (f 1 2 3)
-
 (def ^:private http-req-methods {:get "GET" :put "PUT" :post "POST" :delete "DELETE"})
 
 ;; The 'client dbase'. swap! or reset! on app-state trigger root re-rendering
