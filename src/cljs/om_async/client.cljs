@@ -24,7 +24,7 @@
 (def app-state (atom {}))
 
 ;; [{:keys [dbase table]}] is a special form for
-;; [{method :method, url :url, data :data, on-complete :on-complete]}]
+;; [{method :method, url :url, data :data, on-complete :on-complete}]
 (defn edn-xhr
   "XMLHttpRequest: send HTTP/HTTPS async requests to a web server and load the
   server response data back into the script"
@@ -48,13 +48,13 @@
 (defn get-val [m]
   (get-in m [:val]))
 
-(l/defnd onClick [app owner korks idx-table valx css]
+(defn onClick [app owner korks idx-table valx css]
   (let [fn-name "onClick"]
     ;; TODO (js* "debugger;") seems to cause LightTable freeze
+    (om/transact! app [:data :row0 :dept_name :active] (fn [] true)))
     (let [
           s (str valx " clicked")
           r (om/transact! app korks (fn [] {:val s :active true}))
-          ;; r (om/transact! app {} (fn [] {:color "red"} ))
           ]
       ;; (l/infod src fn-name "r" r)
       ;; we're not allowed to use cursors outside of the render phase as
@@ -67,7 +67,14 @@
       ;;   (fn [response]
       ;;     ;; (l/info src fn-name (str "Server response: " response))
       ;;     )})
-      r)))
+      r))
+
+(defn color [app owner css]
+  (let [v (get-in app [:data :row0 :dept_name :active])
+        r (if v "green" "red")]
+    (println "cn: app" app)
+    (println "cn: v" v "; r" r)
+    r))
 
 (defn render-td [app owner vx idx-table idx-row column css]
   (let [fn-name "render-td"]
@@ -76,7 +83,10 @@
                  (keyword (str "row" idx-row))
                  column]]
       (dom/td
-       #js {:onClick (fn [e] (onClick app owner korks idx-table valx css))}
+       #js {:className css
+            :style #js {:backgroundColor (color app owner css)}
+            :onClick (fn [e] (onClick app owner korks idx-table valx css))
+            }
        valx))))
 
 (defn render-row [app owner css row idx-table idx-row columns]
@@ -96,11 +106,6 @@
          rows               ;; gives the row
          row-indexes)))
 
-(defn color [app owner]
-  (om/transact! app :toggle
-                  (fn [] [{:color "red"}]))
-  (println "color executed"))
-
 (defn render-table [app owner tname tdata ks idx-table]
   (let [fn-name "render-table"]
     (l/infod src fn-name "ks" ks)
@@ -111,11 +116,6 @@
             row-indexes (into [] (range (count rows)))]
         (dom/div nil
                  tname
-                 (dom/div #js
-                          {:id "foo"
-                           :style #js {:backgroundColor "blue"}}
-                          "text: blue")
-                 (dom/button #js {:onClick #(color app owner)} "btn color")
                  (dom/div nil
                           (dom/table nil
                                      (dom/thead nil
@@ -172,11 +172,11 @@
                      (let [extended-data [(get-in app korks)]]
                        (render-data-vec app owner extended-data idx-table)))))))))
 
-
 (defn render-multi [_ app owner]
   (let [fn-name "render-multi"]
     (let [cnt (count app)
-          app-vec (into [] (map-indexed vector app))]
+          app-vec (into [] (map-indexed vector app))
+          table-idx 0]
       ;; (map #(render _ % owner) app)
       (apply dom/div nil
              (map #(render _ (second %) owner (first %))
@@ -200,39 +200,38 @@
     (reify
       om/IWillMount
       (will-mount [_]
-                  (l/info src fn-name "will-mount")
-                  (edn-xhr
-                   {:method :put
-                    :url "fetch"
-                    ;; TODO the idx should be specified in transfer.clj
-                    :data
-                    {:select-rows-from
-                     [
-;;                       {:dbase "employees" :table "employees"   :idx 0}
-                      {:dbase "employees" :table "departments" :idx 1}
-;;                       {:dbase "employees" :table "salaries"    :idx 2}
-                      ]}
-                 ;; {:select-rows-from
-                 ;;  [{:dbase "employees" :table "departments" :idx 0}]}
+        (l/info src fn-name "will-mount")
+        (edn-xhr
+         {:method :put
+          :url "fetch"
+          ;; TODO the idx should be specified in transfer.clj
+          :data
+          {:select-rows-from
+           [
+            ;; {:dbase "employees" :table "employees"   :idx 0}
+            {:dbase "employees" :table "departments" :idx 1}
+            ;; {:dbase "employees" :table "salaries"    :idx 2}
+            ]}
+          ;; {:select-rows-from
+          ;;  [{:dbase "employees" :table "departments" :idx 0}]}
 
-                 ;; {:show-tables-from ["employees"]}
+          ;; {:show-tables-from ["employees"]}
 
-                 ;; {:show-tables-with-data-from [dbase]}
+          ;; {:show-tables-with-data-from [dbase]}
 
-                 ;; {:show-tables-with-data-from
-                 ;;  [(first (get-in app [:dbase0 :name]))]}
+          ;; {:show-tables-with-data-from
+          ;;  [(first (get-in app [:dbase0 :name]))]}
 
-                    ;; om/transact! propagates changes back to the original atom
-                    :on-complete #(om/transact! app [] (fn [_] %))
-                    })
-                  )
+          ;; om/transact! propagates changes back to the original atom
+          :on-complete #(om/transact! app [] (fn [_] %))
+          })
+        )
       om/IRenderState
       (render-state [_ {:keys [err-msg]}]
-                    ;; (l/info src fn-name "render-state")
-                    ;; om.core/build     - build single component
-                    ;; om.core/build-all - build many components
-                    (om/build construct-component app)
-                    ))))
+        ;; (l/info src fn-name "render-state")
+        ;; om.core/build     - build single component
+        ;; om.core/build-all - build many components
+        (om/build construct-component app)))))
 
 ;; Rendering loop on a the "dbase0" DOM element
 (om/root view ;; fn of 2 args: application state data,
