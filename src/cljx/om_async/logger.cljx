@@ -38,6 +38,7 @@
 ;;    "render"
 ;;    "render-td"
    "onClick"
+   "color"
 ;;    "tr"
 
 
