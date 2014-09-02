@@ -26,7 +26,7 @@
     ;; (l/infod src fn-name "dbase" dbase)
     ;; (l/infod src fn-name "table" table)
     (defdb db (mysql (db-connect dbase)))
-    (select table (limit 6))))
+    (select table (limit 3))))
 
 ;; (sql-select-rows-from u/e u/s)
 

@@ -36,9 +36,9 @@
 ;;    "render-indexed-row"
 ;;    "init"
 ;;    "render"
-;;    "render-td"
+   "render-td"
    "onClick"
-   "color"
+;;    "color"
 ;;    "tr"
 
 

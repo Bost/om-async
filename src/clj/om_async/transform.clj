@@ -239,5 +239,55 @@
       (let [f0 (fetch-fn params 0)] ;; onClick sends just 1 value
         ;; (l/info src fn-name (str "f0: " f0))
         (let [data (manipulator-fn f0)]
-          ;; (l/info src fn-name (str "data: " data))
+          (l/infod src fn-name "data" data)
           data)))))
+
+;;  (def app {:table "employees", :dbase "employees", :idx 0, :data {:row5 {:first_name {:val "Anneke", :active false}, :emp_no {:val 10006, :active false}, :birth_date {:val "1953-04-19 23:00:00", :active false}, :last_name {:val "Preusig", :active false}, :hire_date {:val "1989-06-01 22:00:00", :active false}, :gender {:val "F", :active false}}, :row2 {:first_name {:val "Parto", :active false}, :emp_no {:val 10003, :active false}, :birth_date {:val "1959-12-02 23:00:00", :active false}, :last_name {:val "Bamford", :active false}, :hire_date {:val "1986-08-27 22:00:00", :active false}, :gender {:val "M", :active false}}, :row3 {:first_name {:val "Chirstian", :active false}, :emp_no {:val 10004, :active false}, :birth_date {:val "1954-04-30 23:00:00", :active false}, :last_name {:val "Koblick", :active false}, :hire_date {:val "1986-11-30 23:00:00", :active false}, :gender {:val "M", :active false}}, :row4 {:first_name {:val "Kyoichi", :active false}, :emp_no {:val 10005, :active false}, :birth_date {:val "1955-01-20 23:00:00", :active false}, :last_name {:val "Maliniak", :active false}, :hire_date {:val "1989-09-11 22:00:00", :active false}, :gender {:val "M", :active false}}, :row0 {:first_name {:val "Georgi", :active false}, :emp_no {:val 10001, :active false}, :birth_date {:val "1953-09-01 23:00:00", :active false}, :last_name {:val "Facello", :active false}, :hire_date {:val "1986-06-25 22:00:00", :active false}, :gender {:val "M", :active false}}, :row1 {:first_name {:val "Bezalel", :active false}, :emp_no {:val 10002, :active false}, :birth_date {:val "1964-06-01 23:00:00", :active false}, :last_name {:val "Simmel", :active false}, :hire_date {:val "1985-11-20 23:00:00", :active false}, :gender {:val "F", :active false}}}})
+;;  (clojure.pprint/pprint app)
+
+;; {:table "employees",
+;;  :dbase "employees",
+;;  :idx 0,
+;;  :data
+;;  {:row5
+;;   {:first_name {:val "Anneke", :active false},
+;;    :emp_no {:val 10006, :active false},
+;;    :birth_date {:val "1953-04-19 23:00:00", :active false},
+;;    :last_name {:val "Preusig", :active false},
+;;    :hire_date {:val "1989-06-01 22:00:00", :active false},
+;;    :gender {:val "F", :active false}},
+;;   :row2
+;;   {:first_name {:val "Parto", :active false},
+;;    :emp_no {:val 10003, :active false},
+;;    :birth_date {:val "1959-12-02 23:00:00", :active false},
+;;    :last_name {:val "Bamford", :active false},
+;;    :hire_date {:val "1986-08-27 22:00:00", :active false},
+;;    :gender {:val "M", :active false}},
+;;   :row3
+;;   {:first_name {:val "Chirstian", :active false},
+;;    :emp_no {:val 10004, :active false},
+;;    :birth_date {:val "1954-04-30 23:00:00", :active false},
+;;    :last_name {:val "Koblick", :active false},
+;;    :hire_date {:val "1986-11-30 23:00:00", :active false},
+;;    :gender {:val "M", :active false}},
+;;   :row4
+;;   {:first_name {:val "Kyoichi", :active false},
+;;    :emp_no {:val 10005, :active false},
+;;    :birth_date {:val "1955-01-20 23:00:00", :active false},
+;;    :last_name {:val "Maliniak", :active false},
+;;    :hire_date {:val "1989-09-11 22:00:00", :active false},
+;;    :gender {:val "M", :active false}},
+;;   :row0
+;;   {:first_name {:val "Georgi", :active false},
+;;    :emp_no {:val 10001, :active false},
+;;    :birth_date {:val "1953-09-01 23:00:00", :active false},
+;;    :last_name {:val "Facello", :active false},
+;;    :hire_date {:val "1986-06-25 22:00:00", :active false},
+;;    :gender {:val "M", :active false}},
+;;   :row1
+;;   {:first_name {:val "Bezalel", :active false},
+;;    :emp_no {:val 10002, :active false},
+;;    :birth_date {:val "1964-06-01 23:00:00", :active false},
+;;    :last_name {:val "Simmel", :active false},
+;;    :hire_date {:val "1985-11-20 23:00:00", :active false},
+;;    :gender {:val "F", :active false}}}}

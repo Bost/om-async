@@ -45,41 +45,61 @@
 (defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no element is filtered out
 ;; (defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no element is filtered out
 
-(defn onClick [app owner ks]
+(defn full-ks [idx-table ks kw-active]
+  (let [ks-idx (into [(keyword (str idx-table))] ks)]
+    (into ks-idx kw-active)))
+
+(defn onClick [app owner idx-table ks-data kw-active column elem-val]
   (let [fn-name "onClick"]
     ;; TODO (js* "debugger;") seems to cause LightTable freeze
-    (let [active (om/get-state owner ks)]
+    (let [ks (full-ks idx-table ks-data kw-active)
+          active (om/get-state owner ks)]
       ;; (om/transact! app ks (fn [] (not active))) ;; change application state; use with get-in
-      (om/set-state! owner ks (not active))         ;; change local component state
+      (om/set-state! owner ks (not active))  ;; change local component state
 
       ;; we're not allowed to use cursors outside of the render phase as
       ;; this is almost certainly a concurrency bug!
-      ;; (edn-xhr
-      ;;  {:method :put
-      ;;   :url (str "select/id0")
-      ;;   :data {:request data}
-      ;;   :on-complete
-      ;;   (fn [response]
-      ;;     ;; (l/info src fn-name (str "Server response: " response))
-      ;;     )})
+      (l/infod src fn-name "elem-val" elem-val)
+      (l/infod src fn-name "kw-active" kw-active)
+      (l/infod src fn-name "ks-data" ks-data)
+      (l/infod src fn-name "ks" ks)
+      (l/infod src fn-name "bef app" @app)
+;;       (om/set-state! owner ks "new-val")  ;; change local component state
+      (om/transact! app ks-data (fn [] {:val (str "## " ks-data " ##")})) ;; change application state; use with get-in
+      (l/infod src fn-name "aft app" @app)
+;;       (edn-xhr
+;;        {:method :put
+;;         :url (str "select/" column)
+;;         :data {:request elem-val}
+;;         :on-complete
+;;         (fn [response]
+;;           (l/info src fn-name (str "Server response: " response))
+;;           (om/transact! app ks-data (fn [] {:val "new-val: edn-xhr"})) ;; change application state; use with get-in
+;;           (l/infod src fn-name "app" @app)
+;;           )})
+;;           )})
       )))
 
-(defn get-css [app owner ks default]
+(defn get-css [app owner idx-table ks-data kw-active default]
   (let [fn-name "get-css"]
-    (let [active (om/get-state owner ks)
+    (let [ks (full-ks idx-table ks-data kw-active)
+          active (om/get-state owner ks)
           r (if active "active" default)]
       ;; (om/transact! app ks (fn [] (not active)))
       r)))
 
 (defn render-td [app owner vx idx-table idx-row column css]
   (let [fn-name "render-td"]
-    (let [valx (get-in vx [:val])
-          ks-col [:data (keyword (str "row" idx-row)) column]
-          ks-idx (into [(keyword (str idx-table))] ks-col)
-          ks (into ks-idx [:active])]
-      (dom/td #js {:className (get-css app owner ks css)
-                   :onClick (fn [e] (onClick app owner ks))}
-              valx))))
+    (let [td-val (get-in vx [:val])
+          ;; TODO walking over the data from the server doesn't work properly
+          ks-data [:data (keyword (str "row" idx-row)) column]
+          kw-active [:active]
+          ]
+      (l/infod src fn-name "ks-data" ks-data)
+      (l/infod src fn-name "vx" vx)
+      (dom/td #js {:className (get-css app owner idx-table ks-data kw-active css)
+                   :onClick (fn [e] (onClick app owner idx-table ks-data kw-active column td-val))}
+              td-val))))
 
 (defn render-row [app owner css row idx-table idx-row columns]
   (let [fn-name "render-row"]
@@ -105,7 +125,9 @@
       (l/infod src fn-name "header" header)
       (let [rows (into [] (map #(into [] (vals (nth tdata %)))
                                (range (count tdata))))
-            row-indexes (into [] (range (count rows)))]
+;;             row-indexes (reverse (into [] (range (count rows))))
+            row-indexes (into [] (range (count rows)))
+            ]
         (dom/div nil
                  tname
                  (dom/div nil
@@ -125,6 +147,7 @@
           fq-name (str dbname "." tname)
           data (get-in tdata [:data])
           rows (into [] (vals data))
+          ;; TODO (keys (first data)) should give me :row0 :row1 etc.; probably the same should be done with :data
           ks (into [] (keys data))
           ]
       (l/infod src fn-name "ks" ks)
@@ -200,9 +223,9 @@
           :data
           {:select-rows-from
            [
-            {:dbase "employees" :table "employees"   :idx 0}
+;;             {:dbase "employees" :table "employees"   :idx 0}
             {:dbase "employees" :table "departments" :idx 1}
-            {:dbase "employees" :table "salaries"    :idx 2}
+;;             {:dbase "employees" :table "salaries"    :idx 2}
             ]}
           ;; {:select-rows-from
           ;;  [{:dbase "employees" :table "departments" :idx 0}]}
