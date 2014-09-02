@@ -45,17 +45,12 @@
 (defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no element is filtered out
 ;; (defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no element is filtered out
 
-(defn get-val [m]
-  (get-in m [:val]))
-
-(defn onClick [app owner korks idx-table]
+(defn onClick [app owner ks]
   (let [fn-name "onClick"]
     ;; TODO (js* "debugger;") seems to cause LightTable freeze
-    (let [korks-active (into korks [:active])
-          v (om/get-state owner korks-active)]
-      ;; (l/infod src fn-name "v" v)
-      ;; (om/transact! app korks-active (fn [] (not v))) ;; change application state; use with get-in
-      (om/set-state! owner korks-active (not v))        ;; change local component state
+    (let [active (om/get-state owner ks)]
+      ;; (om/transact! app ks (fn [] (not active))) ;; change application state; use with get-in
+      (om/set-state! owner ks (not active))         ;; change local component state
 
       ;; we're not allowed to use cursors outside of the render phase as
       ;; this is almost certainly a concurrency bug!
@@ -69,22 +64,21 @@
       ;;     )})
       )))
 
-(defn color [app owner korks idx-table css]
-  (let [fn-name "color"]
-    (let [korks-active (into korks [:active])
-          v (om/get-state owner korks-active)
-          rcss (if v "active" css)]
-      ;; (l/infod src fn-name "v" v)
-      ;; (om/transact! app korks-active (fn [] (not v)))
-      rcss)))
+(defn get-css [app owner ks default]
+  (let [fn-name "get-css"]
+    (let [active (om/get-state owner ks)
+          r (if active "active" default)]
+      ;; (om/transact! app ks (fn [] (not active)))
+      r)))
 
 (defn render-td [app owner vx idx-table idx-row column css]
   (let [fn-name "render-td"]
-    (let [valx (get-val vx)
-          korks [:data (keyword (str "row" idx-row)) column]]
-      (dom/td #js {:className (color app owner korks idx-table css) ;;css
-;;                    :style #js {:backgroundColor (color app owner korks idx-table valx css)}
-                   :onClick (fn [e] (onClick app owner korks idx-table))}
+    (let [valx (get-in vx [:val])
+          ks-col [:data (keyword (str "row" idx-row)) column]
+          ks-idx (into [(keyword (str idx-table))] ks-col)
+          ks (into ks-idx [:active])]
+      (dom/td #js {:className (get-css app owner ks css)
+                   :onClick (fn [e] (onClick app owner ks))}
               valx))))
 
 (defn render-row [app owner css row idx-table idx-row columns]
