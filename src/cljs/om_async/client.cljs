@@ -48,13 +48,15 @@
 (defn get-val [m]
   (get-in m [:val]))
 
-(defn onClick [app owner korks idx-table valx css]
+(defn onClick [app owner korks idx-table]
   (let [fn-name "onClick"]
     ;; TODO (js* "debugger;") seems to cause LightTable freeze
-    (let [korks-active (into korks [:active])]
-      ;; (l/infod src fn-name "korks-active" korks-active)
-      (om/transact! app korks-active (fn [] true)))
-      ;; (l/infod src fn-name "r" r)
+    (let [korks-active (into korks [:active])
+          v (om/get-state owner korks-active)]
+      ;; (l/infod src fn-name "v" v)
+      ;; (om/transact! app korks-active (fn [] (not v))) ;; change application state; use with get-in
+      (om/set-state! owner korks-active (not v))        ;; change local component state
+
       ;; we're not allowed to use cursors outside of the render phase as
       ;; this is almost certainly a concurrency bug!
       ;; (edn-xhr
@@ -65,26 +67,24 @@
       ;;   (fn [response]
       ;;     ;; (l/info src fn-name (str "Server response: " response))
       ;;     )})
-      ))
+      )))
 
-(defn color [app owner korks idx-table valx css]
+(defn color [app owner korks idx-table css]
   (let [fn-name "color"]
-;;     (l/infod src fn-name "korks" korks)
-;;     (l/infod src fn-name "idx-table" idx-table)
-;;     (l/infod src fn-name "valx" valx)
-;;     (l/infod src fn-name "css" css)
     (let [korks-active (into korks [:active])
-          v (get-in app korks-active)
-          r (if v "red" "")]
-      r)))
+          v (om/get-state owner korks-active)
+          rcss (if v "active" css)]
+      ;; (l/infod src fn-name "v" v)
+      ;; (om/transact! app korks-active (fn [] (not v)))
+      rcss)))
 
 (defn render-td [app owner vx idx-table idx-row column css]
   (let [fn-name "render-td"]
     (let [valx (get-val vx)
           korks [:data (keyword (str "row" idx-row)) column]]
-      (dom/td #js {:className css
-                   :style #js {:backgroundColor (color app owner korks idx-table valx css)}
-                   :onClick (fn [e] (onClick app owner korks idx-table valx css))}
+      (dom/td #js {:className (color app owner korks idx-table css) ;;css
+;;                    :style #js {:backgroundColor (color app owner korks idx-table valx css)}
+                   :onClick (fn [e] (onClick app owner korks idx-table))}
               valx))))
 
 (defn render-row [app owner css row idx-table idx-row columns]
@@ -206,9 +206,9 @@
           :data
           {:select-rows-from
            [
-            ;; {:dbase "employees" :table "employees"   :idx 0}
+            {:dbase "employees" :table "employees"   :idx 0}
             {:dbase "employees" :table "departments" :idx 1}
-            ;; {:dbase "employees" :table "salaries"    :idx 2}
+            {:dbase "employees" :table "salaries"    :idx 2}
             ]}
           ;; {:select-rows-from
           ;;  [{:dbase "employees" :table "departments" :idx 0}]}
@@ -236,19 +236,3 @@
               ;;               backing React component (owner)
          app-state  ;; atom containing application state
          {:target (gdom/getElement "dbase0")}) ;; dbase0 is in index.html
-
-;; eval server.clj, client.cljs, open http://localhost:8080 in browser
-;; (defn contact-server [dbase]
-;;   (edn-xhr
-;;    {:method :put
-;;     :url "fetch"
-;;     ;; :data {:select-rows-from ["employees" "departments"]}
-;;     ;; :data {:select-rows-from ["departments"]}
-;;     ;; :data {:show-tables-from ["employees"]}
-;;     :data {:show-tables-with-data-from [dbase]}
-;;     :on-complete #(om/transact! app dbaseVal0 (fn [_] %))}))
-
-;; (defn color [app owner]
-;;   (om/transact! app :toggle
-;;                 (fn [] [{:color "red"}]))
-;;   (println "color executed"))

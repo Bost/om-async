@@ -72,11 +72,20 @@ tfoot tr td {
 tbody tr td {
 	background: #DDF0BD no-repeat top left;
 }
+tbody tr td.active:hover, tbody tr.odd td.active:hover {
+	background: #DE3624;
+}
+tbody tr td.active {
+	background: #FC9161;
+}
+tbody tr.odd td.active {
+	background: #F2734C;
+}
 tbody tr.odd td {
 	background-color: #D0EBA6;
 }
 tbody tr td:hover, tbody tr.odd td:hover {
-	background: #c5e894;
+	background: #A8ED7A;
 }
 tbody tr th, tbody tr td {
 	padding: 0.1em 0.4em;
@@ -86,7 +95,7 @@ tbody tr th {
 	padding-right: 1em;
 	text-align: right;
 	font-weight: normal;
-	background: #c5e894 no-repeat top left;
+	background: #66FF66 no-repeat top left;
 	text-transform: uppercase;
 }
 tbody tr th:hover {
