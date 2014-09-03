@@ -9,7 +9,9 @@
 (def src "logger.cljx")
 
 (def files
-  ["client.cljs" "transform.clj" "db.clj" "server.clj" "utils"]
+  ["client.cljs" "transform.clj"
+   ;; "db.clj"
+   "server.clj" "utils"]
 ;;   ["client.cljs"]
 ;;   ["transform.clj"]
 ;;   nil
@@ -25,13 +27,14 @@
 ;;    "color"
 ;;    "tr"
 ;;    "on-complete"
+;;    "onClick"
 
 
    ;;;; db.clj
-   "fn-name"
+;;    "fn-name"
 
    ;;;; server.clj
-   "routes-PUT"
+;;    "routes-PUT"
 
    ;;;; utils
 ;;    "convert-to-korks"

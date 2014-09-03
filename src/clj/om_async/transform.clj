@@ -123,9 +123,14 @@
 ;; this part belongs to client.cljs
 
 (defn extend-map [m]
-  "Turns {:a 1, :b 2} to {:a {:val 1, :active false}, :b {:val 2, :active false}}"
+  ;; "Turns {:a 1, :b 2} to {:a {:val 1, :active false}, :b {:val 2, :active false}}"
+  "Turns {:a 1, :b 2} to {:a {:val 1}, :b {:val 2}}.
+  Seems like the :active is not needed because of local component changing using
+  (om/set-state! owner ks (not active))"
   (reduce-kv (fn [m k v]
-               (assoc m k {:val v :active false}))
+               (assoc m k {:val v
+                           ;; :active false
+                           }))
              {} m))
 
 (defn ff [m k v] (assoc m k (extend-map v)))

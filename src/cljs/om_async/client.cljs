@@ -63,21 +63,21 @@
       (l/infod src fn-name "kw-active" kw-active)
       (l/infod src fn-name "ks-data" ks-data)
       (l/infod src fn-name "ks" ks)
-      (l/infod src fn-name "bef app" @app)
-;;       (om/set-state! owner ks "new-val")  ;; change local component state
-      (om/transact! app ks-data (fn [] {:val (str "## " ks-data " ##")})) ;; change application state; use with get-in
-      (l/infod src fn-name "aft app" @app)
-;;       (edn-xhr
-;;        {:method :put
-;;         :url (str "select/" column)
-;;         :data {:request elem-val}
-;;         :on-complete
-;;         (fn [response]
-;;           (l/info src fn-name (str "Server response: " response))
-;;           (om/transact! app ks-data (fn [] {:val "new-val: edn-xhr"})) ;; change application state; use with get-in
-;;           (l/infod src fn-name "app" @app)
-;;           )})
-;;           )})
+;;       (l/infod src fn-name "bef app" @app)
+;; ;;       (om/set-state! owner ks "new-val")  ;; change local component state
+;;       (om/transact! app ks-data (fn [] {:val (str "## " ks-data " ##")})) ;; change application state; use with get-in
+;;       (l/infod src fn-name "aft app" @app)
+      (edn-xhr
+       {:method :put
+        :url (str "select/" column)
+        :data {:request elem-val}
+        :on-complete (fn [response]
+                       (l/info src fn-name (str "Server response: " response))
+                       (om/transact! app ks-data
+                                     (fn []
+                                       {:val (str "# " (:response response) " #")})) ;; change application state; use with get-in
+                       (l/infod src fn-name "@app" @app)
+          )})
       )))
 
 (defn get-css [app owner idx-table ks-data kw-active default]

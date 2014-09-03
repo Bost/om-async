@@ -35,7 +35,7 @@
        (let [fn-name "routes-PUT"]
          (l/infod src fn-name "id" (:id params))
          (l/infod src fn-name "edn-params" edn-params)
-         (let [data {}
+         (let [data {:response (:request edn-params)}
                ;;(trans/request edn-params)
                ]
            (l/infod src fn-name "data" data)
