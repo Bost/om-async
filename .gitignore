@@ -8,7 +8,8 @@ pom.xml
 .lein-repl-history
 .lein-plugins/
 .nrepl-port
-resources/public/js
+resources/public/js/out
+resources/public/js/main.js
 
 # utils.clj and utils.cljs are generated from utils.cljx
 utils.clj
