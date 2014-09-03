@@ -26,7 +26,8 @@
 ;;    "init"
 ;;    "color"
 ;;    "tr"
-;;    "on-complete"
+   "view-onComplete"
+   "onClick-onComplete"
 ;;    "onClick"
 
 

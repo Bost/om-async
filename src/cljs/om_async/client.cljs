@@ -59,25 +59,24 @@
 
       ;; we're not allowed to use cursors outside of the render phase as
       ;; this is almost certainly a concurrency bug!
-      (l/infod src fn-name "elem-val" elem-val)
-      (l/infod src fn-name "kw-active" kw-active)
-      (l/infod src fn-name "ks-data" ks-data)
-      (l/infod src fn-name "ks" ks)
-;;       (l/infod src fn-name "bef app" @app)
-;; ;;       (om/set-state! owner ks "new-val")  ;; change local component state
-;;       (om/transact! app ks-data (fn [] {:val (str "## " ks-data " ##")})) ;; change application state; use with get-in
-;;       (l/infod src fn-name "aft app" @app)
+
+      ;; (l/infod src fn-name "elem-val" elem-val)
+      ;; (l/infod src fn-name "kw-active" kw-active)
+      ;; (l/infod src fn-name "ks-data" ks-data)
+      ;; (l/infod src fn-name "ks" ks)
       (edn-xhr
        {:method :put
         :url (str "select/" column)
+        ;; value under :data can't be a just a "value". (TODO see if only hash-map is accepted)
         :data {:request elem-val}
         :on-complete (fn [response]
-                       (l/info src fn-name (str "Server response: " response))
-                       (om/transact! app ks-data
-                                     (fn []
-                                       {:val (str "# " (:response response) " #")})) ;; change application state; use with get-in
-                       (l/infod src fn-name "@app" @app)
-          )})
+                       (let [fn-name "onClick-onComplete"]
+                         (l/info src fn-name (str "Server response: " response))
+                         ;; change application state; use with get-in
+                         (om/transact! app ks-data
+                                       (fn []
+                                         {:val (str "# " (:response response) " #")}))))
+        })
       )))
 
 (defn get-css [app owner idx-table ks-data kw-active default]
@@ -233,13 +232,12 @@
           ;;  [(first (get-in app [:dbase0 :name]))]}
 
           ;; om/transact! propagates changes back to the original atom
-          :on-complete #(om/transact! app []
-                                      (fn [_]
-                                        (let [fn-name "on-complete"]
-                                          (l/infod src fn-name "app" %)
-                                          %)))
-          })
-        )
+          :on-complete (fn [response]
+                         (let [fn-name "view-onComplete"]
+                           (om/transact! app []
+                                         (fn [_]
+                                           (l/infod src fn-name "app" response)
+                                           response))))}))
       om/IRenderState
       (render-state [_ {:keys [err-msg]}]
         ;; (l/info src fn-name "render-state")
