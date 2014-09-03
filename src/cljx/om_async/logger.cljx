@@ -9,7 +9,7 @@
 (def src "logger.cljx")
 
 (def files
-  ["client.cljs" "transform.clj" "db.clj" "utils"]
+  ["client.cljs" "transform.clj" "db.clj" "server.clj" "utils"]
 ;;   ["client.cljs"]
 ;;   ["transform.clj"]
 ;;   nil
@@ -19,31 +19,19 @@
   [
    ;;;; client.cljs
 ;;    "view"
-;;    "create-table-for-columns"
-;;    "get-data"
-;;    "create-table"
-;;    "table-elem"
-;;    "get-data"
-;;    "convert-to-korks"
-;;    "f"
 ;;    "construct-component"
-;;    "table-elem"
-;;    "render-data-vec"
-;;    "render-data"
-;;    "render-table"
-;;    "render-multi"
-;;    "render-row"
-;;    "render-indexed-row"
+   "table"
 ;;    "init"
-;;    "render"
-   "render-td"
-   "onClick"
 ;;    "color"
 ;;    "tr"
+;;    "on-complete"
 
 
    ;;;; db.clj
    "fn-name"
+
+   ;;;; server.clj
+   "routes-PUT"
 
    ;;;; utils
 ;;    "convert-to-korks"

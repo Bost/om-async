@@ -88,70 +88,67 @@
       ;; (om/transact! app ks (fn [] (not active)))
       r)))
 
-(defn render-td [app owner vx idx-table idx-row column css]
-  (let [fn-name "render-td"]
-    (let [td-val (get-in vx [:val])
+(defn td [app owner cell idx-table idx-row column css]
+  (let [fn-name "td"]
+    (let [td-val (get-in cell [:val])
           ;; TODO walking over the data from the server doesn't work properly
-          ks-data [:data (keyword (str "row" idx-row)) column]
+          ks-data [:data idx-row column]
           kw-active [:active]
           ]
       (l/infod src fn-name "ks-data" ks-data)
-      (l/infod src fn-name "vx" vx)
+      (l/infod src fn-name "cell" cell)
       (dom/td #js {:className (get-css app owner idx-table ks-data kw-active css)
                    :onClick (fn [e] (onClick app owner idx-table ks-data kw-active column td-val))}
               td-val))))
 
-(defn render-row [app owner css row idx-table idx-row columns]
-  (let [fn-name "render-row"]
+(defn tr [app owner css row idx-table idx-row columns]
+  (let [fn-name "tr"]
     (let [ column nil ]
       (apply dom/tr #js {:className css}
-             (map #(render-td app owner %1 idx-table idx-row %2 css)
+             (map (fn [cell-val col]
+                    (td app owner cell-val idx-table idx-row col css))
                   row
                   (cycle columns)
                   )))))
 
-(defn render-indexed-row [app owner idx-table rows row-indexes columns]
-  (let [fn-name "render-indexed-row"]
-    (map (fn [css row row-index]
-           (render-row app owner css row idx-table row-index columns))
+(defn render-row [app owner idx-table rows row-keywords columns]
+  (let [fn-name "render-row"]
+    (map (fn [css row idx-row]
+           (tr app owner css row idx-table idx-row columns))
          (cycle ["" "odd"]) ;; gives the css
          rows               ;; gives the row
-         row-indexes)))
+         row-keywords)))
 
-(defn render-table [app owner tname tdata ks idx-table]
-  (let [fn-name "render-table"]
-    (l/infod src fn-name "ks" ks)
-    (let [header (into [] (keys (first tdata)))]
-      (l/infod src fn-name "header" header)
-      (let [rows (into [] (map #(into [] (vals (nth tdata %)))
-                               (range (count tdata))))
-;;             row-indexes (reverse (into [] (range (count rows))))
-            row-indexes (into [] (range (count rows)))
-            ]
-        (dom/div nil
-                 tname
-                 (dom/div nil
-                          (dom/table nil
-                                     (dom/thead nil
-                                                (apply dom/tr nil
-                                                       (map #(dom/th nil (str %)) header)))
-                                     (apply dom/tbody nil
-                                            (render-indexed-row app owner idx-table rows row-indexes header)
-                                            )))
-                 )))))
+(defn table [app owner tname tdata row-keywords idx-table]
+  (let [fn-name "table"]
+    ;; (l/infod src fn-name "row-keywords" row-keywords)
+    (let [rows (into [] (map #(into [] (vals (nth tdata %)))
+                             (range (count tdata))))
+          header (into [] (keys (first tdata)))]
+      ;; (l/infod src fn-name "header" header)
+      ;; (l/infod src fn-name "rows" rows)
+      (dom/div nil
+               tname
+               (dom/div nil
+                        (dom/table nil
+                                   (dom/thead nil
+                                              (apply dom/tr nil
+                                                     (map #(dom/th nil (str %)) header)))
+                                   (apply dom/tbody nil
+                                          (render-row app owner idx-table
+                                                      rows row-keywords header))))))))
 
 (defn render-data [app owner table-idx tdata idx-table]
   (let [fn-name "render-data"]
     (let [dbname (get-in tdata [:dbase])
           tname (get-in dbname [:table])
-          fq-name (str dbname "." tname)
+          full-tname (str dbname "." tname)
           data (get-in tdata [:data])
           rows (into [] (vals data))
-          ;; TODO (keys (first data)) should give me :row0 :row1 etc.; probably the same should be done with :data
           ks (into [] (keys data))
           ]
-      (l/infod src fn-name "ks" ks)
-      (render-table app owner fq-name rows ks idx-table))))
+      ;; (l/infod src fn-name "ks" ks)
+      (table app owner full-tname rows ks idx-table))))
 
 (defn render-data-vec [app owner extended-data idx-table]
   (let [fn-name "render-data-vec"]
@@ -178,14 +175,12 @@
       (dom/div nil
                (let [tables (get-in app korks)
                      cnt-tables (count tables)]
-                 (if (= 0 cnt-tables)
-                   (do
-                     (let [msg (str "Fetching data from dbase: " dbase)]
-                       (l/info src fn-name msg)
-                       msg))
-                   (do
-                     (let [extended-data [(get-in app korks)]]
-                       (render-data-vec app owner extended-data idx-table)))))))))
+                 (if (zero? cnt-tables)
+                   (let [msg (str "Fetching data from dbase: " dbase)]
+                     (l/info src fn-name msg)
+                     msg)
+                   (let [extended-data [(get-in app korks)]]
+                     (render-data-vec app owner extended-data idx-table))))))))
 
 (defn render-multi [_ app owner]
   (let [fn-name "render-multi"]
@@ -238,7 +233,11 @@
           ;;  [(first (get-in app [:dbase0 :name]))]}
 
           ;; om/transact! propagates changes back to the original atom
-          :on-complete #(om/transact! app [] (fn [_] %))
+          :on-complete #(om/transact! app []
+                                      (fn [_]
+                                        (let [fn-name "on-complete"]
+                                          (l/infod src fn-name "app" %)
+                                          %)))
           })
         )
       om/IRenderState

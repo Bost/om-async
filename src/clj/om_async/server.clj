@@ -32,14 +32,15 @@
 
   (PUT "/select/:id"
        {params :params edn-params :edn-params}
-       (println src "PUT/select" (str "id: " (:id params)))
-       (println src "PUT/select" (str "edn-params: " edn-params))
-       (let [data {}
-             ;;(trans/request edn-params)
-             ]
-         (println src "PUT/select" (str "data: " data))
-         (response (merge data {:status :ok})))
-       )
+       (let [fn-name "routes-PUT"]
+         (l/infod src fn-name "id" (:id params))
+         (l/infod src fn-name "edn-params" edn-params)
+         (let [data {}
+               ;;(trans/request edn-params)
+               ]
+           (l/infod src fn-name "data" data)
+           (response (merge data {:status :ok})))
+         ))
 
   (route/files "/" {:root "resources/public"}))
 

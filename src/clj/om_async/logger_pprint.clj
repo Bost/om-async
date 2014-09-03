@@ -22,7 +22,7 @@
 ;;    "process-sql"
 ;;    "process-select-rows-from"
 ;;    "process-show-tables-with-data-from"
-   "fetch"
+;;    "fetch"
 ;;    "encode-table"
 ;;    "convert-val"
 ;;    "m-select-rows-from"
