@@ -127,7 +127,8 @@
          rows               ;; gives the row
          row-keywords)))
 
-(defn table [app owner tname tdata row-keywords idx-table]
+(defn table
+  [{:keys [app owner tname tdata row-keywords idx-table] :as params}]
   (let [fn-name "table"]
     ;; (l/infod src fn-name "row-keywords" row-keywords)
     (let [rows (into [] (map #(into [] (vals (nth tdata %)))
@@ -162,18 +163,20 @@
           ks (into [] (keys data))
           ]
       ;; (l/infod src fn-name "ks" ks)
-      (table app owner full-tname rows ks idx-table))))
+      (table (into params {:tname full-tname
+                           :tdata rows
+                           :row-keywords ks})))))
 
-(defn render-data-vec [app owner extended-data idx-table]
+(defn render-data-vec
+;;   [app owner extended-data idx-table]
+  [{:keys [app owner extended-data idx-table] :as params}]
   (let [fn-name "render-data-vec"]
     (let [id (into [] (map-indexed vector extended-data))
           rd (map #(render-data
-                    {:app app
-                     :owner owner
-                     :table-idx (keyword (first %))
-                     :tdata (second %)
-                     :idx-table idx-table
-                     }
+                    (into params
+                          {:table-idx (keyword (first %))
+                           :tdata (second %)
+                           :idx-table idx-table})
                     ) id)
           r (apply dom/div nil (into [] rd))]
       ;; (l/infod src fn-name "r" r)
@@ -184,10 +187,10 @@
     ;; (l/infod src fn-name "_" _)
     {}))
 
-(defn render [_ app owner idx-table]
+(defn render
+  [_ {:keys [app owner idx-table] :as params}]
   (let [fn-name "render"]
-    (let [
-          dbase (get-in app [:dbase])
+    (let [dbase (get-in app [:dbase])
           korks []]
       ;; TODO get rid of 'if'
       (dom/div nil
@@ -198,7 +201,9 @@
                      (l/info src fn-name msg)
                      msg)
                    (let [extended-data [(get-in app korks)]]
-                     (render-data-vec app owner extended-data idx-table))))))))
+                     (render-data-vec
+                      (into params {:extended-data extended-data
+                                    :idx-table idx-table})))))))))
 
 (defn render-multi [_ {:keys [app owner]}]
   (let [fn-name "render-multi"]
@@ -207,7 +212,9 @@
           table-idx 0]
       ;; (map #(render _ % owner) app)
       (apply dom/div nil
-             (map #(render _ (second %) owner (first %))
+             (map #(render _ {:app (second %)
+                              :owner owner
+                              :idx-table (first %)})
                   app-vec)))))
 
 ;; 3rd param is a map, associate symbol toggle with the value of the
