@@ -22,14 +22,15 @@
    ;;;; client.cljs
 ;;    "view"
 ;;    "construct-component"
-   "table"
+;;    "table"
 ;;    "init"
 ;;    "color"
 ;;    "tr"
-   "view-onComplete"
-   "onClick-onComplete"
+;;    "view-onComplete"
+;;    "onClick-onComplete"
 ;;    "onClick"
-
+   "render-multi"
+   "render"
 
    ;;;; db.clj
 ;;    "fn-name"

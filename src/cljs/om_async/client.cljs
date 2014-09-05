@@ -91,7 +91,7 @@
       r)))
 
 (defn td
-  [{:keys [app owner cell idx-table idx-row column css] :as params}]
+  [{:keys [cell idx-table idx-row column css] :as params}]
   (let [fn-name "td"]
     (let [td-val (get-in cell [:val])
           ;; TODO walking over the data from the server doesn't work properly
@@ -107,7 +107,7 @@
               td-val))))
 
 (defn tr
-  [{:keys [app owner css row idx-table idx-row columns] :as params}]
+  [{:keys [css row idx-table idx-row columns] :as params}]
   (let [fn-name "tr"]
     (let [ column nil ]
       (apply dom/tr #js {:className css}
@@ -118,7 +118,7 @@
                   )))))
 
 (defn render-row
-  [{:keys [app owner idx-table rows row-keywords columns] :as params}]
+  [{:keys [idx-table rows row-keywords columns] :as params}]
   (let [fn-name "render-row"]
     (map (fn [css row idx-row]
            (tr (into params {:css css
@@ -129,7 +129,7 @@
          row-keywords)))
 
 (defn table
-  [{:keys [app owner tname tdata row-keywords idx-table] :as params}]
+  [{:keys [tname tdata row-keywords idx-table] :as params}]
   (let [fn-name "table"]
     ;; (l/infod src fn-name "row-keywords" row-keywords)
     (let [rows (into [] (map #(into [] (vals (nth tdata %)))
@@ -149,11 +149,9 @@
                                            (into params
                                                  {:rows rows :row-keywords row-keywords :columns header
                                                   })
-                                           ;;app owner idx-table rows row-keywords header
                                            ))))))))
 
 (defn render-data
-;;   [app owner table-idx tdata idx-table]
   [{:keys [table-idx tdata idx-table] :as params}]
   (let [fn-name "render-data"]
     (let [dbname (get-in tdata [:dbase])
@@ -169,7 +167,6 @@
                            :row-keywords ks})))))
 
 (defn render-data-vec
-;;   [app owner extended-data idx-table]
   [{:keys [extended-data idx-table] :as params}]
   (let [fn-name "render-data-vec"]
     (let [id (into [] (map-indexed vector extended-data))
@@ -188,8 +185,9 @@
     {}))
 
 (defn render
-  [_ {:keys [app owner idx-table] :as params}]
+  [{:keys [app idx-table] :as params}]
   (let [fn-name "render"]
+    (l/infod src fn-name "app" app)
     (let [dbase (get-in app [:dbase])
           korks []]
       ;; TODO get rid of 'if'
@@ -204,26 +202,28 @@
                      (render-data-vec
                       (into params {:extended-data extended-data})))))))))
 
-(defn render-multi [_ {:keys [app owner] :as params}]
+(defn render-multi
+  [{:keys [app] :as params}]
   (let [fn-name "render-multi"]
     (let [cnt (count app)
           app-vec (into [] (map-indexed vector app))
           table-idx 0]
-      ;; (map #(render _ % owner) app)
+      (l/infod src fn-name "app" app)
+      (l/infod src fn-name "app-vec" app-vec)
       (apply dom/div nil
-             (map #(render _ (into params {:app (second %) :idx-table (first %)}))
+             (map #(render (into params {:app (second %) :idx-table (first %)}))
                   app-vec)))))
 
 ;; 3rd param is a map, associate symbol toggle with the value of the
 ;; :toggle keyword and "put" it in the opts map
-(defn construct-component [app owner {:keys [toggle] :as opts}]
+(defn construct-component [app owner]
   (let [fn-name "construct-component"]
     (reify
       om/IInitState
       (init-state [_] (init _))
       om/IRenderState
-      (render-state [_ {:keys [toggle]}]
-                    (render-multi _ {:app app :owner owner})))))
+      (render-state [_ {}]
+                    (render-multi {:app app :owner owner})))))
 
 (defn view
   "data - application state data (a cursor); owner - backing React component
