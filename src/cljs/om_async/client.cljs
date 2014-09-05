@@ -45,14 +45,16 @@
 (defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no element is filtered out
 ;; (defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no element is filtered out
 
-(defn full-ks [idx-table ks kw-active]
-  (let [ks-idx (into [(keyword (str idx-table))] ks)]
+(defn full-ks
+  [{:keys [idx-table ks-data kw-active] :as params}]
+  (let [ks-idx (into [(keyword (str idx-table))] ks-data)]
     (into ks-idx kw-active)))
 
-(defn onClick [app owner idx-table ks-data kw-active column elem-val]
+(defn onClick
+  [{:keys [app owner idx-table ks-data kw-active column elem-val] :as params}]
   (let [fn-name "onClick"]
     ;; TODO (js* "debugger;") seems to cause LightTable freeze
-    (let [ks (full-ks idx-table ks-data kw-active)
+    (let [ks (full-ks params)
           active (om/get-state owner ks)]
       ;; (om/transact! app ks (fn [] (not active))) ;; change application state; use with get-in
       (om/set-state! owner ks (not active))  ;; change local component state
@@ -80,29 +82,28 @@
       )))
 
 (defn get-css
-  [{:keys [app owner idx-table ks-data kw-active default]}]
+  [{:keys [app owner idx-table ks-data kw-active default] :as params}]
   (let [fn-name "get-css"]
-    (let [ks (full-ks idx-table ks-data kw-active)
+    (let [ks (full-ks params)
           active (om/get-state owner ks)
           r (if active "active" default)]
       ;; (om/transact! app ks (fn [] (not active)))
       r)))
 
 (defn td
-  [{:keys [app owner cell idx-table idx-row column css]}]
+  [{:keys [app owner cell idx-table idx-row column css] :as params}]
   (let [fn-name "td"]
     (let [td-val (get-in cell [:val])
           ;; TODO walking over the data from the server doesn't work properly
           ks-data [:data idx-row column]
           kw-active [:active]
-          params {:app app :owner owner :idx-table idx-table
-                  :ks-data ks-data :kw-active kw-active :css css}
+          p (into params {:ks-data ks-data :kw-active kw-active :css css})
           ]
       (l/infod src fn-name "ks-data" ks-data)
       (l/infod src fn-name "cell" cell)
 
-      (dom/td #js {:className (get-css params)
-                   :onClick (fn [e] (onClick app owner idx-table ks-data kw-active column td-val))}
+      (dom/td #js {:className (get-css p)
+                   :onClick (fn [e] (onClick (into p {:column column :elem-val td-val})))}
               td-val))))
 
 (defn tr
@@ -145,15 +146,15 @@
                                                      (map #(dom/th nil (str %)) header)))
                                    (apply dom/tbody nil
                                           (render-row
-                                           {:app app :owner owner :idx-table idx-table
-                                            :rows rows :row-keywords row-keywords :columns header
-                                            }
+                                           (into params
+                                                 {:rows rows :row-keywords row-keywords :columns header
+                                                  })
                                            ;;app owner idx-table rows row-keywords header
                                            ))))))))
 
 (defn render-data
 ;;   [app owner table-idx tdata idx-table]
-  [{:keys [app owner table-idx tdata idx-table] :as params}]
+  [{:keys [table-idx tdata idx-table] :as params}]
   (let [fn-name "render-data"]
     (let [dbname (get-in tdata [:dbase])
           tname (get-in dbname [:table])
@@ -169,14 +170,13 @@
 
 (defn render-data-vec
 ;;   [app owner extended-data idx-table]
-  [{:keys [app owner extended-data idx-table] :as params}]
+  [{:keys [extended-data idx-table] :as params}]
   (let [fn-name "render-data-vec"]
     (let [id (into [] (map-indexed vector extended-data))
           rd (map #(render-data
                     (into params
                           {:table-idx (keyword (first %))
-                           :tdata (second %)
-                           :idx-table idx-table})
+                           :tdata (second %)})
                     ) id)
           r (apply dom/div nil (into [] rd))]
       ;; (l/infod src fn-name "r" r)
@@ -202,19 +202,16 @@
                      msg)
                    (let [extended-data [(get-in app korks)]]
                      (render-data-vec
-                      (into params {:extended-data extended-data
-                                    :idx-table idx-table})))))))))
+                      (into params {:extended-data extended-data})))))))))
 
-(defn render-multi [_ {:keys [app owner]}]
+(defn render-multi [_ {:keys [app owner] :as params}]
   (let [fn-name "render-multi"]
     (let [cnt (count app)
           app-vec (into [] (map-indexed vector app))
           table-idx 0]
       ;; (map #(render _ % owner) app)
       (apply dom/div nil
-             (map #(render _ {:app (second %)
-                              :owner owner
-                              :idx-table (first %)})
+             (map #(render _ (into params {:app (second %) :idx-table (first %)}))
                   app-vec)))))
 
 ;; 3rd param is a map, associate symbol toggle with the value of the
