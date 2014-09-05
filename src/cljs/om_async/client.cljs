@@ -51,7 +51,7 @@
     (into ks-idx kw-active)))
 
 (defn onClick
-  [{:keys [app owner idx-table ks-data kw-active column elem-val] :as params}]
+  [{:keys [app owner ks-data kw-active column elem-val] :as params}]
   (let [fn-name "onClick"]
     ;; TODO (js* "debugger;") seems to cause LightTable freeze
     (let [ks (full-ks params)
@@ -82,7 +82,7 @@
       )))
 
 (defn get-css
-  [{:keys [app owner idx-table ks-data kw-active default] :as params}]
+  [{:keys [app owner ks-data kw-active default] :as params}]
   (let [fn-name "get-css"]
     (let [ks (full-ks params)
           active (om/get-state owner ks)
@@ -91,7 +91,7 @@
       r)))
 
 (defn td
-  [{:keys [cell idx-table idx-row column css] :as params}]
+  [{:keys [cell idx-row column css] :as params}]
   (let [fn-name "td"]
     (let [td-val (get-in cell [:val])
           ;; TODO walking over the data from the server doesn't work properly
@@ -107,7 +107,7 @@
               td-val))))
 
 (defn tr
-  [{:keys [css row idx-table idx-row columns] :as params}]
+  [{:keys [css row idx-row columns] :as params}]
   (let [fn-name "tr"]
     (let [ column nil ]
       (apply dom/tr #js {:className css}
@@ -118,7 +118,7 @@
                   )))))
 
 (defn render-row
-  [{:keys [idx-table rows row-keywords columns] :as params}]
+  [{:keys [rows row-keywords] :as params}]
   (let [fn-name "render-row"]
     (map (fn [css row idx-row]
            (tr (into params {:css css
@@ -129,7 +129,7 @@
          row-keywords)))
 
 (defn table
-  [{:keys [tname tdata row-keywords idx-table] :as params}]
+  [{:keys [tname tdata] :as params}]
   (let [fn-name "table"]
     ;; (l/infod src fn-name "row-keywords" row-keywords)
     (let [rows (into [] (map #(into [] (vals (nth tdata %)))
@@ -145,14 +145,11 @@
                                               (apply dom/tr nil
                                                      (map #(dom/th nil (str %)) header)))
                                    (apply dom/tbody nil
-                                          (render-row
-                                           (into params
-                                                 {:rows rows :row-keywords row-keywords :columns header
-                                                  })
-                                           ))))))))
+                                          (render-row (into params {:rows rows :columns header})
+                                                      ))))))))
 
 (defn render-data
-  [{:keys [table-idx tdata idx-table] :as params}]
+  [{:keys [tdata] :as params}]
   (let [fn-name "render-data"]
     (let [dbname (get-in tdata [:dbase])
           tname (get-in dbname [:table])
@@ -167,14 +164,10 @@
                            :row-keywords ks})))))
 
 (defn render-data-vec
-  [{:keys [extended-data idx-table] :as params}]
+  [{:keys [extended-data] :as params}]
   (let [fn-name "render-data-vec"]
-    (let [id (into [] (map-indexed vector extended-data))
-          rd (map #(render-data
-                    (into params
-                          {:table-idx (keyword (first %))
-                           :tdata (second %)})
-                    ) id)
+    (let [id (into [] (map-indexed vector extended-data)) ;; TODO check what exactly do I need here
+          rd (map #(render-data (into params {:tdata (second %)})) id)
           r (apply dom/div nil (into [] rd))]
       ;; (l/infod src fn-name "r" r)
       r)))
@@ -185,7 +178,7 @@
     {}))
 
 (defn render
-  [{:keys [app idx-table] :as params}]
+  [{:keys [app] :as params}]
   (let [fn-name "render"]
     (l/infod src fn-name "app" app)
     (let [dbase (get-in app [:dbase])
@@ -206,12 +199,14 @@
   [{:keys [app] :as params}]
   (let [fn-name "render-multi"]
     (let [cnt (count app)
-          app-vec (into [] (map-indexed vector app))
-          table-idx 0]
+          app-vec (into [] (map-indexed vector app))]
       (l/infod src fn-name "app" app)
       (l/infod src fn-name "app-vec" app-vec)
       (apply dom/div nil
-             (map #(render (into params {:app (second %) :idx-table (first %)}))
+             (map #(render (into params {
+                                         ;; the original value under :app is [{..}]; new value is just the {...}
+                                         :app (second %)
+                                         :idx-table (first %)}))
                   app-vec)))))
 
 ;; 3rd param is a map, associate symbol toggle with the value of the
