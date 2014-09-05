@@ -79,7 +79,8 @@
         })
       )))
 
-(defn get-css [app owner idx-table ks-data kw-active default]
+(defn get-css
+  [{:keys [app owner idx-table ks-data kw-active default]}]
   (let [fn-name "get-css"]
     (let [ks (full-ks idx-table ks-data kw-active)
           active (om/get-state owner ks)
@@ -87,33 +88,41 @@
       ;; (om/transact! app ks (fn [] (not active)))
       r)))
 
-(defn td [app owner cell idx-table idx-row column css]
+(defn td
+  [{:keys [app owner cell idx-table idx-row column css]}]
   (let [fn-name "td"]
     (let [td-val (get-in cell [:val])
           ;; TODO walking over the data from the server doesn't work properly
           ks-data [:data idx-row column]
           kw-active [:active]
+          params {:app app :owner owner :idx-table idx-table
+                  :ks-data ks-data :kw-active kw-active :css css}
           ]
       (l/infod src fn-name "ks-data" ks-data)
       (l/infod src fn-name "cell" cell)
-      (dom/td #js {:className (get-css app owner idx-table ks-data kw-active css)
+
+      (dom/td #js {:className (get-css params)
                    :onClick (fn [e] (onClick app owner idx-table ks-data kw-active column td-val))}
               td-val))))
 
-(defn tr [app owner css row idx-table idx-row columns]
+(defn tr
+  [{:keys [app owner css row idx-table idx-row columns] :as params}]
   (let [fn-name "tr"]
     (let [ column nil ]
       (apply dom/tr #js {:className css}
              (map (fn [cell-val col]
-                    (td app owner cell-val idx-table idx-row col css))
+                    (td (into params {:cell cell-val :column col})))
                   row
                   (cycle columns)
                   )))))
 
-(defn render-row [app owner idx-table rows row-keywords columns]
+(defn render-row
+  [{:keys [app owner idx-table rows row-keywords columns] :as params}]
   (let [fn-name "render-row"]
     (map (fn [css row idx-row]
-           (tr app owner css row idx-table idx-row columns))
+           (tr (into params {:css css
+                             :row row
+                             :idx-row idx-row})))
          (cycle ["" "odd"]) ;; gives the css
          rows               ;; gives the row
          row-keywords)))
@@ -134,10 +143,16 @@
                                               (apply dom/tr nil
                                                      (map #(dom/th nil (str %)) header)))
                                    (apply dom/tbody nil
-                                          (render-row app owner idx-table
-                                                      rows row-keywords header))))))))
+                                          (render-row
+                                           {:app app :owner owner :idx-table idx-table
+                                            :rows rows :row-keywords row-keywords :columns header
+                                            }
+                                           ;;app owner idx-table rows row-keywords header
+                                           ))))))))
 
-(defn render-data [app owner table-idx tdata idx-table]
+(defn render-data
+;;   [app owner table-idx tdata idx-table]
+  [{:keys [app owner table-idx tdata idx-table] :as params}]
   (let [fn-name "render-data"]
     (let [dbname (get-in tdata [:dbase])
           tname (get-in dbname [:table])
@@ -152,10 +167,14 @@
 (defn render-data-vec [app owner extended-data idx-table]
   (let [fn-name "render-data-vec"]
     (let [id (into [] (map-indexed vector extended-data))
-          rd (map #(render-data app owner
-                                (keyword (first %))
-                                (second %)
-                                idx-table) id)
+          rd (map #(render-data
+                    {:app app
+                     :owner owner
+                     :table-idx (keyword (first %))
+                     :tdata (second %)
+                     :idx-table idx-table
+                     }
+                    ) id)
           r (apply dom/div nil (into [] rd))]
       ;; (l/infod src fn-name "r" r)
       r)))
@@ -181,7 +200,7 @@
                    (let [extended-data [(get-in app korks)]]
                      (render-data-vec app owner extended-data idx-table))))))))
 
-(defn render-multi [_ app owner]
+(defn render-multi [_ {:keys [app owner]}]
   (let [fn-name "render-multi"]
     (let [cnt (count app)
           app-vec (into [] (map-indexed vector app))
@@ -199,7 +218,8 @@
       om/IInitState
       (init-state [_] (init _))
       om/IRenderState
-      (render-state [_ {:keys [toggle]}] (render-multi _ app owner)))))
+      (render-state [_ {:keys [toggle]}]
+                    (render-multi _ {:app app :owner owner})))))
 
 (defn view
   "data - application state data (a cursor); owner - backing React component
