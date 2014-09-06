@@ -35,8 +35,11 @@
    ;;;; db.clj
 ;;    "fn-name"
 
+   ;;;; transform.clj
+   "fetch"
    ;;;; server.clj
-;;    "routes-PUT"
+;;    "routes-PUT-select-id"
+   "routes-PUT-fetch"
 
    ;;;; utils
 ;;    "convert-to-korks"

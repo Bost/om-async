@@ -224,17 +224,18 @@
           :url "fetch"
           ;; TODO the idx should be specified in transfer.clj
           :data
-          {:select-rows-from
-           [
-            {:dbase "employees" :table "employees"   :idx 0}
-            {:dbase "employees" :table "departments" :idx 1}
-            {:dbase "employees" :table "salaries"    :idx 2}
-            ]}
+;;           {:select-rows-from
+;;            [
+;;             {:dbase "employees" :table "employees"   :idx 0}
+;;             {:dbase "employees" :table "departments" :idx 1}
+;;             {:dbase "employees" :table "salaries"    :idx 2}
+;;             ]}
 ;;           {:select-rows-from
 ;;            [{:dbase "employees" :table "departments" :idx 0}]}
 
           ;; TODO doesn't work
-;;           {:show-tables-from ["employees"]}
+          {:show-tables-from
+           [{:dbase "employees" :idx 0}]}
 
           ;; TODO doesn't work
 ;;           {:show-tables-with-data-from [dbase]}

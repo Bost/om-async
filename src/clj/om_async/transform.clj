@@ -212,24 +212,28 @@
 
 (defn fetch [edn-params]
   (let [fn-name "fetch"]
-    (let [;; TODO get the content of N-th key? this could be done better
-          kw-fetch-fn (nth (keys edn-params) 0)
-          fetch-fn (kw-fetch-fn fetch-fns)
-          manipulator-fn (kw-fetch-fn manipulator-fns)
-          params (kw-fetch-fn edn-params)]
-      (l/infod src fn-name "kw-fetch-fn" kw-fetch-fn)
-      (l/infod src fn-name "fetch-fn" fetch-fn)
-      (l/infod src fn-name "manipulator-fn" manipulator-fn)
-      (l/infod src fn-name "params" params)
-      (let [raw-data (into [] (map #(fetch-fn %) params))
-            r (identity
-               ;;first
-               (manipulator-fn params raw-data))
-            ]
-        (l/infod src fn-name "raw-data" raw-data)
-        (l/infod src fn-name "---" nil)
-        (l/infod src fn-name "r" r)
-        r))))
+    (l/infod src fn-name "edn-params" edn-params)
+    [1]
+;;     (let [;; TODO get the content of N-th key? this could be done better
+;;           kw-fetch-fn (nth (keys edn-params) 0)
+;;           fetch-fn (kw-fetch-fn fetch-fns)
+;;           manipulator-fn (kw-fetch-fn manipulator-fns)
+;;           params (kw-fetch-fn edn-params)]
+;;       (l/infod src fn-name "kw-fetch-fn" kw-fetch-fn)
+;;       (l/infod src fn-name "fetch-fn" fetch-fn)
+;;       (l/infod src fn-name "manipulator-fn" manipulator-fn)
+;;       (l/infod src fn-name "params" params)
+;;       (let [raw-data (into [] (map #(fetch-fn %) params))
+;;             r (identity
+;;                ;;first
+;;                (manipulator-fn params raw-data))
+;;             ]
+;;         (l/infod src fn-name "raw-data" raw-data)
+;;         (l/infod src fn-name "---" nil)
+;;         (l/infod src fn-name "r" r)
+;;         r))
+)
+  )
 
 (defn request [edn-params]
   (let [fn-name "request"]

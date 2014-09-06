@@ -27,14 +27,19 @@
 
   (PUT "/fetch"
        {params :params edn-params :edn-params}
-       (let [data (trans/fetch edn-params)]
-         (response data)))
+       (let [fn-name "routes-PUT-fetch"]
+         (l/infod src fn-name "edn-params" edn-params)
+         (l/infod src fn-name "params" params)
+         (let [data (trans/fetch edn-params)]
+           (l/infod src fn-name "data" data)
+           (response data))))
 
   (PUT "/select/:id"
        {params :params edn-params :edn-params}
-       (let [fn-name "routes-PUT"]
+       (let [fn-name "routes-PUT-select-id"]
          (l/infod src fn-name "id" (:id params))
          (l/infod src fn-name "edn-params" edn-params)
+         (l/infod src fn-name "params" params)
          (let [data {:response (:request edn-params)}
                ;;(trans/request edn-params)
                ]
