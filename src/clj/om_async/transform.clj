@@ -44,11 +44,15 @@
   (reduce-kv (fn [m k v]
                (assoc m k (convert-val v))) {} m))
 
-(defn encode-table [table data idx]
+(defn encode-table
+  [table data idx]
+  ;; TODO fix this keymap
+;;   [{:keys [table data idx] :as params}]
+
   (let [fn-name "encode-table"]
     ;; (l/infod src fn-name "table" table)
     ;; (l/infod src fn-name "data" data)
-    (let [encoded-table (map #(convert-hashmap %) data)]
+    (let [encoded-table (map convert-hashmap data)]
       ;; (l/infod src fn-name "encoded-table" encoded-table)
       ;; (l/infod src fn-name "idx" idx)
       encoded-table)))
@@ -72,7 +76,7 @@
 ;; TODO paredit grow right should jump over comment
 
 (defn process-show-tables-from [dbase]
-  (process-sql db/sql-show-tables-from dbase 0))
+  (process-sql db/sql-show-tables-from {:dbase dbase :table "employees" :idx 0}))
 
 (defn process-show-tables-with-data-from [dbase]
   (let [fn-name "process-show-tables-with-data-from"]

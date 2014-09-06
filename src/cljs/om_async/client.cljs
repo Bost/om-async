@@ -230,15 +230,18 @@
             {:dbase "employees" :table "departments" :idx 1}
             {:dbase "employees" :table "salaries"    :idx 2}
             ]}
-          ;; {:select-rows-from
-          ;;  [{:dbase "employees" :table "departments" :idx 0}]}
+;;           {:select-rows-from
+;;            [{:dbase "employees" :table "departments" :idx 0}]}
 
-          ;; {:show-tables-from ["employees"]}
+          ;; TODO doesn't work
+;;           {:show-tables-from ["employees"]}
 
-          ;; {:show-tables-with-data-from [dbase]}
+          ;; TODO doesn't work
+;;           {:show-tables-with-data-from [dbase]}
 
-          ;; {:show-tables-with-data-from
-          ;;  [(first (get-in app [:dbase0 :name]))]}
+          ;; TODO doesn't work
+;;           {:show-tables-with-data-from
+;;            [(first (get-in app [:dbase0 :name]))]}
 
           ;; om/transact! propagates changes back to the original atom
           :on-complete (fn [response]
