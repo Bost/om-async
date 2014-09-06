@@ -51,7 +51,7 @@
     (into ks-idx kw-active)))
 
 (defn onClick
-  [{:keys [app owner ks-data kw-active column elem-val] :as params}]
+  [{:keys [app owner ks-data column elem-val] :as params}]
   (let [fn-name "onClick"]
     ;; TODO (js* "debugger;") seems to cause LightTable freeze
     (let [ks (full-ks params)
@@ -63,7 +63,6 @@
       ;; this is almost certainly a concurrency bug!
 
       ;; (l/infod src fn-name "elem-val" elem-val)
-      ;; (l/infod src fn-name "kw-active" kw-active)
       ;; (l/infod src fn-name "ks-data" ks-data)
       ;; (l/infod src fn-name "ks" ks)
       (edn-xhr
@@ -82,7 +81,8 @@
       )))
 
 (defn get-css
-  [{:keys [app owner ks-data kw-active default] :as params}]
+  [{:keys [;;app
+           owner default] :as params}]
   (let [fn-name "get-css"]
     (let [ks (full-ks params)
           active (om/get-state owner ks)
@@ -91,13 +91,13 @@
       r)))
 
 (defn td
-  [{:keys [cell idx-row column css] :as params}]
+  [{:keys [cell idx-row column] :as params}]
   (let [fn-name "td"]
     (let [td-val (get-in cell [:val])
           ;; TODO walking over the data from the server doesn't work properly
           ks-data [:data idx-row column]
           kw-active [:active]
-          p (into params {:ks-data ks-data :kw-active kw-active :css css})
+          p (into params {:ks-data ks-data :kw-active kw-active})
           ]
       (l/infod src fn-name "ks-data" ks-data)
       (l/infod src fn-name "cell" cell)
@@ -107,7 +107,7 @@
               td-val))))
 
 (defn tr
-  [{:keys [css row idx-row columns] :as params}]
+  [{:keys [css row columns] :as params}]
   (let [fn-name "tr"]
     (let [ column nil ]
       (apply dom/tr #js {:className css}
@@ -123,7 +123,8 @@
     (map (fn [css row idx-row]
            (tr (into params {:css css
                              :row row
-                             :idx-row idx-row})))
+                             :idx-row idx-row
+                             })))
          (cycle ["" "odd"]) ;; gives the css
          rows               ;; gives the row
          row-keywords)))
@@ -160,7 +161,7 @@
           ]
       ;; (l/infod src fn-name "ks" ks)
       (table (into params {:tname full-tname
-                           :tdata rows
+                           :tdata rows ;; TODO seem like overwriting - check it!
                            :row-keywords ks})))))
 
 (defn render-data-vec
@@ -169,7 +170,6 @@
     (let [id (into [] (map-indexed vector extended-data)) ;; TODO check what exactly do I need here
           rd (map #(render-data (into params {:tdata (second %)})) id)
           r (apply dom/div nil (into [] rd))]
-      ;; (l/infod src fn-name "r" r)
       r)))
 
 (defn init [_]
