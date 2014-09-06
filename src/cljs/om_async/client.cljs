@@ -50,9 +50,8 @@
   (let [ks-idx (into [(keyword (str idx-table))] ks-data)]
     (into ks-idx kw-active)))
 
-(defn onClick
+(l/defnd onClick
   [{:keys [app owner ks-data column elem-val] :as params}]
-  (let [fn-name "onClick"]
     ;; TODO (js* "debugger;") seems to cause LightTable freeze
     (let [ks (full-ks params)
           active (om/get-state owner ks)]
@@ -62,9 +61,9 @@
       ;; we're not allowed to use cursors outside of the render phase as
       ;; this is almost certainly a concurrency bug!
 
-      ;; (l/infod src fn-name "elem-val" elem-val)
+      (l/infod src fn-name "elem-val" elem-val)
       ;; (l/infod src fn-name "ks-data" ks-data)
-      ;; (l/infod src fn-name "ks" ks)
+      ;; (l/infod src fn-name "app" app)
       (edn-xhr
        {:method :put
         :url (str "select/" column)
@@ -74,161 +73,152 @@
                        (let [fn-name "onClick-onComplete"]
                          (l/info src fn-name (str "Server response: " response))
                          ;; change application state; use with get-in
-                         (om/transact! app ks-data
-                                       (fn []
-                                         {:val (str "# " (:response response) " #")}))))
+;;                          (om/transact! app ks-data
+;;                                        (fn []
+;;                                          {:val (str "# " (:response response) " #")}))
+                         ))
         })
-      )))
+      ))
 
-(defn get-css
+(l/defnd get-css
   [{:keys [;;app
            owner default] :as params}]
-  (let [fn-name "get-css"]
-    (let [ks (full-ks params)
-          active (om/get-state owner ks)
-          r (if active "active" default)]
-      ;; (om/transact! app ks (fn [] (not active)))
-      r)))
+  (let [ks (full-ks params)
+        active (om/get-state owner ks)
+        r (if active "active" default)]
+    ;; (om/transact! app ks (fn [] (not active)))
+    r))
 
-(defn td
+(l/defnd td
   [{:keys [cell idx-row column] :as params}]
-  (let [fn-name "td"]
-    (let [td-val (get-in cell [:val])
-          ;; TODO walking over the data from the server doesn't work properly
-          ks-data [:data idx-row column]
-          kw-active [:active]
-          p (into params {:ks-data ks-data :kw-active kw-active})
-          ]
-      (l/infod src fn-name "ks-data" ks-data)
-      (l/infod src fn-name "cell" cell)
+  (let [td-val (get-in cell [:val])
+        ;; TODO walking over the data from the server doesn't work properly
+        ks-data [:data idx-row column]
+        kw-active [:active]
+        p (into params {:ks-data ks-data :kw-active kw-active})
+        ]
+    (l/infod src fn-name "ks-data" ks-data)
+    (l/infod src fn-name "cell" cell)
 
-      (dom/td #js {:className (get-css p)
-                   :onClick (fn [e] (onClick (into p {:column column :elem-val td-val})))}
-              td-val))))
+    (dom/td #js {:className (get-css p)
+                 :onClick (fn [e] (onClick (into p {:column column :elem-val td-val})))}
+            td-val)))
 
-(defn tr
+(l/defnd tr
   [{:keys [css row columns] :as params}]
-  (let [fn-name "tr"]
-    (let [ column nil ]
-      (apply dom/tr #js {:className css}
-             (map (fn [cell-val col]
-                    (td (into params {:cell cell-val :column col})))
-                  row
-                  (cycle columns)
-                  )))))
+  (let [ column nil ]
+    (apply dom/tr #js {:className css}
+           (map (fn [cell-val col]
+                  (td (into params {:cell cell-val :column col})))
+                row
+                (cycle columns)
+                ))))
 
-(defn render-row
+(l/defnd render-row
   [{:keys [rows row-keywords] :as params}]
-  (let [fn-name "render-row"]
-    (map (fn [css row idx-row]
-           (tr (into params {:css css
-                             :row row
-                             :idx-row idx-row
-                             })))
-         (cycle ["" "odd"]) ;; gives the css
-         rows               ;; gives the row
-         row-keywords)))
+  (map (fn [css row idx-row]
+         (tr (into params {:css css
+                           :row row
+                           :idx-row idx-row
+                           })))
+       (cycle ["" "odd"]) ;; gives the css
+       rows               ;; gives the row
+       row-keywords))
 
-(defn table
+(l/defnd table
   [{:keys [tname tdata] :as params}]
-  (let [fn-name "table"]
-    ;; (l/infod src fn-name "row-keywords" row-keywords)
-    (let [rows (into [] (map #(into [] (vals (nth tdata %)))
-                             (range (count tdata))))
-          header (into [] (keys (first tdata)))]
-      ;; (l/infod src fn-name "header" header)
-      ;; (l/infod src fn-name "rows" rows)
-      (dom/div nil
-               tname
-               (dom/div nil
-                        (dom/table nil
-                                   (dom/thead nil
-                                              (apply dom/tr nil
-                                                     (map #(dom/th nil (str %)) header)))
-                                   (apply dom/tbody nil
-                                          (render-row (into params {:rows rows :columns header})
-                                                      ))))))))
+  ;; (l/infod src fn-name "row-keywords" row-keywords)
+  (let [rows (into [] (map #(into [] (vals (nth tdata %)))
+                           (range (count tdata))))
+        header (into [] (keys (first tdata)))]
+    ;; (l/infod src fn-name "header" header)
+    ;; (l/infod src fn-name "rows" rows)
+    (dom/div nil
+             tname
+             (dom/div nil
+                      (dom/table nil
+                                 (dom/thead nil
+                                            (apply dom/tr nil
+                                                   (map #(dom/th nil (str %)) header)))
+                                 (apply dom/tbody nil
+                                        (render-row (into params {:rows rows :columns header})
+                                                    )))))))
 
-(defn render-data
+(l/defnd render-data
   [{:keys [tdata] :as params}]
-  (let [fn-name "render-data"]
-    (let [dbname (get-in tdata [:dbase])
-          tname (get-in dbname [:table])
-          full-tname (str dbname "." tname)
-          data (get-in tdata [:data])
-          rows (into [] (vals data))
-          ks (into [] (keys data))
-          ]
-      ;; (l/infod src fn-name "ks" ks)
-      (table (into params {:tname full-tname
-                           :tdata rows ;; TODO seem like overwriting - check it!
-                           :row-keywords ks})))))
+  (let [dbname (get-in tdata [:dbase])
+        tname (get-in dbname [:table])
+        full-tname (str dbname "." tname)
+        data (get-in tdata [:data])
+        rows (into [] (vals data))
+        ks (into [] (keys data))
+        ]
+    ;; (l/infod src fn-name "ks" ks)
+    (table (into params {:tname full-tname
+                         :tdata rows ;; TODO seem like overwriting - check it!
+                         :row-keywords ks}))))
 
-(defn render-data-vec
+(l/defnd render-data-vec
   [{:keys [extended-data] :as params}]
-  (let [fn-name "render-data-vec"]
-    (let [id (into [] (map-indexed vector extended-data)) ;; TODO check what exactly do I need here
-          rd (map #(render-data (into params {:tdata (second %)})) id)
-          r (apply dom/div nil (into [] rd))]
-      r)))
+  (let [id (into [] (map-indexed vector extended-data)) ;; TODO check what exactly do I need here
+        rd (map #(render-data (into params {:tdata (second %)})) id)
+        r (apply dom/div nil (into [] rd))]
+    r))
 
-(defn init [_]
-  (let [fn-name "init"]
-    ;; (l/infod src fn-name "_" _)
-    {}))
+(l/defnd init [_]
+  ;; (l/infod src fn-name "_" _)
+  {})
 
-(defn render
+(l/defnd render
   [{:keys [app] :as params}]
-  (let [fn-name "render"]
+  (l/infod src fn-name "app" app)
+  (let [dbase (get-in app [:dbase])
+        korks []]
+    ;; TODO get rid of 'if'
+    (dom/div nil
+             (let [tables (get-in app korks)
+                   cnt-tables (count tables)]
+               (if (zero? cnt-tables)
+                 (let [msg (str "Fetching data from dbase: " dbase)]
+                   (l/info src fn-name msg)
+                   msg)
+                 (let [extended-data [(get-in app korks)]]
+                   (render-data-vec
+                    (into params {:extended-data extended-data}))))))))
+
+(l/defnd render-multi
+  [{:keys [app] :as params}]
+  (let [cnt (count app)
+        app-vec (into [] (map-indexed vector app))]
     (l/infod src fn-name "app" app)
-    (let [dbase (get-in app [:dbase])
-          korks []]
-      ;; TODO get rid of 'if'
-      (dom/div nil
-               (let [tables (get-in app korks)
-                     cnt-tables (count tables)]
-                 (if (zero? cnt-tables)
-                   (let [msg (str "Fetching data from dbase: " dbase)]
-                     (l/info src fn-name msg)
-                     msg)
-                   (let [extended-data [(get-in app korks)]]
-                     (render-data-vec
-                      (into params {:extended-data extended-data})))))))))
-
-(defn render-multi
-  [{:keys [app] :as params}]
-  (let [fn-name "render-multi"]
-    (let [cnt (count app)
-          app-vec (into [] (map-indexed vector app))]
-      (l/infod src fn-name "app" app)
-      (l/infod src fn-name "app-vec" app-vec)
-      (apply dom/div nil
-             (map #(render (into params {
-                                         ;; the original value under :app is [{..}]; new value is just the {...}
-                                         :app (second %)
-                                         :idx-table (first %)}))
-                  app-vec)))))
+    (l/infod src fn-name "app-vec" app-vec)
+    (apply dom/div nil
+           (map #(render (into params {
+                                       ;; the original value under :app is [{..}]; new value is just the {...}
+                                       :app (second %)
+                                       :idx-table (first %)}))
+                app-vec))))
 
 ;; 3rd param is a map, associate symbol toggle with the value of the
 ;; :toggle keyword and "put" it in the opts map
-(defn construct-component [app owner]
-  (let [fn-name "construct-component"]
-    (reify
-      om/IInitState
-      (init-state [_] (init _))
-      om/IRenderState
-      (render-state [_ {}]
-                    (render-multi {:app app :owner owner})))))
-
-(defn view
-  "data - application state data (a cursor); owner - backing React component
-  returns an Om-component, i.e. a model of om/IRender interface"
+(l/defnd construct-component
   [app owner]
-  (let [fn-name "view"]
+  (reify
+    om/IInitState
+    (init-state [_] (init _))
+    om/IRenderState
+    (render-state [_ {}]
+                  (render-multi {:app app :owner owner}))))
+
+;; "data - application state data (a cursor); owner - backing React component
+;; returns an Om-component, i.e. a model of om/IRender interface"
+(l/defnd view
+  [app owner]
+;;   (let [fn-name "view"]
     (reify
       om/IWillMount
       (will-mount [_]
-        (l/info src fn-name "will-mount")
+        ;;(l/info src fn-name "will-mount")
         (edn-xhr
          {:method :put
           :url "fetch"
@@ -236,9 +226,9 @@
           :data
           {:select-rows-from
            [
-;;             {:dbase "employees" :table "employees"   :idx 0}
+            {:dbase "employees" :table "employees"   :idx 0}
             {:dbase "employees" :table "departments" :idx 1}
-;;             {:dbase "employees" :table "salaries"    :idx 2}
+            {:dbase "employees" :table "salaries"    :idx 2}
             ]}
           ;; {:select-rows-from
           ;;  [{:dbase "employees" :table "departments" :idx 0}]}
@@ -252,17 +242,19 @@
 
           ;; om/transact! propagates changes back to the original atom
           :on-complete (fn [response]
-                         (let [fn-name "view-onComplete"]
+                         ;;(let [fn-name "view-onComplete"]
                            (om/transact! app []
                                          (fn [_]
-                                           (l/infod src fn-name "app" response)
-                                           response))))}))
+                                           ;;(l/infod src fn-name "app" response)
+                                           response)))
+                         ;;)
+          }))
       om/IRenderState
       (render-state [_ {:keys [err-msg]}]
         ;; (l/info src fn-name "render-state")
         ;; om.core/build     - build single component
         ;; om.core/build-all - build many components
-        (om/build construct-component app)))))
+        (om/build construct-component app))))
 
 ;; Rendering loop on a the "dbase0" DOM element
 (om/root view ;; fn of 2 args: application state data,

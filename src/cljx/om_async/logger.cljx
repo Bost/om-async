@@ -28,10 +28,10 @@
 ;;    "tr"
 ;;    "view-onComplete"
 ;;    "onClick-onComplete"
-;;    "onClick"
-   "render-multi"
-   "render"
-
+   "onClick"
+;;    "render-multi"
+;;    "render"
+   "abc"
    ;;;; db.clj
 ;;    "fn-name"
 
@@ -70,19 +70,30 @@
          (str "\"" v "\"")
          v) ")"))
 
+;; (defmacro defnd
+;;   "This macro is translated to clj file. In cljs files
+;;   (:require-macros [om-async.logger :as l]) and then l/defnd
+;;   must be used."
+;;   [fname params & body]
+;;   `(defn ~fname ~params
+;;      (do
+;;        (println
+;;         (map #(str ~'src "; " '~fname "; "
+;;                    (encode-name-val %1 %2) "\n")
+;;              '~params ~params))
+;;        ~@body)))
+
 (defmacro defnd
   "This macro is translated to clj file. In cljs files
   (:require-macros [om-async.logger :as l]) and then l/defnd
   must be used."
   [fname params & body]
   `(defn ~fname ~params
-     (do
-       (println
-        (map #(str ~'src "; " '~fname "; "
-                   (encode-name-val %1 %2) "\n")
-             '~params ~params))
-       ~@body)))
+     (let [~'fn-name (str '~fname)]
+       ~@body)) )
 
+;; (macroexpand '(defnx foo [x y z]
+;;                 (+ x y z)))
 ;; (defnd f [x y z]
 ;;   (println "defnd f:"
 ;;            (+ x y z)))
