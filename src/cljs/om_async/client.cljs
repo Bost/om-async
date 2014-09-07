@@ -210,9 +210,9 @@
     (render-state [_ {}]
                   (render-multi {:app app :owner owner}))))
 
+(l/defnd view
 ;; "data - application state data (a cursor); owner - backing React component
 ;; returns an Om-component, i.e. a model of om/IRender interface"
-(l/defnd view
   [app owner]
 ;;   (let [fn-name "view"]
     (reify
@@ -230,12 +230,10 @@
 ;;             {:dbase "employees" :table "departments" :idx 1}
 ;;             {:dbase "employees" :table "salaries"    :idx 2}
 ;;             ]}
-;;           {:select-rows-from
-;;            [{:dbase "employees" :table "departments" :idx 0}]}
+;;           {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}]}
 
           ;; TODO doesn't work
-          {:show-tables-from
-           [{:dbase "employees" :idx 0}]}
+          {:show-tables-from [{:dbase "employees" :idx 0}]}
 
           ;; TODO doesn't work
 ;;           {:show-tables-with-data-from [dbase]}

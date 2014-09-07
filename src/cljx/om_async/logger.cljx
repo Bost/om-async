@@ -10,7 +10,7 @@
 
 (def files
   ["client.cljs" "transform.clj"
-   ;; "db.clj"
+   "db.clj"
    "server.clj" "utils"]
 ;;   ["client.cljs"]
 ;;   ["transform.clj"]
@@ -31,18 +31,27 @@
    "onClick"
 ;;    "render-multi"
 ;;    "render"
-   "abc"
    ;;;; db.clj
 ;;    "fn-name"
 
    ;;;; transform.clj
-   "fetch"
+;;    "fetch"
+   "encode-table"
+   "process-select-rows-from"
+   "m-show-tables-from"
+   "m-select-rows-from"
+
    ;;;; server.clj
 ;;    "routes-PUT-select-id"
-   "routes-PUT-fetch"
-
+;;    "routes-PUT-fetch"
+;;    "process-sql"
+   ""
    ;;;; utils
 ;;    "convert-to-korks"
+
+   ;;;; db.clj
+;;    "sql-show-tables-from"
+;;    "sql-select-rows-from"
    ])
 
 ;; TODO use (partial ..)
