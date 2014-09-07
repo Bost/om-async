@@ -232,11 +232,10 @@
 ;;             ]}
 ;;           {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}]}
 
-          ;; TODO doesn't work
-          {:show-tables-from [{:dbase "employees" :idx 0}]}
+;;           {:show-tables-from [{:dbase "employees" :idx 0}]}
 
           ;; TODO doesn't work
-;;           {:show-tables-with-data-from [dbase]}
+          {:show-tables-with-data-from [{:dbase "employees"}]}
 
           ;; TODO doesn't work
 ;;           {:show-tables-with-data-from
