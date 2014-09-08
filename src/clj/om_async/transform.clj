@@ -77,16 +77,16 @@
 (defn process-show-tables-from [dbase]
   (process-sql db/sql-show-tables-from dbase))
 
-(defn process-show-tables-with-data-from [dbase]
-  (let [fn-name "process-show-tables-with-data-from"]
-    (l/infod src fn-name "dbase" dbase)
-    (let [list-tables (map first (table-vals (db/show-tables-from dbase)))
-          tables (into [] list-tables)
-          count-tables (count tables)]
-      ;; (l/infod src "process-show-tables-with-data-from" "tables: " tables)
-      (map #(process-select-rows-from {:dbase dbase :table %1 :idx %2})
-           tables
-           (into [] (range count-tables))))))
+(l/defnd process-show-tables-with-data-from
+  [{:keys [dbase] :as params}]
+  (l/infod src fn-name "dbase" dbase)
+  (let [list-tables (map first (table-vals (db/show-tables-from params)))
+        tables (into [] list-tables)
+        count-tables (count tables)]
+    ;; (l/infod src "process-show-tables-with-data-from" "tables: " tables)
+    (map #(process-select-rows-from {:dbase dbase :table %1 :idx %2})
+         tables
+         (into [] (range count-tables)))))
 
 (defn process-request [params idx]
   (let [fn-name "process-request"]
@@ -122,62 +122,13 @@
       (l/infod src fn-name "rx" rx)
       rx)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; {
-;; this part belongs to client.cljs
-
-(defn extend-map [m]
-  ;; "Turns {:a 1, :b 2} to {:a {:val 1, :active false}, :b {:val 2, :active false}}"
-  "Turns {:a 1, :b 2} to {:a {:val 1}, :b {:val 2}}.
-  Seems like the :active is not needed because of local component changing using
-  (om/set-state! owner ks (not active))"
-  (reduce-kv (fn [m k v]
-               (assoc m k {:val v
-                           ;; :active false
-                           }))
-             {} m))
-
-(defn ff [m k v] (assoc m k (extend-map v)))
-
-(defn extend-table [t]
-  (let [fn-name "extend-table"]
-    (l/infod src fn-name "t" t)
-    (let [rows (get-in t [:data])]
-      ;;(l/infod src fn-name "rows" rows) ;; (type rows) => om.core/MapCursor
-      (l/infod src fn-name "rows" rows)
-      ;;(l/infod src fn-name "(type rows)" (type rows))
-      (let [ff-rows (reduce-kv ff {} rows)]
-        ;; (l/infod src fn-name "ff-rows" ff-rows)
-        (let [r (assoc t :data ff-rows)]
-          ;; (l/infod src fn-name "r" r)
-          r)))))
-
-(defn xtable [tfull k]
-  (let [fn-name "xtable"]
-    ;; (l/infod src fn-name "tfull" tfull)
-    ;; (l/infod src fn-name "k" k)
-    (let [rlist (extend-table (get-in tfull [k]))
-          r [rlist]]
-      ;; (l/infod src fn-name "rlist" rlist)
-      ;; (l/infod src fn-name "r" r)
-      r)))
-
-(defn extend-all [tfull]
-  (let [fn-name "extend-all"]
-    (let [ks (into [] (keys tfull))
-          rks (map #(xtable tfull %) ks)
-          r (into [] (apply concat (into [] rks)))
-          ]
-      ;; (l/infod src fn-name "r" r)
-      r)))
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; }
-
 (l/defnd m-select-rows-from
   [params data]
   (l/infod src fn-name "params" params)
-;; (def params [{:dbase "employees", :table "departments", :idx 0}])
+  ;; (def params [{:dbase "employees", :table "departments", :idx 0}])
   (l/infod src fn-name "data" data)
-;; (def data [({:dept_no "d009", :dept_name "Customer Service"}
-;;             {:dept_no "d005", :dept_name "Development"})])
+  ;; (def data [({:dept_no "d009", :dept_name "Customer Service"}
+  ;;             {:dept_no "d005", :dept_name "Development"})])
   (let [rlist
         (doall (map (fn [p d]
                       (merge p
@@ -188,12 +139,10 @@
         rdata (zipmap ks rvec)
         ;; TODO extend-table must be done in the client.cljs
         ]
-    (l/infod src fn-name "rvec" rvec)
-    (l/infod src fn-name "rdata" rdata)
-    (let [er (extend-all rdata)
-          r (into [] er)]
-      (l/infod src fn-name "r" r)
-      r)))
+    ;; (l/infod src fn-name "rvec" rvec)
+    ;; (l/infod src fn-name "rdata" rdata)
+    rdata
+    ))
 
 (l/defnd m-show-tables-from
   [params data]
@@ -204,8 +153,12 @@
 ;;             {:table_name "employees"} {:table_name "salaries"} {:table_name "titles"})])
   (m-select-rows-from params data))
 
-(defn m-show-tables-with-data-from [p]
-  (into [] (first p)))
+(l/defnd m-show-tables-with-data-from [params data]
+  (l/infod src fn-name "params" params)
+  (l/infod src fn-name "data" data)
+;;   (into [] (first data))
+  (m-select-rows-from params data)
+  )
 
 (defn m-request [p]
   (into [] p))

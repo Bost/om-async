@@ -20,7 +20,7 @@
 (def functions
   [
    ;;;; client.cljs
-;;    "view"
+   "view"
 ;;    "construct-component"
 ;;    "table"
 ;;    "init"
@@ -31,15 +31,18 @@
    "onClick"
 ;;    "render-multi"
 ;;    "render"
+
    ;;;; db.clj
 ;;    "fn-name"
 
    ;;;; transform.clj
-;;    "fetch"
+   "fetch"
    "encode-table"
    "process-select-rows-from"
    "m-show-tables-from"
    "m-select-rows-from"
+   "m-show-tables-with-data-from"
+   "process-show-tables-with-data-from"
 
    ;;;; server.clj
 ;;    "routes-PUT-select-id"
@@ -50,7 +53,7 @@
 ;;    "convert-to-korks"
 
    ;;;; db.clj
-;;    "sql-show-tables-from"
+   "sql-show-tables-from"
 ;;    "sql-select-rows-from"
    ])
 
@@ -60,7 +63,8 @@
     (if (u/contains-value? functions fn-name)
       (println
        (str src "; " fn-name "; "
-            "(def " def-name " " (pr-str def-val) ")")))))
+            "(def " def-name " " (pr-str def-val) ")"))))
+  def-val)
 
 ;; TODO macro: choose between clojure.pprint/pprint (clj) & println (cljs)
 ;; TODO see (JSON/stringify obj nil 2)
