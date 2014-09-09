@@ -216,6 +216,7 @@
     (l/infod src fn-name "app" app)
     (l/infod src fn-name "app-vec" app-vec)
     (apply dom/div nil
+           ;; TODO render needs to get full app content everytime
            (map #(render (into params {
                                        ;; the original value under :app is [{..}]; new value is just the {...}
                                        :app (second %)

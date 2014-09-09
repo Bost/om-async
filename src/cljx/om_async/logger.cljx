@@ -29,7 +29,8 @@
 ;;    "view-onComplete"
 ;;    "onClick-onComplete"
    "onClick"
-;;    "render-multi"
+   "td"
+   "render-multi"
 ;;    "render"
 
    ;;;; db.clj
