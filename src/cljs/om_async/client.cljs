@@ -55,16 +55,36 @@
   [{:keys [app owner ks-data column elem-val] :as params}]
     ;; TODO (js* "debugger;") seems to cause LightTable freeze
     (let [ks (full-ks params)
-          active (om/get-state owner ks)]
+          active (om/get-state owner ks)
+          ov (om/value app)
+          av @app
+          ]
+      ;; TODO complete app should be accessible here
+      (l/infod src fn-name "(= ov av)" (= ov av)) ;; => true
+      (l/infod src fn-name "active" active)
       ;; (om/transact! app ks (fn [] (not active))) ;; change application state; use with get-in
       (om/set-state! owner ks (not active))  ;; change local component state
+
+      (let [ks-other [:0 :data :row1 :emp_no]
+            ks-other-active (into ks-other [:active])
+            ks-other-val (into ks-other [:val])
+            v (om/get-state owner ks-other-val)
+            a (om/get-state owner ks-other-active)
+            ]
+        (l/infod src fn-name "ks-other-val" ks-other-val)
+        (l/infod src fn-name "v" v)
+        (l/infod src fn-name "a" a)
+        (om/set-state! owner ks-other (not active)))  ;; change local component state
+
 
       ;; we're not allowed to use cursors outside of the render phase as
       ;; this is almost certainly a concurrency bug!
 
-      (l/infod src fn-name "elem-val" elem-val)
-      ;; (l/infod src fn-name "ks-data" ks-data)
-      ;; (l/infod src fn-name "app" app)
+;;       (l/infod src fn-name "elem-val" elem-val)
+      (l/infod src fn-name "ks" ks)
+;;       (l/infod src fn-name "ks-data" ks-data)
+;;       (l/infod src fn-name "app" @app)
+      ;; (l/infod src fn-name "owner" owner)
       (edn-xhr
        {:method :put
         :url (str "select/" column)
@@ -94,7 +114,9 @@
   [{:keys [cell idx-row column] :as params}]
   (let [td-val (get-in cell [:val])
         ;; TODO walking over the data from the server doesn't work properly
-        ks-data [:data idx-row column]
+        ks-data [
+                 :data idx-row column
+                 ]
         kw-active [:active]
         p (into params {:ks-data ks-data :kw-active kw-active})
         ]
@@ -183,7 +205,7 @@
                  (let [msg (str "Fetching data from dbase: " dbase)]
                    (l/info src fn-name msg)
                    msg)
-                 (let [extended-data [(get-in app korks)]]
+                 (let [extended-data [tables]]
                    (render-data-vec
                     (into params {:extended-data extended-data}))))))))
 
@@ -224,15 +246,15 @@
           :url "fetch"
           ;; TODO the idx should be specified in transfer.clj
           :data
-;;           {:select-rows-from
-;;            [
-;;             {:dbase "employees" :table "employees"   :idx 0}
-;;             {:dbase "employees" :table "departments" :idx 1}
-;;             {:dbase "employees" :table "salaries"    :idx 2}
-;;             ]}
+          {:select-rows-from
+           [
+            {:dbase "employees" :table "employees"   :idx 0}
+            {:dbase "employees" :table "departments" :idx 1}
+            {:dbase "employees" :table "salaries"    :idx 2}
+            ]}
 ;;           {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}]}
 
-          {:show-tables-from [{:dbase "employees" :idx 0}]}
+;;           {:show-tables-from [{:dbase "employees" :idx 0}]}
 
           ;; TODO this might work as :select-rows-from
 ;;           {:show-tables-with-data-from [{:dbase "employees"}]}
