@@ -11,17 +11,16 @@
 
 (def src "transform.clj")
 
-(defn table-vals [data]
-  (let [fn-name "table-vals"]
-    (l/infod src fn-name "data" data)
-    (let [result
-          (map (fn [v]
-                 ;; TODO convert only dates to strings
-                 (into [] (map str
-                               (into [] (vals v)))))
-               data)]
-      (l/infod src fn-name "result" result)
-      result)))
+(l/defnd table-vals [data]
+  ;; (l/infod src fn-name "data" data)
+  (let [result
+        (map (fn [v]
+               ;; TODO convert only dates to strings
+               (into [] (map str
+                             (into [] (vals v)))))
+             data)]
+    ;; (l/infod src fn-name "result" result)
+    result))
 
 (defn nth-from [all-vals idx]
   (map #(nth % idx) all-vals))
@@ -33,12 +32,11 @@
 
 (def built-in-formatter (tf/formatters :mysql))
 
-(defn convert-val [v]
-  (let [fn-name "convert-val"]
-    ;; (l/infod src fn-name "v" v)
-    (if (instance? java.util.Date v)
-      (tf/unparse built-in-formatter (tc/from-date v))
-      v)))
+(l/defnd convert-val [v]
+  ;; (l/infod src fn-name "v" v)
+  (if (instance? java.util.Date v)
+    (tf/unparse built-in-formatter (tc/from-date v))
+    v))
 
 (defn convert-hashmap [m]
   "Apply convert-val on each value of hash-map m"
@@ -53,23 +51,23 @@
   ;; (l/infod src fn-name "table" table)
   ;; (l/infod src fn-name "data" data)
   (let [encoded-table (map convert-hashmap data)]
-    (l/infod src fn-name "encoded-table" encoded-table)
+    ;; (l/infod src fn-name "encoded-table" encoded-table)
     ;; (l/infod src fn-name "idx" idx)
     encoded-table))
 
 ;; every process-* function must call a function from om-async.db
 (l/defnd process-sql [sql-fn {:keys [dbase table idx] :as params}]
   ;; "idx is index for the keyword :table in the returned hash-map"
-  (l/infod src fn-name "sql-fn" sql-fn)
-  (l/infod src fn-name "dbase" dbase)
-  (l/infod src fn-name "table" table)
-  (l/infod src fn-name "idx " idx)
+  ;; (l/infod src fn-name "sql-fn" sql-fn)
+  ;; (l/infod src fn-name "dbase" dbase)
+  ;; (l/infod src fn-name "table" table)
+  ;; (l/infod src fn-name "idx " idx)
   (encode-table table (sql-fn params) idx))
 
 (l/defnd process-select-rows-from [obj]
-  (l/infod src fn-name "obj" obj)
+  ;; (l/infod src fn-name "obj" obj)
   (let [r (process-sql db/sql-select-rows-from obj)]
-    (l/infod src fn-name "r" r)
+    ;; (l/infod src fn-name "r" r)
     r))
 
 ;; TODO paredit grow right should jump over comment
@@ -79,7 +77,7 @@
 
 (l/defnd process-show-tables-with-data-from
   [{:keys [dbase] :as params}]
-  (l/infod src fn-name "dbase" dbase)
+  ;; (l/infod src fn-name "dbase" dbase)
   (let [list-tables (map first (table-vals (db/show-tables-from params)))
         tables (into [] list-tables)
         count-tables (count tables)]
@@ -88,13 +86,12 @@
          tables
          (into [] (range count-tables)))))
 
-(defn process-request [params idx]
-  (let [fn-name "process-request"]
-    (let [table ((u/kw :table :name idx) params)
-          data (encode-table table (db/s params idx) idx)]
-      (l/infod src fn-name "table" table)
-      ;; (l/infod src fn-name "data" data)
-      data)))
+(l/defnd process-request [params idx]
+  (let [table ((u/kw :table :name idx) params)
+        data (encode-table table (db/s params idx) idx)]
+    ;; (l/infod src fn-name "table" table)
+    ;; (l/infod src fn-name "data" data)
+    data))
 
 (def fetch-fns {:select-rows-from           process-select-rows-from
                 :show-tables-from           process-show-tables-from
@@ -102,31 +99,28 @@
                 :request                    process-request
                 })
 
-(defn m-x [params data]
-  (let [fn-name "m-x"]
-    (l/infod src fn-name "params" params)
-    (l/infod src fn-name "data" data)
-    (let [vals-vec (u/convert-to-korks u/kw-row data)
-          rx (first vals-vec)]
-      (l/infod src fn-name "vals-vec" vals-vec)
-      (l/infod src fn-name "rx" rx)
-      rx)))
+(l/defnd m-x [params data]
+  ;; (l/infod src fn-name "params" params)
+  ;; (l/infod src fn-name "data" data)
+  (let [vals-vec (u/convert-to-korks u/kw-row data)
+        rx (first vals-vec)]
+    ;; (l/infod src fn-name "vals-vec" vals-vec)
+    ;; (l/infod src fn-name "rx" rx)
+    rx))
 
-(defn m-x-one [params data]
-  (let [fn-name "m-x"]
-    (l/infod src fn-name "params" params)
-    (l/infod src fn-name "data" data)
-    (let [vals-vec (u/convert-to-korks u/kw-row data)
-          rx (first vals-vec)]
-      (l/infod src fn-name "vals-vec" vals-vec)
-      (l/infod src fn-name "rx" rx)
-      rx)))
+(l/defnd m-x-one [params data]
+  ;; (l/infod src fn-name "params" params)
+  ;; (l/infod src fn-name "data" data)
+  (let [vals-vec (u/convert-to-korks u/kw-row data)
+        rx (first vals-vec)]
+    ;; (l/infod src fn-name "vals-vec" vals-vec)
+    ;; (l/infod src fn-name "rx" rx)
+    rx))
 
-(l/defnd m-select-rows-from
-  [params data]
-  (l/infod src fn-name "params" params)
+(l/defnd m-select-rows-from [params data]
+  ;; (l/infod src fn-name "params" params)
   ;; (def params [{:dbase "employees", :table "departments", :idx 0}])
-  (l/infod src fn-name "data" data)
+  ;; (l/infod src fn-name "data" data)
   ;; (def data [({:dept_no "d009", :dept_name "Customer Service"}
   ;;             {:dept_no "d005", :dept_name "Development"})])
   (let [rlist
@@ -144,21 +138,19 @@
     rdata
     ))
 
-(l/defnd m-show-tables-from
-  [params data]
-  (l/infod src fn-name "params" params)
+(l/defnd m-show-tables-from [params data]
+;;   (l/infod src fn-name "params" params)
 ;;  (def params [{:dbase "employees" :idx 0}]})
-  (l/infod src fn-name "data" data)
+;;   (l/infod src fn-name "data" data)
 ;; (def data [({:table_name "departments"} {:table_name "dept_emp"} {:table_name "dept_manager"}
 ;;             {:table_name "employees"} {:table_name "salaries"} {:table_name "titles"})])
   (m-select-rows-from params data))
 
 (l/defnd m-show-tables-with-data-from [params data]
-  (l/infod src fn-name "params" params)
-  (l/infod src fn-name "data" data)
+  ;; (l/infod src fn-name "params" params)
+  ;; (l/infod src fn-name "data" data)
 ;;   (into [] (first data))
-  (m-select-rows-from params data)
-  )
+  (m-select-rows-from params data))
 
 (defn m-request [p]
   (into [] p))
@@ -170,42 +162,39 @@
                       })
 
 (l/defnd fetch [edn-params]
-  (l/infod src fn-name "edn-params" edn-params)
+  ;; (l/infod src fn-name "edn-params" edn-params)
   (let [;; TODO get the content of N-th key? this could be done better
         kw-fetch-fn (nth (keys edn-params) 0)
         fetch-fn (kw-fetch-fn fetch-fns)
         manipulator-fn (kw-fetch-fn manipulator-fns)
         params (kw-fetch-fn edn-params)]
-    (l/infod src fn-name "kw-fetch-fn" kw-fetch-fn)
-    (l/infod src fn-name "fetch-fn" fetch-fn)
-    (l/infod src fn-name "manipulator-fn" manipulator-fn)
-    (l/infod src fn-name "params" params)
+    ;; (l/infod src fn-name "kw-fetch-fn" kw-fetch-fn)
+    ;; (l/infod src fn-name "fetch-fn" fetch-fn)
+    ;; (l/infod src fn-name "manipulator-fn" manipulator-fn)
+    ;; (l/infod src fn-name "params" params)
     (let [raw-data (into [] (map fetch-fn params))
           r (identity
              ;;first
              (manipulator-fn params raw-data))]
-      (l/infod src fn-name "raw-data" raw-data)
-      (l/infod src fn-name "---" nil)
-      (l/infod src fn-name "r" r)
-      r)
-    ))
+      ;; (l/infod src fn-name "raw-data" raw-data)
+      ;; (l/infod src fn-name "r" r)
+      r)))
 
-(defn request [edn-params]
-  (let [fn-name "request"]
-    ;; (l/info src fn-name (str "edn-params: " edn-params))
-    (let [kw-fetch-fn (nth (keys edn-params) 0)
-          fetch-fn (kw-fetch-fn fetch-fns)
-          manipulator-fn (kw-fetch-fn manipulator-fns)
-          params (kw-fetch-fn edn-params)
-          val-params (into [] (vals params))
-          ]
-      ;; (l/info src fn-name (str "kw-fetch-fn: " kw-fetch-fn))
-      ;; (l/info src fn-name (str "fetch-fn: " fetch-fn))
-      ;; (l/info src fn-name (str "manipulator-fn: " manipulator-fn))
-      ;; (l/info src fn-name (str "params: " params))
-      ;; (l/info src fn-name (str "val-params: " val-params))
-      (let [f0 (fetch-fn params 0)] ;; onClick sends just 1 value
-        ;; (l/info src fn-name (str "f0: " f0))
-        (let [data (manipulator-fn f0)]
-          (l/infod src fn-name "data" data)
-          data)))))
+(l/defnd request [edn-params]
+  ;; (l/info src fn-name (str "edn-params: " edn-params))
+  (let [kw-fetch-fn (nth (keys edn-params) 0)
+        fetch-fn (kw-fetch-fn fetch-fns)
+        manipulator-fn (kw-fetch-fn manipulator-fns)
+        params (kw-fetch-fn edn-params)
+        val-params (into [] (vals params))
+        ]
+    ;; (l/info src fn-name (str "kw-fetch-fn: " kw-fetch-fn))
+    ;; (l/info src fn-name (str "fetch-fn: " fetch-fn))
+    ;; (l/info src fn-name (str "manipulator-fn: " manipulator-fn))
+    ;; (l/info src fn-name (str "params: " params))
+    ;; (l/info src fn-name (str "val-params: " val-params))
+    (let [f0 (fetch-fn params 0)] ;; onClick sends just 1 value
+      ;; (l/info src fn-name (str "f0: " f0))
+      (let [data (manipulator-fn f0)]
+        ;; (l/infod src fn-name "data" data)
+        data))))

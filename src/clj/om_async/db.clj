@@ -22,19 +22,19 @@
 
 (l/defnd sql-select-rows-from
   [{:keys [dbase table] :as params}]
-  (l/infod src fn-name "params" params)
-  (l/infod src fn-name "dbase" dbase)
-  (l/infod src fn-name "table" table)
+  ;; (l/infod src fn-name "params" params)
+  ;; (l/infod src fn-name "dbase" dbase)
+  ;; (l/infod src fn-name "table" table)
   (defdb db (mysql (db-connect dbase)))
   (let [r (select table (limit 2))]
-    (l/infod src fn-name "r " r)
+    ;; (l/infod src fn-name "r " r)
     r))
 
 ;; (sql-select-rows-from u/e u/s)
 
 (l/defnd sql-show-tables-from
   [{:keys [dbase] :as params}]
-  (l/infod src fn-name "dbase" dbase)
+  ;; (l/infod src fn-name "dbase" dbase)
   (select ist
           (fields ;;:table_schema
            :table_name)

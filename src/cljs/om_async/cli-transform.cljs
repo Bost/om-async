@@ -1,21 +1,9 @@
 (ns om-async.cli-transform
-;;   (:require [cljs.reader :as reader]
-;;             [goog.events :as events]
-;;             [goog.dom :as gdom]
-;;             [om.core :as om :include-macros true]
-;;             [om.dom :as dom :include-macros true]
-;;             [cljs.core.async :refer [put! chan <!]]
-;;             [om-async.utils :as u]
-;;             [om-async.logger :as l]
-;;             ;;[clojure.walk :as walk]
-;;             )
-;;   (:import [goog.net XhrIo]
-;;            goog.net.EventType
-;;            [goog.events EventType])
-  (:require-macros [om-async.logger :as l]))
+;;   (:require [om-async.logger :as l])
+;;   (:require-macros [om-async.logger :as l])
+  )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; {
-;; this part belongs to client.cljs
+;; (def src "cli-transform.cljs")
 
 (defn extend-map [m]
   ;; "Turns {:a 1, :b 2} to {:a {:val 1, :active false}, :b {:val 2, :active false}}"
@@ -30,11 +18,11 @@
 
 (defn ff [m k v] (assoc m k (extend-map v)))
 
-(l/defnd extend-table [t]
-  (l/infod src fn-name "t" t)
+(defn extend-table [t]
+  ;; (l/infod src fn-name "t" t)
   (let [rows (get-in t [:data])]
     ;;(l/infod src fn-name "rows" rows) ;; (type rows) => om.core/MapCursor
-    (l/infod src fn-name "rows" rows)
+    ;; (l/infod src fn-name "rows" rows)
     ;;(l/infod src fn-name "(type rows)" (type rows))
     (let [ff-rows (reduce-kv ff {} rows)]
       ;; (l/infod src fn-name "ff-rows" ff-rows)
@@ -42,7 +30,7 @@
         ;; (l/infod src fn-name "r" r)
         r))))
 
-(l/defnd xtable [tfull k]
+(defn xtable [tfull k]
   ;; (l/infod src fn-name "tfull" tfull)
   ;; (l/infod src fn-name "k" k)
   (let [rlist (extend-table (get-in tfull [k]))
@@ -51,12 +39,10 @@
     ;; (l/infod src fn-name "r" r)
     r))
 
-(l/defnd extend-all [tfull]
+(defn extend-all [tfull]
   (let [ks (into [] (keys tfull))
         rks (map #(xtable tfull %) ks)
         r (into [] (apply concat (into [] rks)))
         ]
     ;; (l/infod src fn-name "r" r)
     r))
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; }
-
