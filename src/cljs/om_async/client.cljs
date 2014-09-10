@@ -21,6 +21,9 @@
 
 (def ^:private http-req-methods {:get "GET" :put "PUT" :post "POST" :delete "DELETE"})
 
+;; prefix for table index
+(def table-prefix "table")
+
 ;; The 'client dbase'. swap! or reset! on app-state trigger root re-rendering
 (def app-state (atom {}))
 
@@ -48,32 +51,48 @@
 
 (defn full-ks
   [{:keys [idx-table ks-data kw-active] :as params}]
-  (let [ks-idx (into [(keyword (str idx-table))] ks-data)]
+  (let [ks-idx (into [(keyword (str table-prefix idx-table))] ks-data)]
     (into ks-idx kw-active)))
+
+(l/defnd ks-other [idx-table cell-val]
+;;   (l/infod src fn-name "idx-table" idx-table)
+;;   (l/infod src fn-name "cell-val" cell-val)
+  (if (not (nil? cell-val))
+    [(keyword (str table-prefix idx-table)) :data :row1 :emp_no :active]))
 
 (l/defnd onClick
   [{:keys [app-full app owner ks-data column elem-val] :as params}]
     ;; TODO (js* "debugger;") seems to cause LightTable freeze
     (let [ks (full-ks params)
           active (om/get-state owner ks)
-          af @app-full
           ]
       ;; (om/transact! app ks (fn [] (not active))) ;; change application state; use with get-in
       (om/set-state! owner ks (not active))  ;; change local component state
 
       (let [
             app-ks [:data :row1 :emp_no :val]
-            ks-other [:0 :data :row1 :emp_no]
-            ks-other-active (into ks-other [:active])
-            ks-other-val (into ks-other [:val])
-            x (map #(get-in % app-ks) af)
+;;             ks-other [(keyword (str table-prefix 0)) :data :row1 :emp_no]
+;;             ks-other-active (into ks-other [:active])
+;;             ks-other-val (into ks-other [:val])
+            x (into [] (map #(get-in % app-ks) @app-full))
+            y (into [] (map-indexed vector x))
+            z (into [] (map #(ks-other (first %) (second %)) y))
+            a (into [] (remove nil? z))
             ]
-        (l/infod src fn-name "ks-other-val" ks-other-val)
+        (l/infod src fn-name "ks-data" ks-data)
         (l/infod src fn-name "ks" ks)
-        (l/infod src fn-name "af" af)
+        ;; (l/infod src fn-name "ks-other-val" ks-other-val)
+        ;; (l/infod src fn-name "@app-full" @app-full)
         (l/infod src fn-name "x" x)
+;;         (l/infod src fn-name "y" y)
+;;         (l/infod src fn-name "z" z)
+        (l/infod src fn-name "a" a)
 
-        (om/set-state! owner ks-other-active (not active)))  ;; change local component state
+        ;;(map #(om/set-state! owner % (not active)) a)  ;; change local component state
+        (om/set-state! owner
+                       [:table0 :data :row1 :emp_no :active]
+;;                        [:table1 :data :row1 :emp_no :active]
+                       (not active))
 
       ;; we're not allowed to use cursors outside of the render phase as
       ;; this is almost certainly a concurrency bug!
@@ -97,7 +116,7 @@
 ;;                                          {:val (str "# " (:response response) " #")}))
                          ))
         })
-      ))
+      )))
 
 (l/defnd get-css
   [{:keys [;;app
@@ -245,11 +264,11 @@
           :data
           {:select-rows-from
            [
-            {:dbase "employees" :table "employees"   :idx 0}
-            {:dbase "employees" :table "departments" :idx 1}
-            {:dbase "employees" :table "salaries"    :idx 2}
+            {:dbase "employees" :table "employees"   :idx (keyword (str table-prefix 0))}
+            {:dbase "employees" :table "departments" :idx (keyword (str table-prefix 1))}
+            {:dbase "employees" :table "salaries"    :idx (keyword (str table-prefix 2))}
             ]}
-;;           {:select-rows-from [{:dbase "employees" :table "departments" :idx 0}]}
+;;           {:select-rows-from [{:dbase "employees" :table "departments" :idx :table0}]}
 
 ;;           {:show-tables-from [{:dbase "employees" :idx 0}]}
 

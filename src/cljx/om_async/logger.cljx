@@ -31,6 +31,7 @@
    "onClick"
    "td"
    "render-multi"
+   "ks-other"
 ;;    "render"
 
    ;;;; db.clj
