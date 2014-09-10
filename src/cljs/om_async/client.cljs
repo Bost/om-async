@@ -52,36 +52,33 @@
     (into ks-idx kw-active)))
 
 (l/defnd onClick
-  [{:keys [app owner ks-data column elem-val] :as params}]
+  [{:keys [app-full app owner ks-data column elem-val] :as params}]
     ;; TODO (js* "debugger;") seems to cause LightTable freeze
     (let [ks (full-ks params)
           active (om/get-state owner ks)
-          ov (om/value app)
-          av @app
+          av @app-full
           ]
-      ;; TODO complete app should be accessible here
-      (l/infod src fn-name "(= ov av)" (= ov av)) ;; => true
-      (l/infod src fn-name "active" active)
       ;; (om/transact! app ks (fn [] (not active))) ;; change application state; use with get-in
       (om/set-state! owner ks (not active))  ;; change local component state
 
-      (let [ks-other [:0 :data :row1 :emp_no]
+      (let [ks-other [:data :row1 :emp_no]
             ks-other-active (into ks-other [:active])
             ks-other-val (into ks-other [:val])
-            v (om/get-state owner ks-other-val)
-            a (om/get-state owner ks-other-active)
+            x (map #(get-in ks-other-val %) av)
             ]
         (l/infod src fn-name "ks-other-val" ks-other-val)
-        (l/infod src fn-name "v" v)
-        (l/infod src fn-name "a" a)
-        (om/set-state! owner ks-other (not active)))  ;; change local component state
+;;         (map #(get-in av %) ks-other-val)
+        (l/infod src fn-name "ks" ks)
+        (l/infod src fn-name "av" av)
+        (l/infod src fn-name "x" x)
 
+        (om/set-state! owner ks-other (not active)))  ;; change local component state
 
       ;; we're not allowed to use cursors outside of the render phase as
       ;; this is almost certainly a concurrency bug!
 
 ;;       (l/infod src fn-name "elem-val" elem-val)
-      (l/infod src fn-name "ks" ks)
+;;       (l/infod src fn-name "ks" ks)
 ;;       (l/infod src fn-name "ks-data" ks-data)
 ;;       (l/infod src fn-name "app" @app)
       ;; (l/infod src fn-name "owner" owner)
@@ -114,14 +111,12 @@
   [{:keys [cell idx-row column] :as params}]
   (let [td-val (get-in cell [:val])
         ;; TODO walking over the data from the server doesn't work properly
-        ks-data [
-                 :data idx-row column
-                 ]
+        ks-data [:data idx-row column]
         kw-active [:active]
         p (into params {:ks-data ks-data :kw-active kw-active})
         ]
-    (l/infod src fn-name "ks-data" ks-data)
-    (l/infod src fn-name "cell" cell)
+;;     (l/infod src fn-name "ks-data" ks-data)
+;;     (l/infod src fn-name "cell" cell)
 
     (dom/td #js {:className (get-css p)
                  :onClick (fn [e] (onClick (into p {:column column :elem-val td-val})))}
@@ -178,7 +173,7 @@
         ]
     ;; (l/infod src fn-name "ks" ks)
     (table (into params {:tname full-tname
-                         :tdata rows ;; TODO seem like overwriting - check it!
+                         :tdata rows ;; TODO seem like overwriting fn input - check it!
                          :row-keywords ks}))))
 
 (l/defnd render-data-vec
@@ -213,11 +208,11 @@
   [{:keys [app] :as params}]
   (let [cnt (count app)
         app-vec (into [] (map-indexed vector app))]
-    (l/infod src fn-name "app" app)
-    (l/infod src fn-name "app-vec" app-vec)
+    ;; (l/infod src fn-name "app" app)
+    ;; (l/infod src fn-name "app-vec" app-vec)
     (apply dom/div nil
-           ;; TODO render needs to get full app content everytime
            (map #(render (into params {
+                                       :app-full app
                                        ;; the original value under :app is [{..}]; new value is just the {...}
                                        :app (second %)
                                        :idx-table (first %)}))
