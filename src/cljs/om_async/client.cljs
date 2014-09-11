@@ -90,96 +90,38 @@
 
 (defn activate-other
   "TODO the proper kw-idx-table (e.g. :table0 / :table1) must be prepended to table-ktirj-active"
-  [app owner]
-;;   (println "app: " app)
-;;   (println "owner: " owner)
+  [app owner active]
   (let [kat (korks-all-tables app)]
-;;     (println "kat: " kat)
-;;     (println (map vector kat app))
     (doseq [[kti ti] (map vector kat app)]  ;; korks-for-table-i
-;;       (println "kti: " kti "; ti: " ti)
       (doseq [ktirj kti]
-;;         (println "ktirj: " ktirj "; kti: " kti "; ti: " ti)
         (let [tirj-val (get-in ti (into ktirj [:val]))]
-;;           (println "tirj-val: " tirj-val)
           (if (= tirj-val 10001)
-            (do
-              ;;(println "if-then: " tirj-val)
-              (let [
-                    ktirj-active (into ktirj [:active])
-                    table-ktirj-active (into [:table0] ktirj-active)
-                    active (om/get-state owner table-ktirj-active)
-                    ]
-                (println "owner: " owner)
-                (println "table-ktirj-active: " table-ktirj-active)
-                (println "(not active): " (not active))
-                (om/set-state! owner ktirj-active (not active))  ;; change local component state
-                )
-              )
-            ;;(println "if-else: " tirj-val)
-            )
-          )
-        )
-      )
-    )
-  )
-
-;; (defn get-nth-in [zapp zkws]
-;;   (into []
-;;         (map #(get-in zapp (into [:data] [% :emp_no])) zkws)))
-
-;; (let [kws (all-idx-table-kws app-full)]
-;;   (into []
-;;         (map #(get-nth-in (nth app-full %) (nth kws %))
-;;              (range (count app-full)))))
-
-
-;; (defn all-row-kws [app]
-;;   (let [data-vec (into [] (map :data app))
-;;         r (into [] (map keys data-vec))]
-;;     r))
+            (let [ktirj-active (into ktirj [:active])
+                  table-ktirj-active (into [:table0] ktirj-active)]
+              ;; change local component state
+              (om/set-state! owner table-ktirj-active active))))))))
 
 (l/defnd onClick
   [{:keys [app-full app owner ks-data column elem-val] :as params}]
-    ;; TODO (js* "debugger;") seems to cause LightTable freeze
-    (let [ks (full-ks params)
-          active (om/get-state owner ks)
+  ;; TODO (js* "debugger;") seems to cause LightTable freeze
+  (let [ks (full-ks params)
+        active (om/get-state owner ks)]
+    ;; (om/transact! app ks (fn [] (not active))) ;; change application state; use with get-in
+    (om/set-state! owner ks (not active))  ;; change local component state
+    (let [
+          app-ks [:data :row1 :emp_no :val]
+          ;; ks-other [(keyword (str table-prefix 0)) :data :row1 :emp_no]
+          ;; ks-other-active (into ks-other [:active])
+          ;; ks-other-val (into ks-other [:val])
           ]
-      ;; (om/transact! app ks (fn [] (not active))) ;; change application state; use with get-in
-      (om/set-state! owner ks (not active))  ;; change local component state
-
-      (let [
-            app-ks [:data :row1 :emp_no :val]
-;;             ks-other [(keyword (str table-prefix 0)) :data :row1 :emp_no]
-;;             ks-other-active (into ks-other [:active])
-;;             ks-other-val (into ks-other [:val])
-            x (into [] (map #(get-in % app-ks) @app-full))
-            y (into [] (map-indexed vector x))
-            z (into [] (map #(ks-other (first %) (second %)) y))
-            a (into [] (remove nil? z))
-            ]
-;;         (l/infod src fn-name "ks-data" ks-data)
-;;         (l/infod src fn-name "ks" ks)
-        ;; (l/infod src fn-name "ks-other-val" ks-other-val)
-;;         (l/infod src fn-name "@app-full" @app-full)
-;;         (l/infod src fn-name "x" x)
-;;         (l/infod src fn-name "y" y)
-;;         (l/infod src fn-name "z" z)
-;;         (l/infod src fn-name "a" a)
-
-        ;;(map #(om/set-state! owner % (not active)) a)  ;; change local component state
-;;         (om/set-state! owner [:table0 :data :row0 :emp_no :active] (not active))
-;;         (om/set-state! owner [:table0 :data :row1 :emp_no :active] (not active))
-        (activate-other @app-full owner)
-
-
+      (activate-other @app-full owner (not active))
       ;; we're not allowed to use cursors outside of the render phase as
       ;; this is almost certainly a concurrency bug!
 
-;;       (l/infod src fn-name "elem-val" elem-val)
-;;       (l/infod src fn-name "ks" ks)
-;;       (l/infod src fn-name "ks-data" ks-data)
-;;       (l/infod src fn-name "app" @app)
+      ;; (l/infod src fn-name "elem-val" elem-val)
+      ;; (l/infod src fn-name "ks" ks)
+      ;; (l/infod src fn-name "ks-data" ks-data)
+      ;; (l/infod src fn-name "app" @app)
       ;; (l/infod src fn-name "owner" owner)
       (edn-xhr
        {:method :put
@@ -190,9 +132,9 @@
                        (let [fn-name "onClick-onComplete"]
                          (l/info src fn-name (str "Server response: " response))
                          ;; change application state; use with get-in
-;;                          (om/transact! app ks-data
-;;                                        (fn []
-;;                                          {:val (str "# " (:response response) " #")}))
+                         ;;                          (om/transact! app ks-data
+                         ;;                                        (fn []
+                         ;;                                          {:val (str "# " (:response response) " #")}))
                          ))
         })
       )))
