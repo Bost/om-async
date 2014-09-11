@@ -15,6 +15,9 @@
            [goog.events EventType])
   (:require-macros [om-async.logger :as l]))
 
+;; TODO button: deactivate-all
+;; TODO fix table namespace
+
 (def src "client.cljs")
 
 (enable-console-print!)
