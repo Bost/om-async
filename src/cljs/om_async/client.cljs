@@ -62,9 +62,9 @@
 
 (defn nth-korks
   "Returns [[:data elem0 :emp_no] [:data elem1 :emp_no] [:data elem2 :emp_no]]"
-  [vec-of-elems]
+  [vec-of-elems column]
   (into []
-        (map #(into [:data] [% :emp_no]) vec-of-elems)))
+        (map #(into [:data] [% column]) vec-of-elems)))
 
 (defn all-idx-table-kws
   "Returns [[:row0 :row1] [:row0 :row1] [:row0 :row1]]"
@@ -78,14 +78,13 @@
     [[:data :row0 :emp_no] [:data :row1 :emp_no]]  ;; for :table0
     [[:data :row0 :emp_no] [:data :row1 :emp_no]]  ;; for :table1
     [[:data :row0 :emp_no] [:data :row1 :emp_no]]  ;; for :table2
-  ]
-  TODO korks-all-tables should work on any column"
-  [app]
-  (into [] (map #(nth-korks %) (all-idx-table-kws app))))
+  ]"
+  [app column]
+  (into [] (map #(nth-korks % column) (all-idx-table-kws app))))
 
-(defn activate-other
-  [app owner elem-val active]
-  (let [kat (korks-all-tables app)]
+(defn toggle-cells
+  [app owner column elem-val active]
+  (let [kat (korks-all-tables app column)]
     (doseq [[kti ti i] (map vector kat app (range))]  ;; korks-for-table-i
       (doseq [ktirj kti]
         (let [tirj-val (get-in ti (into ktirj [:val]))]
@@ -110,7 +109,7 @@
     ;; (l/infod src fn-name "ks-data" ks-data)
     ;; (l/infod src fn-name "app" @app)
     ;; (l/infod src fn-name "owner" owner)
-    (activate-other @app-full owner elem-val (not active))
+    (toggle-cells @app-full owner (last ks-data) elem-val (not active))
 
     (edn-xhr
      {:method :put
@@ -121,16 +120,14 @@
                      (let [fn-name "onClick-onComplete"]
                        (l/info src fn-name (str "Server response: " response))
                        ;; change application state; use with get-in
-                       ;;                          (om/transact! app ks-data
-                       ;;                                        (fn []
-                       ;;                                          {:val (str "# " (:response response) " #")}))
+                       ;; (om/transact! app ks-data
+                       ;;               (fn []
+                       ;;                 {:val (str "# " (:response response) " #")}))
                        ))
-      })
-    ))
+      })))
 
 (l/defnd get-css
-  [{:keys [;;app
-           owner default] :as params}]
+  [{:keys [owner default] :as params}]
   (let [ks (full-ks params)
         active (om/get-state owner ks)
         r (if active "active" default)]
@@ -147,7 +144,6 @@
         ]
 ;;     (l/infod src fn-name "ks-data" ks-data)
 ;;     (l/infod src fn-name "cell" cell)
-
     (dom/td #js {:className (get-css p)
                  :onClick (fn [e] (onClick (into p {:column column :elem-val td-val})))}
             td-val)))
