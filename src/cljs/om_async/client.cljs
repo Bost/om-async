@@ -60,6 +60,32 @@
   (if (not (nil? cell-val))
     [(keyword (str table-prefix idx-table)) :data :row1 :emp_no :active]))
 
+
+(def app-full
+  [{:table "salaries", :dbase "employees", :idx :table2, :data {:row0 {:emp_no {:val 10001}, :from_date {:val "1986-06-25 22:00:00"}, :to_date {:val "1987-06-25 22:00:00"}, :salary {:val 60117}}, :row1 {:emp_no {:val 10001}, :from_date {:val "1987-06-25 22:00:00"}, :to_date {:val "1988-06-24 22:00:00"}, :salary {:val 62102}}}}
+   {:table "employees", :dbase "employees", :idx :table0, :data {:row0 {:first_name {:val "Georgi"}, :emp_no {:val 10001}, :birth_date {:val "1953-09-01 23:00:00"}, :last_name {:val "Facello"}, :hire_date {:val "1986-06-25 22:00:00"}, :gender {:val "M"}}, :row1 {:first_name {:val "Bezalel"}, :emp_no {:val 10002}, :birth_date {:val "1964-06-01 23:00:00"}, :last_name {:val "Simmel"}, :hire_date {:val "1985-11-20 23:00:00"}, :gender {:val "F"}}}}
+   {:table "departments", :dbase "employees", :idx :table1, :data {:row0 {:dept_name {:val "Customer Service"}, :dept_no {:val "d009"}}, :row1 {:dept_name {:val "Development"}, :dept_no {:val "d005"}}}}])
+
+(defn all-idx-table-kws [app]
+  (into []
+        (for [i (map :idx app)]
+          [i])))
+
+(all-idx-table-kws app-full)
+
+(defn all-row-kws [app]
+  (let [data-vec (into [] (map :data app))
+        r (into [] (map keys data-vec))]
+    r))
+
+(apply map str [[:a :b] [:c :d]])
+(let [tables (all-idx-table-kws app-full)]
+  (apply map str tables (all-row-kws app-full)))
+
+
+(defn all-table-rows [table]
+  (keys (map :data table)))
+
 (l/defnd onClick
   [{:keys [app-full app owner ks-data column elem-val] :as params}]
     ;; TODO (js* "debugger;") seems to cause LightTable freeze
@@ -82,7 +108,7 @@
         (l/infod src fn-name "ks-data" ks-data)
         (l/infod src fn-name "ks" ks)
         ;; (l/infod src fn-name "ks-other-val" ks-other-val)
-        ;; (l/infod src fn-name "@app-full" @app-full)
+        (l/infod src fn-name "@app-full" @app-full)
         (l/infod src fn-name "x" x)
 ;;         (l/infod src fn-name "y" y)
 ;;         (l/infod src fn-name "z" z)
