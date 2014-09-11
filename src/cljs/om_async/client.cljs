@@ -66,25 +66,78 @@
    {:table "employees", :dbase "employees", :idx :table0, :data {:row0 {:first_name {:val "Georgi"}, :emp_no {:val 10001}, :birth_date {:val "1953-09-01 23:00:00"}, :last_name {:val "Facello"}, :hire_date {:val "1986-06-25 22:00:00"}, :gender {:val "M"}}, :row1 {:first_name {:val "Bezalel"}, :emp_no {:val 10002}, :birth_date {:val "1964-06-01 23:00:00"}, :last_name {:val "Simmel"}, :hire_date {:val "1985-11-20 23:00:00"}, :gender {:val "F"}}}}
    {:table "departments", :dbase "employees", :idx :table1, :data {:row0 {:dept_name {:val "Customer Service"}, :dept_no {:val "d009"}}, :row1 {:dept_name {:val "Development"}, :dept_no {:val "d005"}}}}])
 
-(defn all-idx-table-kws [app]
+(defn nth-korks
+  "Returns [[:data elem0 :emp_no] [:data elem1 :emp_no] [:data elem2 :emp_no]]"
+  [vec-of-elems]
   (into []
-        (for [i (map :idx app)]
-          [i])))
+        (map #(into [:data] [% :emp_no]) vec-of-elems)))
 
-(all-idx-table-kws app-full)
+(defn all-idx-table-kws
+  "Returns [[:row0 :row1] [:row0 :row1] [:row0 :row1]]"
+  [app]
+  (into []
+        (for [i (map :data app)]
+          (into [] (keys i)))))
 
-(defn all-row-kws [app]
-  (let [data-vec (into [] (map :data app))
-        r (into [] (map keys data-vec))]
-    r))
+(defn korks-all-tables
+  "Returns [
+    [[:data :row0 :emp_no] [:data :row1 :emp_no]]  ;; for :table0
+    [[:data :row0 :emp_no] [:data :row1 :emp_no]]  ;; for :table1
+    [[:data :row0 :emp_no] [:data :row1 :emp_no]]  ;; for :table2
+  ]"
+  [app]
+  (into [] (map #(nth-korks %) (all-idx-table-kws app-full))))
 
-(apply map str [[:a :b] [:c :d]])
-(let [tables (all-idx-table-kws app-full)]
-  (apply map str tables (all-row-kws app-full)))
+(defn activate-other
+  "TODO the proper kw-idx-table (e.g. :table0 / :table1) must be prepended to table-ktirj-active"
+  [app owner]
+;;   (println "app: " app)
+;;   (println "owner: " owner)
+  (let [kat (korks-all-tables app)]
+;;     (println "kat: " kat)
+;;     (println (map vector kat app))
+    (doseq [[kti ti] (map vector kat app)]  ;; korks-for-table-i
+;;       (println "kti: " kti "; ti: " ti)
+      (doseq [ktirj kti]
+;;         (println "ktirj: " ktirj "; kti: " kti "; ti: " ti)
+        (let [tirj-val (get-in ti (into ktirj [:val]))]
+;;           (println "tirj-val: " tirj-val)
+          (if (= tirj-val 10001)
+            (do
+              ;;(println "if-then: " tirj-val)
+              (let [
+                    ktirj-active (into ktirj [:active])
+                    table-ktirj-active (into [:table0] ktirj-active)
+                    active (om/get-state owner table-ktirj-active)
+                    ]
+                (println "owner: " owner)
+                (println "table-ktirj-active: " table-ktirj-active)
+                (println "(not active): " (not active))
+                (om/set-state! owner ktirj-active (not active))  ;; change local component state
+                )
+              )
+            ;;(println "if-else: " tirj-val)
+            )
+          )
+        )
+      )
+    )
+  )
+
+;; (defn get-nth-in [zapp zkws]
+;;   (into []
+;;         (map #(get-in zapp (into [:data] [% :emp_no])) zkws)))
+
+;; (let [kws (all-idx-table-kws app-full)]
+;;   (into []
+;;         (map #(get-nth-in (nth app-full %) (nth kws %))
+;;              (range (count app-full)))))
 
 
-(defn all-table-rows [table]
-  (keys (map :data table)))
+;; (defn all-row-kws [app]
+;;   (let [data-vec (into [] (map :data app))
+;;         r (into [] (map keys data-vec))]
+;;     r))
 
 (l/defnd onClick
   [{:keys [app-full app owner ks-data column elem-val] :as params}]
@@ -105,20 +158,20 @@
             z (into [] (map #(ks-other (first %) (second %)) y))
             a (into [] (remove nil? z))
             ]
-        (l/infod src fn-name "ks-data" ks-data)
-        (l/infod src fn-name "ks" ks)
+;;         (l/infod src fn-name "ks-data" ks-data)
+;;         (l/infod src fn-name "ks" ks)
         ;; (l/infod src fn-name "ks-other-val" ks-other-val)
-        (l/infod src fn-name "@app-full" @app-full)
-        (l/infod src fn-name "x" x)
+;;         (l/infod src fn-name "@app-full" @app-full)
+;;         (l/infod src fn-name "x" x)
 ;;         (l/infod src fn-name "y" y)
 ;;         (l/infod src fn-name "z" z)
-        (l/infod src fn-name "a" a)
+;;         (l/infod src fn-name "a" a)
 
         ;;(map #(om/set-state! owner % (not active)) a)  ;; change local component state
-        (om/set-state! owner
-                       [:table0 :data :row1 :emp_no :active]
-;;                        [:table1 :data :row1 :emp_no :active]
-                       (not active))
+;;         (om/set-state! owner [:table0 :data :row0 :emp_no :active] (not active))
+;;         (om/set-state! owner [:table0 :data :row1 :emp_no :active] (not active))
+        (activate-other @app-full owner)
+
 
       ;; we're not allowed to use cursors outside of the render phase as
       ;; this is almost certainly a concurrency bug!
