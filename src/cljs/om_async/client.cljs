@@ -60,12 +60,6 @@
   (if (not (nil? cell-val))
     [(keyword (str table-prefix idx-table)) :data :row1 :emp_no :active]))
 
-
-(def app-full
-  [{:table "salaries", :dbase "employees", :idx :table2, :data {:row0 {:emp_no {:val 10001}, :from_date {:val "1986-06-25 22:00:00"}, :to_date {:val "1987-06-25 22:00:00"}, :salary {:val 60117}}, :row1 {:emp_no {:val 10001}, :from_date {:val "1987-06-25 22:00:00"}, :to_date {:val "1988-06-24 22:00:00"}, :salary {:val 62102}}}}
-   {:table "employees", :dbase "employees", :idx :table0, :data {:row0 {:first_name {:val "Georgi"}, :emp_no {:val 10001}, :birth_date {:val "1953-09-01 23:00:00"}, :last_name {:val "Facello"}, :hire_date {:val "1986-06-25 22:00:00"}, :gender {:val "M"}}, :row1 {:first_name {:val "Bezalel"}, :emp_no {:val 10002}, :birth_date {:val "1964-06-01 23:00:00"}, :last_name {:val "Simmel"}, :hire_date {:val "1985-11-20 23:00:00"}, :gender {:val "F"}}}}
-   {:table "departments", :dbase "employees", :idx :table1, :data {:row0 {:dept_name {:val "Customer Service"}, :dept_no {:val "d009"}}, :row1 {:dept_name {:val "Development"}, :dept_no {:val "d005"}}}}])
-
 (defn nth-korks
   "Returns [[:data elem0 :emp_no] [:data elem1 :emp_no] [:data elem2 :emp_no]]"
   [vec-of-elems]
@@ -84,20 +78,20 @@
     [[:data :row0 :emp_no] [:data :row1 :emp_no]]  ;; for :table0
     [[:data :row0 :emp_no] [:data :row1 :emp_no]]  ;; for :table1
     [[:data :row0 :emp_no] [:data :row1 :emp_no]]  ;; for :table2
-  ]"
+  ]
+  TODO korks-all-tables should work on any column"
   [app]
-  (into [] (map #(nth-korks %) (all-idx-table-kws app-full))))
+  (into [] (map #(nth-korks %) (all-idx-table-kws app))))
 
 (defn activate-other
-  "TODO the proper kw-idx-table (e.g. :table0 / :table1) must be prepended to table-ktirj-active"
-  [app owner active]
+  [app owner elem-val active]
   (let [kat (korks-all-tables app)]
-    (doseq [[kti ti] (map vector kat app)]  ;; korks-for-table-i
+    (doseq [[kti ti i] (map vector kat app (range))]  ;; korks-for-table-i
       (doseq [ktirj kti]
         (let [tirj-val (get-in ti (into ktirj [:val]))]
-          (if (= tirj-val 10001)
+          (if (= tirj-val elem-val)
             (let [ktirj-active (into ktirj [:active])
-                  table-ktirj-active (into [:table0] ktirj-active)]
+                  table-ktirj-active (into [(keyword (str table-prefix i))] ktirj-active)]
               ;; change local component state
               (om/set-state! owner table-ktirj-active active))))))))
 
@@ -106,38 +100,33 @@
   ;; TODO (js* "debugger;") seems to cause LightTable freeze
   (let [ks (full-ks params)
         active (om/get-state owner ks)]
+    ;; we're not allowed to use cursors outside of the render phase as
+    ;; this is almost certainly a concurrency bug!
     ;; (om/transact! app ks (fn [] (not active))) ;; change application state; use with get-in
-    (om/set-state! owner ks (not active))  ;; change local component state
-    (let [
-          app-ks [:data :row1 :emp_no :val]
-          ;; ks-other [(keyword (str table-prefix 0)) :data :row1 :emp_no]
-          ;; ks-other-active (into ks-other [:active])
-          ;; ks-other-val (into ks-other [:val])
-          ]
-      (activate-other @app-full owner (not active))
-      ;; we're not allowed to use cursors outside of the render phase as
-      ;; this is almost certainly a concurrency bug!
+    ;; (om/set-state! owner ks (not active))  ;; change local component state
 
-      ;; (l/infod src fn-name "elem-val" elem-val)
-      ;; (l/infod src fn-name "ks" ks)
-      ;; (l/infod src fn-name "ks-data" ks-data)
-      ;; (l/infod src fn-name "app" @app)
-      ;; (l/infod src fn-name "owner" owner)
-      (edn-xhr
-       {:method :put
-        :url (str "select/" column)
-        ;; value under :data can't be a just a "value". (TODO see if only hash-map is accepted)
-        :data {:request elem-val}
-        :on-complete (fn [response]
-                       (let [fn-name "onClick-onComplete"]
-                         (l/info src fn-name (str "Server response: " response))
-                         ;; change application state; use with get-in
-                         ;;                          (om/transact! app ks-data
-                         ;;                                        (fn []
-                         ;;                                          {:val (str "# " (:response response) " #")}))
-                         ))
-        })
-      )))
+    ;; (l/infod src fn-name "elem-val" elem-val)
+    ;; (l/infod src fn-name "ks" ks)
+    ;; (l/infod src fn-name "ks-data" ks-data)
+    ;; (l/infod src fn-name "app" @app)
+    ;; (l/infod src fn-name "owner" owner)
+    (activate-other @app-full owner elem-val (not active))
+
+    (edn-xhr
+     {:method :put
+      :url (str "select/" column)
+      ;; value under :data can't be a just a "value". (TODO see if only hash-map is accepted)
+      :data {:request elem-val}
+      :on-complete (fn [response]
+                     (let [fn-name "onClick-onComplete"]
+                       (l/info src fn-name (str "Server response: " response))
+                       ;; change application state; use with get-in
+                       ;;                          (om/transact! app ks-data
+                       ;;                                        (fn []
+                       ;;                                          {:val (str "# " (:response response) " #")}))
+                       ))
+      })
+    ))
 
 (l/defnd get-css
   [{:keys [;;app
