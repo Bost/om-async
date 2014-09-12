@@ -40,10 +40,7 @@
   [{:keys [cell idx-row column] :as params}]
   (let [td-val (get-in cell [:val])
         ;; TODO walking over the data from the server doesn't work properly
-        ks-data [:data idx-row column]
-        kw-active [:active]
-        p (into params {:ks-data ks-data :kw-active kw-active})
-        ]
+        p (into params {:ks-data [:data idx-row column] :kw-active [:active]})]
 ;;     (l/infod src fn-name "ks-data" ks-data)
 ;;     (l/infod src fn-name "cell" cell)
     (dom/td #js {:className (get-css p)
@@ -71,41 +68,27 @@
        rows               ;; gives the row
        row-keywords))
 
-(l/defnd get-display
-  [{:keys [owner default] :as params}]
-  (let [ks (oc/full-ks-display params)
-        active (om/get-state owner ks)
-        r (if active "display" default)]
-    ;; (om/transact! app ks (fn [] (not active)))
-    r))
+(defn get-display
+  [{:keys [owner] :as params}]
+  (let [display (om/get-state owner [:table0 :display])]
+    (println "display" display)
+    (if (or (nil? display) display)
+      #js {}
+      #js {:display "none"})))
 
 (defn table
   [{:keys [app owner tname tdata] :as params}]
   (let [rows (into [] (map #(into [] (vals (nth tdata %)))
                            (range (count tdata))))
         header (into [] (keys (first tdata)))
-        kw-display [:display]
-        p (into params {:ks-data ks-data :kw-display kw-display})
+        ;; (:idx app) must be used (no @)
+        ;; if binded in a let-statement outside
+        p (into params {:idx (:idx app) :kw-display [:display]})
         ]
-    (dom/div #js { :display (get-display p) }
+    (dom/div #js {:style (get-display p)}
              tname
-             (dom/button
-              #js {
-                   :onClick (fn [e]
-                              ;; (:idx app) must be used (no @)
-                              ;; if binded in a let-statement outside
-                              (oc/remove-table (into params {:idx (:idx @app)})))}
-              "remove")
-             (dom/button
-              #js {
-                   :display none
-                   :onClick (fn [e]
-                              ;; (:idx app) must be used (no @)
-                              ;; if binded in a let-statement outside
-                              (oc/more-rows (into params {:idx (:idx @app)}))
-                              )
-                   }
-              "more-rows")
+             (dom/button #js {:onClick (fn [e] (oc/remove-table p))} "remove")
+             (dom/button #js {:onClick (fn [e] (oc/more-rows p))} "more-rows")
              (dom/div nil
                       (dom/table nil
                                  (dom/thead nil

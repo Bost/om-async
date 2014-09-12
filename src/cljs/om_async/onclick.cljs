@@ -44,9 +44,8 @@
     (into ks-idx kw-active)))
 
 (defn full-ks-display
-  [{:keys [idx-table ks-data kw-display] :as params}]
-  (let [ks-idx (into [(kw-table idx-table)] ks-data)]
-    (into ks-idx kw-display)))
+  [{:keys [idx-table kw-display] :as params}]
+  [(kw-table idx-table) kw-display])
 
 (defn nth-korks
   "Returns [[:data elem0 :emp_no] [:data elem1 :emp_no] [:data elem2 :emp_no]]"
@@ -114,12 +113,6 @@
                        ))
       })))
 
-(defn display [show]
-  (if show
-    #js {}
-    #js {:display "none"}))
-;; :style (display true)
-
 (defn deactivate-all
   "Deactivate all active React GUI components"
   [{:keys [owner] :as params}]
@@ -134,6 +127,7 @@
   [{:keys [owner idx] :as params}]
 ;;   (println "idx: " idx)
   (println "idx: " (idx-table idx))
+  (om/set-state! owner [:table0 :display] false)
   (println "TODO implement remove-table"))
 
 (defn more-rows
