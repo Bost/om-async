@@ -71,14 +71,12 @@
        rows               ;; gives the row
        row-keywords))
 
-(l/defnd table
+(defn table
   [{:keys [tname tdata] :as params}]
-  ;; (l/infod src fn-name "row-keywords" row-keywords)
   (let [rows (into [] (map #(into [] (vals (nth tdata %)))
                            (range (count tdata))))
         header (into [] (keys (first tdata)))]
-    ;; (l/infod src fn-name "header" header)
-    ;; (l/infod src fn-name "rows" rows)
+    (println "tname: " tname)
     (dom/div nil
              tname
              (dom/button

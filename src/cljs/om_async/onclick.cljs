@@ -111,6 +111,7 @@
   (println "TODO implement deactivate-all; use clojure/walk?"))
 
 (defn remove-table
-  "Remove table component from web page"
+  "Remove table component from web page
+  TODO put tname to the params and use it as table-id for removal?"
   [{:keys [owner] :as params}]
   (println "TODO implement remove-table"))
