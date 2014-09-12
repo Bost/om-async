@@ -20,6 +20,10 @@
 (defn kw-table [idx]
   (keyword (str "table" idx)))
 
+(defn idx-table [kw-table]
+  (let [start (count "table")]
+    (reader/read-string (subs (name kw-table) start (+ start 1)))))
+
 (def ^:private http-req-methods {:get "GET" :put "PUT" :post "POST" :delete "DELETE"})
 
 (defn edn-xhr
@@ -112,6 +116,9 @@
 
 (defn remove-table
   "Remove table component from web page
-  TODO put tname to the params and use it as table-id for removal?"
-  [{:keys [owner] :as params}]
-  (println "TODO implement remove-table"))
+  TODO put idx-table to the params and use it as table-id for removal?"
+  [{:keys [owner idx] :as params}]
+;;   (println "idx: " idx)
+  (println "idx: " (idx-table idx)
+  (println "TODO implement remove-table")
+  )
