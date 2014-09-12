@@ -43,6 +43,11 @@
   (let [ks-idx (into [(kw-table idx-table)] ks-data)]
     (into ks-idx kw-active)))
 
+(defn full-ks-display
+  [{:keys [idx-table ks-data kw-display] :as params}]
+  (let [ks-idx (into [(kw-table idx-table)] ks-data)]
+    (into ks-idx kw-display)))
+
 (defn nth-korks
   "Returns [[:data elem0 :emp_no] [:data elem1 :emp_no] [:data elem2 :emp_no]]"
   [vec-of-elems column]
@@ -109,16 +114,23 @@
                        ))
       })))
 
+(defn display [show]
+  (if show
+    #js {}
+    #js {:display "none"}))
+;; :style (display true)
+
 (defn deactivate-all
   "Deactivate all active React GUI components"
   [{:keys [owner] :as params}]
   (println "TODO implement deactivate-all; use clojure/walk?"))
 
-(defn displayed-elems [elem add-remove-N])
+(defn displayed-elems [elem add-remove-N]
+  nil)
 
 (defn remove-table
-  "TODO Should use the displayed-elems fn work a la Display +N / -N tables"
-  "Remove table component from web page"
+  "TODO Should use the displayed-elems fn work a la Display +N / -N tables
+  Remove table component from web page"
   [{:keys [owner idx] :as params}]
 ;;   (println "idx: " idx)
   (println "idx: " (idx-table idx))
