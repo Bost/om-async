@@ -114,11 +114,20 @@
   [{:keys [owner] :as params}]
   (println "TODO implement deactivate-all; use clojure/walk?"))
 
+(defn displayed-elems [elem add-remove-N])
+
 (defn remove-table
-  "Remove table component from web page
-  TODO put idx-table to the params and use it as table-id for removal?"
+  "TODO Should use the displayed-elems fn work a la Display +N / -N tables"
+  "Remove table component from web page"
   [{:keys [owner idx] :as params}]
 ;;   (println "idx: " idx)
-  (println "idx: " (idx-table idx)
-  (println "TODO implement remove-table")
-  )
+  (println "idx: " (idx-table idx))
+  (println "TODO implement remove-table"))
+
+(defn more-rows
+  "Display +N / -N rows"
+  [{:keys [owner idx] :as params}]
+;;   (println "idx: " idx)
+  (println "idx: " (idx-table idx))
+  (println "TODO implement more-rows"))
+

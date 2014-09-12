@@ -72,15 +72,24 @@
        row-keywords))
 
 (defn table
-  [{:keys [app tname tdata] :as params}]
+  [{:keys [app owner tname tdata] :as params}]
   (let [rows (into [] (map #(into [] (vals (nth tdata %)))
                            (range (count tdata))))
         header (into [] (keys (first tdata)))]
     (dom/div nil
              tname
              (dom/button
-              #js {:onClick (fn [e] (oc/remove-table (into params {:idx (:idx @app)})))}
+              #js {:onClick (fn [e]
+                              ;; (:idx app) must be used (no @)
+                              ;; if binded in a let-statement outside
+                              (oc/remove-table (into params {:idx (:idx @app)})))}
               "remove")
+             (dom/button
+              #js {:onClick (fn [e]
+                              ;; (:idx app) must be used (no @)
+                              ;; if binded in a let-statement outside
+                              (oc/more-rows (into params {:idx (:idx @app)})))}
+              "more-rows")
              (dom/div nil
                       (dom/table nil
                                  (dom/thead nil
