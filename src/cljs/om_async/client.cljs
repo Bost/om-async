@@ -16,16 +16,13 @@
   (:require-macros [om-async.logger :as l]))
 
 ;; TODO button: deactivate-all
-;; TODO fix table namespace
 
 (def src "client.cljs")
+(def table-prefix "table") ;; prefix for table index (in e.g. :table0)
 
 (enable-console-print!)
 
 (def ^:private http-req-methods {:get "GET" :put "PUT" :post "POST" :delete "DELETE"})
-
-;; prefix for table index
-(def table-prefix "table")
 
 ;; The 'client dbase'. swap! or reset! on app-state trigger root re-rendering
 (def app-state (atom {}))
@@ -194,13 +191,13 @@
 (l/defnd render-data
   [{:keys [tdata] :as params}]
   (let [dbname (get-in tdata [:dbase])
-        tname (get-in dbname [:table])
+        tname (get-in tdata [:table])
         full-tname (str dbname "." tname)
         data (get-in tdata [:data])
         rows (into [] (vals data))
         ks (into [] (keys data))
         ]
-    ;; (l/infod src fn-name "ks" ks)
+    ;;(l/infod src fn-name "ks" ks)
     (table (into params {:tname full-tname
                          :tdata rows ;; TODO seem like overwriting fn input - check it!
                          :row-keywords ks}))))
@@ -234,12 +231,15 @@
                     (into params {:extended-data extended-data}))))))))
 
 (l/defnd render-multi
-  [{:keys [app] :as params}]
+  [{:keys [app owner] :as params}]
   (let [cnt (count app)
         app-vec (into [] (map-indexed vector app))]
     ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "app-vec" app-vec)
     (apply dom/div nil
+           (dom/button
+            #js {:onClick #(om/set-state! owner :editing true)}
+            "deactivate-all")
            (map #(render (into params {
                                        :app-full app
                                        ;; the original value under :app is [{..}]; new value is just the {...}
