@@ -1,45 +1,24 @@
 (ns om-async.client
-  (:require [cljs.reader :as reader]
-            [goog.events :as events]
-            [goog.dom :as gdom]
+  (:require [goog.dom :as gdom]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
+            ;; this is probably not needed at the moment
             [cljs.core.async :refer [put! chan <!]]
             [om-async.utils :as u]
             [om-async.logger :as l]
+            [om-async.onclick :as oc]
             [om-async.cli-transform :as t]
-            ;;[clojure.walk :as walk]
             )
   (:import [goog.net XhrIo]
-           goog.net.EventType
-           [goog.events EventType])
+           goog.net.EventType)
   (:require-macros [om-async.logger :as l]))
 
-;; TODO button: deactivate-all
-
 (def src "client.cljs")
-(def table-prefix "table") ;; prefix for table index (in e.g. :table0)
 
 (enable-console-print!)
 
-(def ^:private http-req-methods {:get "GET" :put "PUT" :post "POST" :delete "DELETE"})
-
 ;; The 'client dbase'. swap! or reset! on app-state trigger root re-rendering
 (def app-state (atom {}))
-
-;; [{:keys [dbase table]}] is a special form for
-;; [{method :method, url :url, data :data, on-complete :on-complete}]
-(defn edn-xhr
-  "XMLHttpRequest: send HTTP/HTTPS async requests to a web server and load the
-  server response data back into the script"
-  [{:keys [method url data on-complete]}]
-  (let [xhr (XhrIo.)]  ;; instantiate a basic class for handling XMLHttpRequests.
-    (events/listen xhr goog.net.EventType.COMPLETE
-      (fn [e]
-        (on-complete (reader/read-string (.getResponseText xhr)))))
-    (. xhr
-      (send url (http-req-methods method) (when data (pr-str data))
-        #js {"Content-Type" "application/edn"}))))
 
 ;; TODO consider using take-while/drop-while to increase performance
 (defn column-filter? [elem-idx] true) ;; no element is filtered out
@@ -49,86 +28,9 @@
 (defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no element is filtered out
 ;; (defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no element is filtered out
 
-(defn full-ks
-  [{:keys [idx-table ks-data kw-active] :as params}]
-  (let [ks-idx (into [(keyword (str table-prefix idx-table))] ks-data)]
-    (into ks-idx kw-active)))
-
-(l/defnd ks-other [idx-table cell-val]
-;;   (l/infod src fn-name "idx-table" idx-table)
-;;   (l/infod src fn-name "cell-val" cell-val)
-  (if (not (nil? cell-val))
-    [(keyword (str table-prefix idx-table)) :data :row1 :emp_no :active]))
-
-(defn nth-korks
-  "Returns [[:data elem0 :emp_no] [:data elem1 :emp_no] [:data elem2 :emp_no]]"
-  [vec-of-elems column]
-  (into []
-        (map #(into [:data] [% column]) vec-of-elems)))
-
-(defn all-idx-table-kws
-  "Returns [[:row0 :row1] [:row0 :row1] [:row0 :row1]]"
-  [app]
-  (into []
-        (for [i (map :data app)]
-          (into [] (keys i)))))
-
-(defn korks-all-tables
-  "Returns [
-    [[:data :row0 :emp_no] [:data :row1 :emp_no]]  ;; for :table0
-    [[:data :row0 :emp_no] [:data :row1 :emp_no]]  ;; for :table1
-    [[:data :row0 :emp_no] [:data :row1 :emp_no]]  ;; for :table2
-  ]"
-  [app column]
-  (into [] (map #(nth-korks % column) (all-idx-table-kws app))))
-
-(defn toggle-cells
-  [app owner column elem-val active]
-  (let [kat (korks-all-tables app column)]
-    (doseq [[kti ti i] (map vector kat app (range))]  ;; korks-for-table-i
-      (doseq [ktirj kti]
-        (let [tirj-val (get-in ti (into ktirj [:val]))]
-          (if (= tirj-val elem-val)
-            (let [ktirj-active (into ktirj [:active])
-                  table-ktirj-active (into [(keyword (str table-prefix i))] ktirj-active)]
-              ;; change local component state
-              (om/set-state! owner table-ktirj-active active))))))))
-
-(l/defnd onClick
-  [{:keys [app-full app owner ks-data column elem-val] :as params}]
-  ;; TODO (js* "debugger;") seems to cause LightTable freeze
-  (let [ks (full-ks params)
-        active (om/get-state owner ks)]
-    ;; we're not allowed to use cursors outside of the render phase as
-    ;; this is almost certainly a concurrency bug!
-    ;; (om/transact! app ks (fn [] (not active))) ;; change application state; use with get-in
-    ;; (om/set-state! owner ks (not active))  ;; change local component state
-
-    ;; (l/infod src fn-name "elem-val" elem-val)
-    ;; (l/infod src fn-name "ks" ks)
-    ;; (l/infod src fn-name "ks-data" ks-data)
-    ;; (l/infod src fn-name "app" @app)
-    ;; (l/infod src fn-name "owner" owner)
-    (toggle-cells @app-full owner (last ks-data) elem-val (not active))
-
-    (edn-xhr
-     {:method :put
-      :url (str "select/" column)
-      ;; value under :data can't be a just a "value". (TODO see if only hash-map is accepted)
-      :data {:request elem-val}
-      :on-complete (fn [response]
-                     (let [fn-name "onClick-onComplete"]
-                       (l/info src fn-name (str "Server response: " response))
-                       ;; change application state; use with get-in
-                       ;; (om/transact! app ks-data
-                       ;;               (fn []
-                       ;;                 {:val (str "# " (:response response) " #")}))
-                       ))
-      })))
-
 (l/defnd get-css
   [{:keys [owner default] :as params}]
-  (let [ks (full-ks params)
+  (let [ks (oc/full-ks params)
         active (om/get-state owner ks)
         r (if active "active" default)]
     ;; (om/transact! app ks (fn [] (not active)))
@@ -145,7 +47,7 @@
 ;;     (l/infod src fn-name "ks-data" ks-data)
 ;;     (l/infod src fn-name "cell" cell)
     (dom/td #js {:className (get-css p)
-                 :onClick (fn [e] (onClick (into p {:column column :elem-val td-val})))}
+                 :onClick (fn [e] (oc/activate (into p {:column column :elem-val td-val})))}
             td-val)))
 
 (l/defnd tr
@@ -238,7 +140,7 @@
     ;; (l/infod src fn-name "app-vec" app-vec)
     (apply dom/div nil
            (dom/button
-            #js {:onClick #(om/set-state! owner :editing true)}
+            #js {:onClick (fn [e] (oc/deactivate-all params))}
             "deactivate-all")
            (map #(render (into params {
                                        :app-full app
@@ -266,16 +168,16 @@
       om/IWillMount
       (will-mount [_]
         ;;(l/info src fn-name "will-mount")
-        (edn-xhr
+        (oc/edn-xhr
          {:method :put
           :url "fetch"
           ;; TODO the idx should be specified in transfer.clj
           :data
           {:select-rows-from
            [
-            {:dbase "employees" :table "employees"   :idx (keyword (str table-prefix 0))}
-            {:dbase "employees" :table "departments" :idx (keyword (str table-prefix 1))}
-            {:dbase "employees" :table "salaries"    :idx (keyword (str table-prefix 2))}
+            {:dbase "employees" :table "employees"   :idx (oc/kw-table 0)}
+            {:dbase "employees" :table "departments" :idx (oc/kw-table 1)}
+            {:dbase "employees" :table "salaries"    :idx (oc/kw-table 2)}
             ]}
 ;;           {:select-rows-from [{:dbase "employees" :table "departments" :idx :table0}]}
 
