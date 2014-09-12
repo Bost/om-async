@@ -71,24 +71,40 @@
        rows               ;; gives the row
        row-keywords))
 
+(l/defnd get-display
+  [{:keys [owner default] :as params}]
+  (let [ks (oc/full-ks-display params)
+        active (om/get-state owner ks)
+        r (if active "display" default)]
+    ;; (om/transact! app ks (fn [] (not active)))
+    r))
+
 (defn table
   [{:keys [app owner tname tdata] :as params}]
   (let [rows (into [] (map #(into [] (vals (nth tdata %)))
                            (range (count tdata))))
-        header (into [] (keys (first tdata)))]
-    (dom/div nil
+        header (into [] (keys (first tdata)))
+        kw-display [:display]
+        p (into params {:ks-data ks-data :kw-display kw-display})
+        ]
+    (dom/div #js { :display (get-display p) }
              tname
              (dom/button
-              #js {:onClick (fn [e]
+              #js {
+                   :onClick (fn [e]
                               ;; (:idx app) must be used (no @)
                               ;; if binded in a let-statement outside
                               (oc/remove-table (into params {:idx (:idx @app)})))}
               "remove")
              (dom/button
-              #js {:onClick (fn [e]
+              #js {
+                   :display none
+                   :onClick (fn [e]
                               ;; (:idx app) must be used (no @)
                               ;; if binded in a let-statement outside
-                              (oc/more-rows (into params {:idx (:idx @app)})))}
+                              (oc/more-rows (into params {:idx (:idx @app)}))
+                              )
+                   }
               "more-rows")
              (dom/div nil
                       (dom/table nil
