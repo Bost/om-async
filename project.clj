@@ -7,18 +7,18 @@
   :jvm-opts ^:replace ["-Xmx1g" "-server"]
 
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-2277"]
-                 [ring/ring "1.3.0"]
-                 [org.clojure/core.async "0.1.303.0-886421-alpha"]
-                 [om "0.7.1"]
-                 [compojure "1.1.8"]
+                 [org.clojure/clojurescript "0.0-2322"]
+                 [ring/ring "1.3.1"]
+                 [org.clojure/core.async "0.1.338.0-5c5012-alpha"]
+                 [om "0.7.2"]
+                 [compojure "1.1.9"]
                  [fogus/ring-edn "0.2.0"]
                  ;; [com.datomic/datomic-free "0.9.4699"]
 
                  [org.clojure/java.jdbc "0.3.5"]
                  [mysql/mysql-connector-java "5.1.32"]
 
-                 [korma "0.3.3"] ;; sql for clojure
+                 [korma "0.4.0"] ;; sql for clojure
 
                  ;; logging
                  ;; [com.taoensso/timbre "3.2.1"]
