@@ -81,6 +81,9 @@
     ;; (l/infod src fn-name "rows" rows)
     (dom/div nil
              tname
+             (dom/button
+              #js {:onClick (fn [e] (oc/remove-table params))}
+              "remove")
              (dom/div nil
                       (dom/table nil
                                  (dom/thead nil

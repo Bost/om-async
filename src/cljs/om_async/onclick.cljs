@@ -106,8 +106,11 @@
       })))
 
 (defn deactivate-all
-  "TODO deactivate-all functionality"
+  "Deactivate all active React GUI components"
   [{:keys [owner] :as params}]
-  (println "TODO implemnent deactivate-all; use clojure/walk?")
-;;   (om/set-state! owner :editing true)
-  )
+  (println "TODO implement deactivate-all; use clojure/walk?"))
+
+(defn remove-table
+  "Remove table component from web page"
+  [{:keys [owner] :as params}]
+  (println "TODO implement remove-table"))
