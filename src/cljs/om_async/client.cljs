@@ -70,25 +70,36 @@
 
 (l/defnd get-display
   [{:keys [owner idx] :as params}]
+;;   (l/infod src fn-name "owner" owner)
+;;   (l/infod src fn-name "idx" idx)
   (let [display (om/get-state owner [idx :display])]
-    ;; (l/infod src fn-name "display" display)
     (if (or (nil? display) display)
       #js {}
       #js {:display "none"})))
 
 (l/defnd table
-  [{:keys [app owner tname tdata] :as params}]
+  [{:keys [app owner idx rows-displayed tname tdata] :as params}]
   (let [rows (into [] (map #(into [] (vals (nth tdata %)))
                            (range (count tdata))))
         header (into [] (keys (first tdata)))
         ;; (:idx app) must be used (no @)
         ;; if binded in a let-statement outside
-        p (into params {:idx (:idx app) :kw-display [:display]})
         ]
-    (dom/div #js {:style (get-display p)}
+;;     (l/infod src fn-name "params" params)
+;;     (l/infod src fn-name "owner" owner)
+;;     (l/infod src fn-name "rows-displayed" (:rows-displayed app))
+    (l/infod src fn-name "table: idx" (:idx app))
+    (dom/div #js {:style (get-display (into params {:idx (:idx app)}))}
              tname
-             (dom/button #js {:onClick (fn [e] (oc/hide-table p))} "hide-table")
-             (dom/button #js {:onClick (fn [e] (oc/more-rows p))} "more-rows")
+             (dom/button #js {:onClick (fn [e]
+                                         (oc/hide-table (into params {:idx (:idx @app)})))}
+                         "hide-table")
+             (dom/button #js {:onClick (fn [e]
+                                         (oc/more-rows
+                                          (into params {:idx (:idx @app)
+                                                        :rows-displayed (:rows-displayed @app)
+                                                        })))}
+                         "more-rows")
              (dom/div nil
                       (dom/table nil
                                  (dom/thead nil

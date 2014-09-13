@@ -124,16 +124,24 @@
 
 (l/defnd hide-table
 ;;   "TODO Should use the displayed-elems fn work a la Display +N / -N tables
-;;   Remove table component from web page"
-  [{:keys [app owner idx] :as params}]
-  ;; (l/infod src fn-name "app" @app)
+;;   Hide table component from web page"
+  [{:keys [owner idx] :as params}]
   ;; (l/infod src fn-name "owner" owner)
-  ;; (l/infod src fn-name "idx" idx)
+  ;;(l/infod src fn-name "idx" idx)
   (om/set-state! owner [idx :display] false))
 
 (l/defnd more-rows
 ;;   "Display +N / -N rows"
-  [{:keys [owner idx] :as params}]
-;;   (println "idx: " idx)
-  (println "TODO implement more-rows"))
+  [{:keys [app owner dbase idx rows-displayed] :as params}]
+  (l/infod src fn-name "app" @app)
+;;   (l/infod src fn-name "owner" owner)
+;;   (l/infod src fn-name "rows-displayed" rows-displayed)
+;;   (l/infod src fn-name "idx" idx)
+;;   (l/infod src fn-name "dbase" dbase)
+;;   (l/infod src fn-name "rows-displayed" (:rows-displayed @app))
+  (println "TODO implement more-rows")
+
+;;   (om/transact! @app [idx :rows-displayed] (inc rows-displayed))
+;;   (om/set-state! owner [idx :rows-displayed] (inc rows-displayed))
+  )
 
