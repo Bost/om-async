@@ -40,6 +40,8 @@
   [coll element]
   (boolean (some #(= element %) coll)))
 
+(defn in? [seq elem] (contains-value? seq elem))
+
 (def d  "departments")
 (def e  "employees")
 (def s  "salaries")

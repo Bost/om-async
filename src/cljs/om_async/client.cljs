@@ -68,15 +68,15 @@
        rows               ;; gives the row
        row-keywords))
 
-(defn get-display
+(l/defnd get-display
   [{:keys [owner] :as params}]
   (let [display (om/get-state owner [:table0 :display])]
-    (println "display" display)
+    (l/infod src fn-name "display" display)
     (if (or (nil? display) display)
       #js {}
       #js {:display "none"})))
 
-(defn table
+(l/defnd table
   [{:keys [app owner tname tdata] :as params}]
   (let [rows (into [] (map #(into [] (vals (nth tdata %)))
                            (range (count tdata))))
@@ -85,6 +85,7 @@
         ;; if binded in a let-statement outside
         p (into params {:idx (:idx app) :kw-display [:display]})
         ]
+    (l/infod src fn-name "owner" owner)
     (dom/div #js {:style (get-display p)}
              tname
              (dom/button #js {:onClick (fn [e] (oc/remove-table p))} "remove")

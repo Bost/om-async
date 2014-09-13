@@ -7,13 +7,14 @@
 ;;             [om.dom :as dom :include-macros true]
             [cljs.core.async :refer [put! chan <!]]
 ;;             [om-async.utils :as u]
-;;             [om-async.logger :as l]
+            [om-async.logger :as l]
 ;;             [om-async.cli-transform :as t]
 ;;             ;;[clojure.walk :as walk]
             )
   (:import [goog.net XhrIo]
            goog.net.EventType
-           [goog.events EventType]))
+           [goog.events EventType])
+  (:require-macros [om-async.logger :as l]))
 
 (def src "onclick.cljs")
 
@@ -121,14 +122,16 @@
 (defn displayed-elems [elem add-remove-N]
   nil)
 
-(defn remove-table
-  "TODO Should use the displayed-elems fn work a la Display +N / -N tables
-  Remove table component from web page"
+(l/defnd remove-table
+;;   "TODO Should use the displayed-elems fn work a la Display +N / -N tables
+;;   Remove table component from web page"
   [{:keys [owner idx] :as params}]
-;;   (println "idx: " idx)
+  (let [display (om/get-state owner [:table0 :display])]
+    (l/infod src fn-name "display" display))
   (println "idx: " (idx-table idx))
+  (println "owner: " owner)
   (om/set-state! owner [:table0 :display] false)
-  (println "TODO implement remove-table"))
+  )
 
 (defn more-rows
   "Display +N / -N rows"

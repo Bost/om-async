@@ -9,78 +9,71 @@
 (def src "logger.cljx")
 
 (def files
-  ["client.cljs" "transform.clj"
-   "db.clj"
-   "server.clj" "utils"]
-;;   ["client.cljs"]
-;;   ["transform.clj"]
-;;   nil
+  {:client.cljs [ "table"
+                  "view"
+                  ;;    "construct-component"
+                  ;;    "table"
+                  ;;    "init"
+                  ;;    "color"
+                  ;;    "tr"
+                  ;;    "view-onComplete"
+                  ;;    "onClick-onComplete"
+                  "onClick"
+                  "td"
+                  "render-multi"
+                  "ks-other"
+                  ;;    "render"
+                  ]
+   :onclick.cljs [ ]
+   :transform.clj [
+                   ;;    "fetch"
+                   ;;    "encode-table"
+                   ;;    "process-select-rows-from"
+                   ;;    "m-show-tables-from"
+                   ;;    "m-select-rows-from"
+                   ;;    "m-show-tables-with-data-from"
+                   ;;    "process-show-tables-with-data-from"
+                   ]
+   :server.clj [
+                ;;    "routes-PUT-select-id"
+                ;;    "routes-PUT-fetch"
+                ;;    "process-sql"
+                ]
+   :utils [
+           ;;    "convert-to-korks"
+           ]
+
+   :db.clj [
+            "sql-show-tables-from"
+            ;;    "sql-select-rows-from"
+            ;;    "fn-name"
+            ]
+   }
   )
-
-(def functions
-  [
-   ;;;; client.cljs
-   "view"
-;;    "construct-component"
-;;    "table"
-;;    "init"
-;;    "color"
-;;    "tr"
-;;    "view-onComplete"
-;;    "onClick-onComplete"
-   "onClick"
-   "td"
-   "render-multi"
-   "ks-other"
-;;    "render"
-
-   ;;;; db.clj
-;;    "fn-name"
-
-   ;;;; transform.clj
-   "fetch"
-   "encode-table"
-   "process-select-rows-from"
-   "m-show-tables-from"
-   "m-select-rows-from"
-   "m-show-tables-with-data-from"
-   "process-show-tables-with-data-from"
-
-   ;;;; server.clj
-;;    "routes-PUT-select-id"
-;;    "routes-PUT-fetch"
-;;    "process-sql"
-   ""
-   ;;;; utils
-;;    "convert-to-korks"
-
-   ;;;; db.clj
-   "sql-show-tables-from"
-;;    "sql-select-rows-from"
-   ])
 
 ;; TODO use (partial ..)
 (defn infod [src fn-name def-name def-val]
-  (if (u/contains-value? files src)
-    (if (u/contains-value? functions fn-name)
-      (println
-       (str src "; " fn-name "; "
-            "(def " def-name " " (pr-str def-val) ")"))))
-  def-val)
+  (let [fns ((keyword src) files)]
+    (if fns
+      (if (u/in? fns fn-name)
+        (println
+         (str src "; " fn-name "; "
+              "(def " def-name " " (pr-str def-val) ")"))))
+    def-val))
 
 ;; TODO macro: choose between clojure.pprint/pprint (clj) & println (cljs)
 ;; TODO see (JSON/stringify obj nil 2)
-(defn info [src fn-name msg]
-  (if (u/contains-value? files src)
-    (if (u/contains-value? functions fn-name)
-      (println
-       (str src "; " fn-name "; " msg)))))
+;; (defn info [src fn-name msg]
+;;   (if (u/contains-value? files src)
+;;     (if (u/contains-value? functions fn-name)
+;;       (println
+;;        (str src "; " fn-name "; " msg)))))
 
-(defn error [src fn-name msg]
-  (let [separator "========="]
-    (info src fn-name separator)
-    (info src fn-name (str "ERROR: " msg))
-    (info src fn-name separator)))
+;; (defn error [src fn-name msg]
+;;   (let [separator "========="]
+;;     (info src fn-name separator)
+;;     (info src fn-name (str "ERROR: " msg))
+;;     (info src fn-name separator)))
 
 (defn encode-name-val [n v]
   (str "(def " n " "
