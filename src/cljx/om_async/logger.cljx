@@ -24,7 +24,10 @@
                   "ks-other"
                   ;;    "render"
                   ]
-   :onclick.cljs [ ]
+   :onclick.cljs [
+                  ;; "hide-table"
+                  "more-rows"
+                  ]
    :transform.clj [
                    ;;    "fetch"
                    ;;    "encode-table"

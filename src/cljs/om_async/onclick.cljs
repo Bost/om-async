@@ -122,16 +122,14 @@
 (defn displayed-elems [elem add-remove-N]
   nil)
 
-(l/defnd remove-table
+(l/defnd hide-table
 ;;   "TODO Should use the displayed-elems fn work a la Display +N / -N tables
 ;;   Remove table component from web page"
-  [{:keys [owner idx] :as params}]
-  (let [display (om/get-state owner [:table0 :display])]
-    (l/infod src fn-name "display" display))
-  (println "idx: " (idx-table idx))
-  (println "owner: " owner)
-  (om/set-state! owner [:table0 :display] false)
-  )
+  [{:keys [app owner idx] :as params}]
+  ;; (l/infod src fn-name "app" @app)
+  ;; (l/infod src fn-name "owner" owner)
+  ;; (l/infod src fn-name "idx" idx)
+  (om/set-state! owner [idx :display] false))
 
 (defn more-rows
   "Display +N / -N rows"

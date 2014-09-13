@@ -21,12 +21,12 @@
 (def app-state (atom {}))
 
 ;; TODO consider using take-while/drop-while to increase performance
-(defn column-filter? [elem-idx] true) ;; no element is filtered out
+(defn column-filter? [elem-idx] true) ;; no elem is filtered out
 ;; (let [m {:a 1 :b 2 :c 1}]
 ;;   (select-keys m (for [[k v] m :when (= v 1)] k)))
 
-(defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no element is filtered out
-;; (defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no element is filtered out
+(defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no elem is filtered out
+;; (defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no elem is filtered out
 
 (l/defnd get-css
   [{:keys [owner default] :as params}]
@@ -69,9 +69,9 @@
        row-keywords))
 
 (l/defnd get-display
-  [{:keys [owner] :as params}]
-  (let [display (om/get-state owner [:table0 :display])]
-    (l/infod src fn-name "display" display)
+  [{:keys [owner idx] :as params}]
+  (let [display (om/get-state owner [idx :display])]
+    ;; (l/infod src fn-name "display" display)
     (if (or (nil? display) display)
       #js {}
       #js {:display "none"})))
@@ -85,10 +85,9 @@
         ;; if binded in a let-statement outside
         p (into params {:idx (:idx app) :kw-display [:display]})
         ]
-    (l/infod src fn-name "owner" owner)
     (dom/div #js {:style (get-display p)}
              tname
-             (dom/button #js {:onClick (fn [e] (oc/remove-table p))} "remove")
+             (dom/button #js {:onClick (fn [e] (oc/hide-table p))} "hide-table")
              (dom/button #js {:onClick (fn [e] (oc/more-rows p))} "more-rows")
              (dom/div nil
                       (dom/table nil
