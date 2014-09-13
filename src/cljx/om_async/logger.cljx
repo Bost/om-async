@@ -31,7 +31,7 @@
    :transform.clj [
                    ;;    "fetch"
                    ;;    "encode-table"
-                   ;;    "process-select-rows-from"
+                   "process-select-rows-from"
                    ;;    "m-show-tables-from"
                    ;;    "m-select-rows-from"
                    ;;    "m-show-tables-with-data-from"

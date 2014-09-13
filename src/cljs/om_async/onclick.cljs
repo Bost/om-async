@@ -131,10 +131,9 @@
   ;; (l/infod src fn-name "idx" idx)
   (om/set-state! owner [idx :display] false))
 
-(defn more-rows
-  "Display +N / -N rows"
+(l/defnd more-rows
+;;   "Display +N / -N rows"
   [{:keys [owner idx] :as params}]
 ;;   (println "idx: " idx)
-  (println "idx: " (idx-table idx))
   (println "TODO implement more-rows"))
 

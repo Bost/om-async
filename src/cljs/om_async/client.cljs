@@ -183,11 +183,12 @@
           :data
           {:select-rows-from
            [
-            {:dbase "employees" :table "employees"   :idx (oc/kw-table 0)}
-            {:dbase "employees" :table "departments" :idx (oc/kw-table 1)}
-            {:dbase "employees" :table "salaries"    :idx (oc/kw-table 2)}
+            ;; !!! Woa any key-value pair I stuff in pops up in the db.sql-select-rows-from fn.
+            {:dbase "employees" :table "employees"   :rows-displayed 1 :idx (oc/kw-table 0)}
+            {:dbase "employees" :table "departments" :rows-displayed 2 :idx (oc/kw-table 1)}
+            {:dbase "employees" :table "salaries"    :rows-displayed 4 :idx (oc/kw-table 2)}
             ]}
-;;           {:select-rows-from [{:dbase "employees" :table "departments" :idx :table0}]}
+;;           {:select-rows-from [{:dbase "employees" :table "departments" :rows-displayed 2 :idx :table0}]}
 
 ;;           {:show-tables-from [{:dbase "employees" :idx 0}]}
 
