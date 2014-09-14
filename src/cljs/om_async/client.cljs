@@ -95,13 +95,23 @@
                                          (oc/hide-table (into params {:idx (:idx @app)})))}
                          "hide-table")
              (dom/button #js {:onClick (fn [e]
-                                         (oc/more-rows
+                                         (oc/displayed-rows
                                           (into params {:dbase (:dbase @app)
                                                         :table (:table @app)
                                                         :rows-displayed (:rows-displayed @app)
                                                         :idx (:idx @app)
+                                                        :fnc inc
                                                         })))}
                          "more-rows")
+             (dom/button #js {:onClick (fn [e]
+                                         (oc/displayed-rows
+                                          (into params {:dbase (:dbase @app)
+                                                        :table (:table @app)
+                                                        :rows-displayed (:rows-displayed @app)
+                                                        :idx (:idx @app)
+                                                        :fnc dec
+                                                        })))}
+                         "less-rows")
              (dom/div nil
                       (dom/table nil
                                  (dom/thead nil

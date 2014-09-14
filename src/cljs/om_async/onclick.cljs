@@ -131,9 +131,9 @@
   ;;(l/infod src fn-name "idx" idx)
   (om/set-state! owner [idx :display] false))
 
-(l/defnd more-rows
+(l/defnd displayed-rows
 ;;   "Display +N / -N rows"
-  [{:keys [app owner dbase table rows-displayed idx] :as params}]
+  [{:keys [app owner dbase table rows-displayed idx fnc] :as params}]
 ;;   (l/infod src fn-name "app" @app)
 ;;   (l/infod src fn-name "owner" owner)
 ;;   (l/infod src fn-name "rows-displayed" rows-displayed)
@@ -147,7 +147,7 @@
     :url "fetch"
     :data
     {:select-rows-from
-     [{:dbase dbase :table table :rows-displayed (inc rows-displayed) :idx idx}]}
+     [{:dbase dbase :table table :rows-displayed (fnc rows-displayed) :idx idx}]}
     :on-complete (fn [response]
                    (let [er (t/extend-all response)
                          r (first (into [] er))]
