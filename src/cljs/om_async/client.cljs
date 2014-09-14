@@ -82,6 +82,7 @@
   (let [rows (into [] (map #(into [] (vals (nth tdata %)))
                            (range (count tdata))))
         header (into [] (keys (first tdata)))
+        buttons [{:name "more-rows" :fnc inc} {:name "less-rows" :fnc dec}]
         ;; (:idx app) must be used (no @)
         ;; if binded in a let-statement outside
         ]
@@ -94,24 +95,17 @@
              (dom/button #js {:onClick (fn [e]
                                          (oc/hide-table (into params {:idx (:idx @app)})))}
                          "hide-table")
-             (dom/button #js {:onClick (fn [e]
-                                         (oc/displayed-rows
-                                          (into params {:dbase (:dbase @app)
-                                                        :table (:table @app)
-                                                        :rows-displayed (:rows-displayed @app)
-                                                        :idx (:idx @app)
-                                                        :fnc inc
-                                                        })))}
-                         "more-rows")
-             (dom/button #js {:onClick (fn [e]
-                                         (oc/displayed-rows
-                                          (into params {:dbase (:dbase @app)
-                                                        :table (:table @app)
-                                                        :rows-displayed (:rows-displayed @app)
-                                                        :idx (:idx @app)
-                                                        :fnc dec
-                                                        })))}
-                         "less-rows")
+             (apply dom/span nil
+                    (map
+                     #(dom/button #js {:onClick (fn [e]
+                                                  (oc/displayed-rows
+                                                   (into params {:dbase (:dbase @app)
+                                                                 :table (:table @app)
+                                                                 :rows-displayed (:rows-displayed @app)
+                                                                 :idx (:idx @app)
+                                                                 :fnc (:fnc %)
+                                                                 })))}
+                                  (:name %)) buttons))
              (dom/div nil
                       (dom/table nil
                                  (dom/thead nil
