@@ -88,7 +88,7 @@
 ;;     (l/infod src fn-name "params" params)
 ;;     (l/infod src fn-name "owner" owner)
 ;;     (l/infod src fn-name "rows-displayed" (:rows-displayed app))
-    (l/infod src fn-name "table: idx" (:idx app))
+;;     (l/infod src fn-name "table: idx" (:idx app))
     (dom/div #js {:style (get-display (into params {:idx (:idx app)}))}
              tname
              (dom/button #js {:onClick (fn [e]
@@ -96,8 +96,10 @@
                          "hide-table")
              (dom/button #js {:onClick (fn [e]
                                          (oc/more-rows
-                                          (into params {:idx (:idx @app)
+                                          (into params {:dbase (:dbase @app)
+                                                        :table (:table @app)
                                                         :rows-displayed (:rows-displayed @app)
+                                                        :idx (:idx @app)
                                                         })))}
                          "more-rows")
              (dom/div nil

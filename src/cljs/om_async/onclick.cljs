@@ -8,7 +8,7 @@
             [cljs.core.async :refer [put! chan <!]]
 ;;             [om-async.utils :as u]
             [om-async.logger :as l]
-;;             [om-async.cli-transform :as t]
+            [om-async.cli-transform :as t]
 ;;             ;;[clojure.walk :as walk]
             )
   (:import [goog.net XhrIo]
@@ -122,6 +122,7 @@
 (defn displayed-elems [elem add-remove-N]
   nil)
 
+;; (into {:a 1 :b 2} {:a 2 :c 3})
 (l/defnd hide-table
 ;;   "TODO Should use the displayed-elems fn work a la Display +N / -N tables
 ;;   Hide table component from web page"
@@ -132,16 +133,31 @@
 
 (l/defnd more-rows
 ;;   "Display +N / -N rows"
-  [{:keys [app owner dbase idx rows-displayed] :as params}]
-  (l/infod src fn-name "app" @app)
+  [{:keys [app owner dbase table rows-displayed idx] :as params}]
+;;   (l/infod src fn-name "app" @app)
 ;;   (l/infod src fn-name "owner" owner)
 ;;   (l/infod src fn-name "rows-displayed" rows-displayed)
-;;   (l/infod src fn-name "idx" idx)
 ;;   (l/infod src fn-name "dbase" dbase)
-;;   (l/infod src fn-name "rows-displayed" (:rows-displayed @app))
-  (println "TODO implement more-rows")
-
-;;   (om/transact! @app [idx :rows-displayed] (inc rows-displayed))
-;;   (om/set-state! owner [idx :rows-displayed] (inc rows-displayed))
+;;   (l/infod src fn-name "table" table)
+;;   (l/infod src fn-name "rows-displayed" rows-displayed)
+;;   (l/infod src fn-name "idx" idx)
+  ;;   (println "TODO implement more-rows")
+  (edn-xhr
+   {:method :put
+    :url "fetch"
+    :data
+    {:select-rows-from
+     [{:dbase dbase :table table :rows-displayed (inc rows-displayed) :idx idx}]}
+    :on-complete (fn [response]
+                   (let [er (t/extend-all response)
+                         r (first (into [] er))]
+                     ;; (l/infod src fn-name "r" r)
+                     ;; om/transact! propagates changes back to the original atom
+                     (om/transact! app []
+                                   (fn [_]
+                                     ;; (l/infod src fn-name "response" response)
+                                     ;; (l/infod src fn-name "r" r)
+                                     r)))
+                   )
+    })
   )
-
