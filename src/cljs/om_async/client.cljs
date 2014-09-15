@@ -82,7 +82,8 @@
   (let [rows (into [] (map #(into [] (vals (nth tdata %)))
                            (range (count tdata))))
         header (into [] (keys (first tdata)))
-        buttons [{:name "more-rows" :fnc inc} {:name "less-rows" :fnc dec}]
+        buttons [{:name "more-rows" :fnc inc :exec-fnc? (fn [_] true)}
+                 {:name "less-rows" :fnc dec :exec-fnc? (fn [cnt-rows] (> cnt-rows 0))}]
         ;; (:idx app) must be used (no @)
         ;; if binded in a let-statement outside
         ]
@@ -104,6 +105,7 @@
                                                                  :rows-displayed (:rows-displayed @app)
                                                                  :idx (:idx @app)
                                                                  :fnc (:fnc %)
+                                                                 :exec-fnc? (:exec-fnc? %)
                                                                  })))}
                                   (:name %)) buttons))
              (dom/div nil

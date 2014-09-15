@@ -27,11 +27,11 @@
                   ]
    :onclick.cljs [
                   "hide-table"
-                  "more-rows"
+                  "displayed-rows"
                   ]
    :transform.clj [
                    ;;    "fetch"
-                   ;;    "encode-table"
+                   ;; "encode-table"
                    ;; "process-select-rows-from"
                    ;;    "m-show-tables-from"
                    ;;    "m-select-rows-from"

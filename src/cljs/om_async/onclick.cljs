@@ -133,7 +133,7 @@
 
 (l/defnd displayed-rows
 ;;   "Display +N / -N rows"
-  [{:keys [app owner dbase table rows-displayed idx fnc] :as params}]
+  [{:keys [app owner dbase table rows-displayed idx fnc exec-fnc?] :as params}]
 ;;   (l/infod src fn-name "app" @app)
 ;;   (l/infod src fn-name "owner" owner)
 ;;   (l/infod src fn-name "rows-displayed" rows-displayed)
@@ -141,23 +141,24 @@
 ;;   (l/infod src fn-name "table" table)
 ;;   (l/infod src fn-name "rows-displayed" rows-displayed)
 ;;   (l/infod src fn-name "idx" idx)
-  ;;   (println "TODO implement more-rows")
-  (edn-xhr
-   {:method :put
-    :url "fetch"
-    :data
-    {:select-rows-from
-     [{:dbase dbase :table table :rows-displayed (fnc rows-displayed) :idx idx}]}
-    :on-complete (fn [response]
-                   (let [er (t/extend-all response)
-                         r (first (into [] er))]
-                     ;; (l/infod src fn-name "r" r)
-                     ;; om/transact! propagates changes back to the original atom
-                     (om/transact! app []
-                                   (fn [_]
-                                     ;; (l/infod src fn-name "response" response)
-                                     ;; (l/infod src fn-name "r" r)
-                                     r)))
-                   )
-    })
+;;   (l/infod src fn-name "exec-fnc?" exec-fnc?)
+  (if (exec-fnc? rows-displayed)
+    (edn-xhr
+     {:method :put
+      :url "fetch"
+      :data
+      {:select-rows-from
+       [{:dbase dbase :table table :rows-displayed (fnc rows-displayed) :idx idx}]}
+      :on-complete (fn [response]
+                     (let [er (t/extend-all response)
+                           r (first (into [] er))]
+                       ;; (l/infod src fn-name "r" r)
+                       ;; om/transact! propagates changes back to the original atom
+                       (om/transact! app []
+                                     (fn [_]
+                                       ;; (l/infod src fn-name "response" response)
+                                       ;; (l/infod src fn-name "r" r)
+                                       r)))
+                     )
+      }))
   )
