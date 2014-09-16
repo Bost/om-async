@@ -1,5 +1,6 @@
 (ns om-async.client
   (:require [goog.dom :as gdom]
+;;             [goog.ui :as goui]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             ;; this is probably not needed at the moment
@@ -182,12 +183,14 @@
             "deactivate-all")
            (dom/script
             nil
-            (str
-             "var component = new goog.ui.TableSorter();\n"
-             "component.decorate(goog.dom.getElement('sortMe'));\n"
-             "component.setSortFunction(1, goog.ui.TableSorter.alphaSort);\n"
-             "component.setSortFunction(2, goog.ui.TableSorter.createReverseSort(goog.ui.TableSorter.numericSort));\n"
-             )
+            (let [c (TableSorter.)
+                  el (gdom/getElement "sortMe")
+;;                   rs (-createReverseSort TableSorter. .numericSort) ;; TODO this is wrong
+                  ]
+             (.decorate c el)
+;;              (.setSortFunction c 1 goog.ui.TableSorter.alphaSort)
+;;              (.setSortFunction c 2 )
+              )
             )
            (map #(render (into params {
                                        :app-full app
