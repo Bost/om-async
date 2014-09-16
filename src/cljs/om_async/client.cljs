@@ -94,7 +94,8 @@
     (dom/div #js {:style (get-display (into params {:idx (:idx app)}))}
              tname
              (dom/button #js {:onClick (fn [e]
-                                         (oc/hide-table (into params {:idx (:idx @app)})))}
+                                         (oc/hide-table (into params {:idx (:idx @app)}))
+                                         )}
                          "hide-table")
              (apply dom/span nil
                     (map
@@ -117,11 +118,13 @@
                                  (apply dom/tbody nil
                                         (render-row (into params {:rows rows :columns header})
                                                     )))]
-                        ;; [object Object] has no method 'tablesorter'
-;;                         (.tablesorter t)
-;;                         (println t)
+                        ;; TODO try jayq document-ready
+;;                         (println ".tablesorter:" (.tablesorter (js/$ (:idx app))))
+;;                         (.tablesorter (js/$ (:idx app)))
                         t)
-                      ))))
+                      )))
+;;   (.tablesorter (js/$ (:idx app)))
+  )
 
 (l/defnd render-data
   [{:keys [tdata] :as params}]
