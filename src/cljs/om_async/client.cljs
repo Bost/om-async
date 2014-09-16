@@ -109,13 +109,19 @@
                                                                  })))}
                                   (:name %)) buttons))
              (dom/div nil
-                      (dom/table nil
+                      (let [t
+                      (dom/table #js {:id (name (:idx app))}
                                  (dom/thead nil
                                             (apply dom/tr nil
                                                    (map #(dom/th nil (str %)) header)))
                                  (apply dom/tbody nil
                                         (render-row (into params {:rows rows :columns header})
-                                                    )))))))
+                                                    )))]
+                        ;; [object Object] has no method 'tablesorter'
+;;                         (.tablesorter t)
+;;                         (println t)
+                        t)
+                      ))))
 
 (l/defnd render-data
   [{:keys [tdata] :as params}]
