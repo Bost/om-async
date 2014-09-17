@@ -1,6 +1,6 @@
 (ns om-async.client
   (:require [goog.dom :as gdom]
-;;             [goog.ui :as goui]
+            [jayq.macros]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             ;; this is probably not needed at the moment
@@ -78,6 +78,22 @@
       #js {}
       #js {:display "none"})))
 
+(l/defnd table-sorter [elem-id]
+  (jayq.macros/ready
+   (let [el (gdom/getElement elem-id)]
+     (if (nil? el)
+       (println "elem-id: " elem-id "; el: " el)
+       (let [component (TableSorter.)
+             alphaSort goog.ui.TableSorter.alphaSort
+             numericSort goog.ui.TableSorter.numericSort
+             reverseSort (goog.ui.TableSorter.createReverseSort numericSort)]
+         (.decorate component el)
+         (.setSortFunction component 1 alphaSort)
+         (.setSortFunction component 2 reverseSort)))
+     )
+   )
+  )
+
 (l/defnd table
   [{:keys [app owner idx rows-displayed tname tdata] :as params}]
   (let [rows (into [] (map #(into [] (vals (nth tdata %)))
@@ -88,10 +104,10 @@
         ;; (:idx app) must be used (no @)
         ;; if binded in a let-statement outside
         ]
-;;     (l/infod src fn-name "params" params)
-;;     (l/infod src fn-name "owner" owner)
-;;     (l/infod src fn-name "rows-displayed" (:rows-displayed app))
-;;     (l/infod src fn-name "table: idx" (:idx app))
+    ;;     (l/infod src fn-name "params" params)
+    ;;     (l/infod src fn-name "owner" owner)
+    ;;     (l/infod src fn-name "rows-displayed" (:rows-displayed app))
+    ;;     (l/infod src fn-name "table: idx" (:idx app))
     (dom/div #js {:style (get-display (into params {:idx (:idx app)}))}
              tname
              (dom/button #js {:onClick (fn [e]
@@ -110,22 +126,21 @@
                                                                  :exec-fnc? (:exec-fnc? %)
                                                                  })))}
                                   (:name %)) buttons))
-             (dom/div nil
-                      (let [t
-                      (dom/table #js {:id (name (:idx app))}
+             (let [table-id (name (:idx app))]
+;;                (apply dom/div nil
+                      (dom/table #js {:id table-id}
                                  (dom/thead nil
                                             (apply dom/tr nil
                                                    (map #(dom/th nil (str %)) header)))
                                  (apply dom/tbody nil
-                                        (render-row (into params {:rows rows :columns header})
-                                                    )))]
-                        ;; TODO try jayq document-ready
-;;                         (println ".tablesorter:" (.tablesorter (js/$ (:idx app))))
-;;                         (.tablesorter (js/$ (:idx app)))
-                        t)
-                      )))
-;;   (.tablesorter (js/$ (:idx app)))
-  )
+                                        (render-row (into params {:rows rows :columns header}))))
+
+                      )
+             (dom/div nil (name (:idx app)))
+             (table-sorter (name (:idx app)))
+;;                )
+             )
+    ))
 
 (l/defnd render-data
   [{:keys [tdata] :as params}]
@@ -167,22 +182,14 @@
     (dom/div nil  "Fetching data..." )
     (apply dom/div nil
            (dom/button #js {:onClick (fn [e] (oc/deactivate-all params))} "deactivate-all")
-           (dom/script
-            nil
-            (let [component (TableSorter.)
-                  el (gdom/getElement "sortMe")
-                  alphaSort goog.ui.TableSorter.alphaSort
-                  numericSort goog.ui.TableSorter.numericSort
-                  reverseSort (goog.ui.TableSorter.createReverseSort numericSort)]
-              (.decorate component el)
-              (.setSortFunction component 1 alphaSort)
-              (.setSortFunction component 2 reverseSort)))
+           (table-sorter "sortMe")
            (map #(render (into params {
                                        :app-full app
                                        ;; the original value under :app is [{..}]; new value is just the {...}
                                        :app (second %)
                                        :idx-table (first %)}))
-                (into [] (map-indexed vector app))))))
+                (into [] (map-indexed vector app)))
+           )))
 
 ;; 3rd param is a map, associate symbol toggle with the value of the
 ;; :toggle keyword and "put" it in the opts map
