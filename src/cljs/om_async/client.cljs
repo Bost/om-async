@@ -153,26 +153,18 @@
   {})
 
 (l/defnd render
-  [{:keys [app] :as params}]
-  (l/infod src fn-name "app" app)
-  (let [dbase (get-in app [:dbase])
-        korks []]
-    ;; TODO get rid of 'if'
-    (dom/div #js {:id (str "render" 0)}
-             (let [tables (get-in app korks)
-                   cnt-tables (count tables)
-                   extended-data [tables]]
-               (render-data-vec
-                (into params {:extended-data extended-data}))))))
+  [{:keys [app idx] :as params}]
+  ;; (l/infod src fn-name "params" params)
+  (dom/div #js {:id idx}
+           (render-data-vec
+            (into params {:extended-data [app]}))))
 
 (l/defnd render-multi
   [{:keys [app owner] :as params}]
   ;; (l/infod src fn-name "app" app)
-  ;; (l/infod src fn-name "app-vec" app-vec)
-  (if (zero? (count (get-in app []))) ;; TODO simplify counting of elems in the app
-    (let [msg (str "Fetching data from dbase: " (get-in app [:dbase]))]
-      ;;(l/info src fn-name msg) ;; l/info makes troubles
-      (dom/div nil msg))
+  ;; TODO get rid of 'if'
+  (if (zero? (count app))
+    (dom/div nil  "Fetching data..." )
     (apply dom/div nil
            (dom/button #js {:onClick (fn [e] (oc/deactivate-all params))} "deactivate-all")
            (dom/script

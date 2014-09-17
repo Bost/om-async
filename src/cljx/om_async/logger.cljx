@@ -22,7 +22,7 @@
                   "td"
                   "render-multi"
                   "ks-other"
-                  ;;    "render"
+                  "render"
                   "get-display"
                   ]
    :onclick.cljs [
