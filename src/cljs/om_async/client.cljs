@@ -1,6 +1,6 @@
 (ns om-async.client
+;;   (:use [jayq.core :only [$ css html document-ready]])
   (:require [goog.dom :as gdom]
-            [jayq.macros]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             ;; this is probably not needed at the moment
@@ -12,7 +12,9 @@
             )
   (:import [goog.net XhrIo]
            [goog.ui TableSorter])
-  (:require-macros [om-async.logger :as l]))
+  (:require-macros [om-async.logger :as l]
+;;                    [jayq.macros :as j]
+                   ))
 
 (def src "client.cljs")
 
@@ -78,20 +80,18 @@
       #js {}
       #js {:display "none"})))
 
-(l/defnd table-sorter [elem-id]
-  (jayq.macros/ready
-   (let [el (gdom/getElement elem-id)]
-     (if (nil? el)
-       (println "elem-id: " elem-id "; el: " el)
-       (let [component (TableSorter.)
-             alphaSort goog.ui.TableSorter.alphaSort
-             numericSort goog.ui.TableSorter.numericSort
-             reverseSort (goog.ui.TableSorter.createReverseSort numericSort)]
-         (.decorate component el)
-         (.setSortFunction component 1 alphaSort)
-         (.setSortFunction component 2 reverseSort)))
-     )
-   )
+(defn table-sorter [elem-id]
+  (let [el (gdom/getElement elem-id)]
+    (if (nil? el)
+      (println "elem-id: " elem-id "; el: " el)
+      (let [component (TableSorter.)
+            alphaSort goog.ui.TableSorter.alphaSort
+            numericSort goog.ui.TableSorter.numericSort
+            reverseSort (goog.ui.TableSorter.createReverseSort numericSort)]
+        (.decorate component el)
+        (.setSortFunction component 1 alphaSort)
+        (.setSortFunction component 2 reverseSort)))
+    )
   )
 
 (l/defnd table
@@ -110,6 +110,10 @@
     ;;     (l/infod src fn-name "table: idx" (:idx app))
     (dom/div #js {:style (get-display (into params {:idx (:idx app)}))}
              tname
+             (dom/button #js {:onClick (fn [e]
+                                         (table-sorter (name (:idx @app)))
+                                         )}
+                         "sort-table")
              (dom/button #js {:onClick (fn [e]
                                          (oc/hide-table (into params {:idx (:idx @app)}))
                                          )}
@@ -137,8 +141,7 @@
 
                       )
              (dom/div nil (name (:idx app)))
-             (table-sorter (name (:idx app)))
-;;                )
+             ;; (table-sorter (name (:idx app)))
              )
     ))
 
