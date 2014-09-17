@@ -11,8 +11,7 @@
             [om-async.cli-transform :as t]
             )
   (:import [goog.net XhrIo]
-           [goog.ui TableSorter]
-           goog.net.EventType)
+           [goog.ui TableSorter])
   (:require-macros [om-async.logger :as l]))
 
 (def src "client.cljs")
@@ -161,14 +160,10 @@
     ;; TODO get rid of 'if'
     (dom/div #js {:id (str "render" 0)}
              (let [tables (get-in app korks)
-                   cnt-tables (count tables)]
-               (if (zero? cnt-tables)
-                 (let [msg (str "Fetching data from dbase: " dbase)]
-                   (l/info src fn-name msg)
-                   msg)
-                 (let [extended-data [tables]]
-                   (render-data-vec
-                    (into params {:extended-data extended-data}))))))))
+                   cnt-tables (count tables)
+                   extended-data [tables]]
+               (render-data-vec
+                (into params {:extended-data extended-data}))))))
 
 (l/defnd render-multi
   [{:keys [app owner] :as params}]
@@ -176,29 +171,40 @@
         app-vec (into [] (map-indexed vector app))]
     ;; (l/infod src fn-name "app" app)
     ;; (l/infod src fn-name "app-vec" app-vec)
-    (apply dom/div nil
-           (dom/button
-            #js {:onClick (fn [e] (oc/deactivate-all params))
-                 }
-            "deactivate-all")
-           (dom/script
-            nil
-            (let [c (TableSorter.)
-                  el (gdom/getElement "sortMe")
-;;                   rs (-createReverseSort TableSorter. .numericSort) ;; TODO this is wrong
-                  ]
-             (.decorate c el)
-;;              (.setSortFunction c 1 goog.ui.TableSorter.alphaSort)
-;;              (.setSortFunction c 2 )
-              )
-            )
-           (map #(render (into params {
-                                       :app-full app
-                                       ;; the original value under :app is [{..}]; new value is just the {...}
-                                       :app (second %)
-                                       :idx-table (first %)}))
-                app-vec)
-           )))
+    (let [tables (get-in app [])
+          cnt-tables (count tables)]
+      (if (zero? cnt-tables)
+        (let [msg (str "Fetching data from dbase: " (get-in app [:dbase]))]
+          (l/info src fn-name msg)
+          (dom/div nil msg)
+          )
+        (let [extended-data [tables]]
+          (dom/div nil "bar")
+;;           (apply dom/div nil
+;;                  (dom/button #js {:onClick (fn [e] (oc/deactivate-all params))} "deactivate-all")
+;;                  (dom/script
+;;                   nil
+;;                   (let [c (TableSorter.)
+;;                         el (gdom/getElement "sortMe")
+;;                         alphaSort goog.ui.TableSorter.alphaSort
+;;                         reverseSort (goog.ui.TableSorter.createReverseSort goog.ui.TableSorter.numericSort)
+;;                         ]
+;;                     (.decorate c el)
+;;                     (.setSortFunction c 1 alphaSort)
+;;                     (.setSortFunction c 2 reverseSort)
+;;                     )
+;;                   )
+;;                  (map #(render (into params {
+;;                                              :app-full app
+;;                                              ;; the original value under :app is [{..}]; new value is just the {...}
+;;                                              :app (second %)
+;;                                              :idx-table (first %)}))
+;;                       app-vec)
+;;                  )
+          )
+        )
+      )
+    ))
 
 ;; 3rd param is a map, associate symbol toggle with the value of the
 ;; :toggle keyword and "put" it in the opts map
