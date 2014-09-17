@@ -83,16 +83,14 @@
 (defn table-sorter [elem-id]
   (let [el (gdom/getElement elem-id)]
     (if (nil? el)
-      (println "elem-id: " elem-id "; el: " el)
+      (println "ERROR: (gdom/getElement elem-id) is nil: " el)
       (let [component (TableSorter.)
             alphaSort goog.ui.TableSorter.alphaSort
             numericSort goog.ui.TableSorter.numericSort
             reverseSort (goog.ui.TableSorter.createReverseSort numericSort)]
         (.decorate component el)
         (.setSortFunction component 1 alphaSort)
-        (.setSortFunction component 2 reverseSort)))
-    )
-  )
+        (.setSortFunction component 2 reverseSort)))))
 
 (l/defnd table
   [{:keys [app owner idx rows-displayed tname tdata] :as params}]
@@ -128,17 +126,15 @@
                                   (:name %)) buttons))
              (let [table-id (name (:idx app))]
 ;;                (apply dom/div nil
-                      (dom/table #js {:id table-id}
-                                 (dom/thead nil
-                                            (apply dom/tr nil
-                                                   (map #(dom/th nil (str %)) header)))
-                                 (apply dom/tbody nil
-                                        (render-row (into params {:rows rows :columns header}))))
-
-                      )
+               (dom/table #js {:id table-id :onMouseOver (fn [] (table-sorter table-id))}
+                          (dom/thead nil
+                                     (apply dom/tr nil
+                                            (map #(dom/th nil (str %)) header)))
+                          (apply dom/tbody nil
+                                 (render-row (into params {:rows rows :columns header}))))
+               )
              (dom/div nil (name (:idx app)))
 ;;              (m/ready )
-             (table-sorter (name (:idx app)))
              )
     ))
 
