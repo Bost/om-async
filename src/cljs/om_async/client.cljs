@@ -1,5 +1,5 @@
 (ns om-async.client
-;;   (:use [jayq.core :only [$ css html document-ready]])
+  (:use [jayq.core :only [$ css html document-ready]])
   (:require [goog.dom :as gdom]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
@@ -13,7 +13,7 @@
   (:import [goog.net XhrIo]
            [goog.ui TableSorter])
   (:require-macros [om-async.logger :as l]
-;;                    [jayq.macros :as j]
+                   [jayq.macros :as m]
                    ))
 
 (def src "client.cljs")
@@ -141,7 +141,8 @@
 
                       )
              (dom/div nil (name (:idx app)))
-             ;; (table-sorter (name (:idx app)))
+;;              (m/ready )
+             (table-sorter (name (:idx app)))
              )
     ))
 
