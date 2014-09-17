@@ -111,10 +111,6 @@
     (dom/div #js {:style (get-display (into params {:idx (:idx app)}))}
              tname
              (dom/button #js {:onClick (fn [e]
-                                         (table-sorter (name (:idx @app)))
-                                         )}
-                         "sort-table")
-             (dom/button #js {:onClick (fn [e]
                                          (oc/hide-table (into params {:idx (:idx @app)}))
                                          )}
                          "hide-table")
