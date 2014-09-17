@@ -1,5 +1,5 @@
 (ns om-async.client
-  (:use [jayq.core :only [$ css html document-ready]])
+;;   (:use [jayq.core :only [$ css html document-ready]])
   (:require [goog.dom :as gdom]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
@@ -13,7 +13,7 @@
   (:import [goog.net XhrIo]
            [goog.ui TableSorter])
   (:require-macros [om-async.logger :as l]
-                   [jayq.macros :as m]
+;;                    [jayq.macros :as m]
                    ))
 
 (def src "client.cljs")
@@ -106,12 +106,12 @@
     ;;     (l/infod src fn-name "owner" owner)
     ;;     (l/infod src fn-name "rows-displayed" (:rows-displayed app))
     ;;     (l/infod src fn-name "table: idx" (:idx app))
-    (dom/div #js {:style (get-display (into params {:idx (:idx app)}))}
+    (dom/div nil
              tname
              (dom/button #js {:onClick (fn [e]
-                                         (oc/hide-table (into params {:idx (:idx @app)}))
+                                         (oc/toggle-table (into params {:idx (:idx @app)}))
                                          )}
-                         "hide-table")
+                         "toggle-table")
              (apply dom/span nil
                     (map
                      #(dom/button #js {:onClick (fn [e]
@@ -125,15 +125,15 @@
                                                                  })))}
                                   (:name %)) buttons))
              (let [table-id (name (:idx app))]
-;;                (apply dom/div nil
-               (dom/table #js {:id table-id :onMouseOver (fn [] (table-sorter table-id))}
+               ;;                (apply dom/div nil
+               (dom/table #js {:id table-id :onMouseOver (fn [] (table-sorter table-id))
+                               :style (get-display (into params {:idx (:idx app)}))}
                           (dom/thead nil
                                      (apply dom/tr nil
                                             (map #(dom/th nil (str %)) header)))
                           (apply dom/tbody nil
                                  (render-row (into params {:rows rows :columns header}))))
                )
-             (dom/div nil (name (:idx app)))
 ;;              (m/ready )
              )
     ))

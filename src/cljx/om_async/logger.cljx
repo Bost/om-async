@@ -26,7 +26,7 @@
                   "get-display"
                   ]
    :onclick.cljs [
-                  "hide-table"
+                  "toggle-table"
                   "displayed-rows"
                   ]
    :transform.clj [

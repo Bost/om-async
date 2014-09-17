@@ -123,13 +123,18 @@
   nil)
 
 ;; (into {:a 1 :b 2} {:a 2 :c 3})
-(l/defnd hide-table
-;;   "TODO Should use the displayed-elems fn work a la Display +N / -N tables
-;;   Hide table component from web page"
+(l/defnd toggle-table
+  ;; "TODO Should use the displayed-elems fn work a la Display +N / -N tables
+  ;;  Hide table component from web page"
   [{:keys [owner idx] :as params}]
   ;; (l/infod src fn-name "owner" owner)
-  ;;(l/infod src fn-name "idx" idx)
-  (om/set-state! owner [idx :display] false))
+  ;; (l/infod src fn-name "idx" idx)
+  (let [korks [idx :display]
+        displayed-state (om/get-state owner korks)
+        ;; TODO proper initialisation of table displayed state
+        displayed (if (nil? displayed-state) true displayed-state)]
+    ;; (l/infod src fn-name "displayed" displayed)
+    (om/set-state! owner korks (not displayed))))
 
 (l/defnd displayed-rows
 ;;   "Display +N / -N rows"
