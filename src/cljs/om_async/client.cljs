@@ -167,44 +167,30 @@
 
 (l/defnd render-multi
   [{:keys [app owner] :as params}]
-  (let [cnt (count app)
-        app-vec (into [] (map-indexed vector app))]
-    ;; (l/infod src fn-name "app" app)
-    ;; (l/infod src fn-name "app-vec" app-vec)
-    (let [tables (get-in app [])
-          cnt-tables (count tables)]
-      (if (zero? cnt-tables)
-        (let [msg (str "Fetching data from dbase: " (get-in app [:dbase]))]
-          (l/info src fn-name msg)
-          (dom/div nil msg)
-          )
-        (let [extended-data [tables]]
-          (dom/div nil "bar")
-;;           (apply dom/div nil
-;;                  (dom/button #js {:onClick (fn [e] (oc/deactivate-all params))} "deactivate-all")
-;;                  (dom/script
-;;                   nil
-;;                   (let [c (TableSorter.)
-;;                         el (gdom/getElement "sortMe")
-;;                         alphaSort goog.ui.TableSorter.alphaSort
-;;                         reverseSort (goog.ui.TableSorter.createReverseSort goog.ui.TableSorter.numericSort)
-;;                         ]
-;;                     (.decorate c el)
-;;                     (.setSortFunction c 1 alphaSort)
-;;                     (.setSortFunction c 2 reverseSort)
-;;                     )
-;;                   )
-;;                  (map #(render (into params {
-;;                                              :app-full app
-;;                                              ;; the original value under :app is [{..}]; new value is just the {...}
-;;                                              :app (second %)
-;;                                              :idx-table (first %)}))
-;;                       app-vec)
-;;                  )
-          )
-        )
-      )
-    ))
+  ;; (l/infod src fn-name "app" app)
+  ;; (l/infod src fn-name "app-vec" app-vec)
+  (if (zero? (count (get-in app []))) ;; TODO simplify counting of elems in the app
+    (let [msg (str "Fetching data from dbase: " (get-in app [:dbase]))]
+      ;;(l/info src fn-name msg) ;; l/info makes troubles
+      (dom/div nil msg))
+    (apply dom/div nil
+           (dom/button #js {:onClick (fn [e] (oc/deactivate-all params))} "deactivate-all")
+           (dom/script
+            nil
+            (let [component (TableSorter.)
+                  el (gdom/getElement "sortMe")
+                  alphaSort goog.ui.TableSorter.alphaSort
+                  numericSort goog.ui.TableSorter.numericSort
+                  reverseSort (goog.ui.TableSorter.createReverseSort numericSort)]
+              (.decorate component el)
+              (.setSortFunction component 1 alphaSort)
+              (.setSortFunction component 2 reverseSort)))
+           (map #(render (into params {
+                                       :app-full app
+                                       ;; the original value under :app is [{..}]; new value is just the {...}
+                                       :app (second %)
+                                       :idx-table (first %)}))
+                (into [] (map-indexed vector app))))))
 
 ;; 3rd param is a map, associate symbol toggle with the value of the
 ;; :toggle keyword and "put" it in the opts map
