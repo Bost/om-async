@@ -81,7 +81,7 @@
 (defn table-sorter [elem-id]
   (let [el (gdom/getElement elem-id)]
     (if (nil? el)
-      (println "ERROR: (gdom/getElement elem-id) is nil: " el)
+      (println (str "ERROR: (gdom/getElement " elem-id") is nil: " el))
       (let [component (TableSorter.)
             alphaSort goog.ui.TableSorter.alphaSort
             numericSort goog.ui.TableSorter.numericSort
@@ -191,12 +191,13 @@
 
 ;; 3rd param is a map, associate symbol toggle with the value of the
 ;; :toggle keyword and "put" it in the opts map
-(l/defnd construct-component
+(defn construct-component
   [app owner]
   (reify
     om/IRenderState
     (render-state [_ {}]
-                  (render-multi {:app app :owner owner}))))
+                  (render-multi {:app app :owner owner}))
+    ))
 
 (l/defnd view
 ;; "data - application state data (a cursor); owner - backing React component
@@ -278,7 +279,15 @@
                  (table-sorter "table2")
                  (table-sorter "sortMe")
                  )
-      ))
+;;       om/IDidUpdate
+;;       (om/did-update [this prev-props prev-state]
+;;                  (table-sorter "table0")
+;;                  (table-sorter "table1")
+;;                  (table-sorter "table2")
+;;                  (table-sorter "sortMe")
+;;                  )
+      )
+  )
 
 ;; Rendering loop on a the "dbase0" DOM element
 (om/root view ;; fn of 2 args: application state data,
