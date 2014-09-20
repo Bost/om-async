@@ -12,9 +12,7 @@
             )
   (:import [goog.net XhrIo]
            [goog.ui TableSorter])
-  (:require-macros [om-async.logger :as l]
-;;                    [jayq.macros :as m]
-                   ))
+  (:require-macros [om-async.logger :as l]))
 
 (def src "client.cljs")
 
@@ -126,7 +124,8 @@
                                   (:name %)) buttons))
              (let [table-id (name (:idx app))]
                ;;                (apply dom/div nil
-               (dom/table #js {:id table-id :onMouseOver (fn [] (table-sorter table-id))
+               (dom/table #js {:id table-id
+                               ;; :onMouseOver (fn [] (table-sorter table-id))
                                :style (get-display (into params {:idx (:idx app)}))}
                           (dom/thead nil
                                      (apply dom/tr nil
@@ -134,7 +133,6 @@
                           (apply dom/tbody nil
                                  (render-row (into params {:rows rows :columns header}))))
                )
-;;              (m/ready )
              )
     ))
 
@@ -174,26 +172,28 @@
   [{:keys [app owner] :as params}]
   ;; (l/infod src fn-name "app" app)
   ;; TODO get rid of 'if'
-  (if (zero? (count app))
-    (dom/div nil  "Fetching data..." )
-    (apply dom/div nil
-           (dom/button #js {:onClick (fn [e] (oc/deactivate-all params))} "deactivate-all")
-           (table-sorter "sortMe")
-           (map #(render (into params {
-                                       :app-full app
-                                       ;; the original value under :app is [{..}]; new value is just the {...}
-                                       :app (second %)
-                                       :idx-table (first %)}))
-                (into [] (map-indexed vector app)))
-           )))
+;;   (reify
+;;     om/IRenderState
+;;     (render-state [_ {}]
+                  (if (zero? (count app))
+                    (dom/div nil  "Fetching data..." )
+                    (apply dom/div nil
+                           (dom/button #js {:onClick (fn [e] (oc/deactivate-all params))} "deactivate-all")
+;;                            (table-sorter "sortMe")
+                           (map #(render (into params {
+                                                       :app-full app
+                                                       ;; the original value under :app is [{..}]; new value is just the {...}
+                                                       :app (second %)
+                                                       :idx-table (first %)}))
+                                (into [] (map-indexed vector app)))
+                           )))
+;;     ))
 
 ;; 3rd param is a map, associate symbol toggle with the value of the
 ;; :toggle keyword and "put" it in the opts map
 (l/defnd construct-component
   [app owner]
   (reify
-    om/IInitState
-    (init-state [_] (init _))
     om/IRenderState
     (render-state [_ {}]
                   (render-multi {:app app :owner owner}))))
@@ -203,6 +203,20 @@
 ;; returns an Om-component, i.e. a model of om/IRender interface"
   [app owner]
     (reify
+;; IInitState
+;; IWillMount
+;; IDidMount
+;; IShouldUpdate
+;; IWillReceiveProps
+;; IWillUpdate
+;; IDidUpdate
+;; IRender
+;; IRenderState
+;; IDisplayName
+;; IWillUnmount
+      om/IInitState
+      (init-state [_] (init _))
+
       om/IWillMount
       (will-mount [_]
         ;;(l/info src fn-name "will-mount")
@@ -236,21 +250,35 @@
           ;; om/transact! propagates changes back to the original atom
           :on-complete (fn [response]
                          (let [er (t/extend-all response)
-                               r (into [] er)
-                               ]
+                               r (into [] er)]
                            ;; (l/infod src fn-name "r" r)
                            (om/transact! app []
                                          (fn [_]
                                            ;;(l/infod src fn-name "app" response)
-                                           r)))
-                         )
+                                           r))))
           }))
       om/IRenderState
-      (render-state [_ {:keys [err-msg]}]
+      (render-state
+;;        [_ {:keys [err-msg]}]
+       [_ {}]
+
         ;; (l/info src fn-name "render-state")
         ;; om.core/build     - build single component
         ;; om.core/build-all - build many components
-        (om/build construct-component app))))
+
+        (om/build
+         ;; render-multi
+         construct-component
+         app))
+
+      om/IDidMount
+      (did-mount [_]
+                 (table-sorter "table0")
+                 (table-sorter "table1")
+                 (table-sorter "table2")
+                 (table-sorter "sortMe")
+                 )
+      ))
 
 ;; Rendering loop on a the "dbase0" DOM element
 (om/root view ;; fn of 2 args: application state data,

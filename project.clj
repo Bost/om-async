@@ -27,7 +27,6 @@
                  ;; [org.slf4j/slf4j-log4j12 "1.7.7"]
 
                  [clj-time "0.8.0"]
-                 [jayq "2.5.2"]
                  ]
 
   :plugins [[lein-cljsbuild "1.0.3"]
