@@ -78,8 +78,15 @@
       #js {}
       #js {:display "none"})))
 
-(defn table-sorter [elem-id]
-  (let [el (gdom/getElement elem-id)]
+(defn table-sorter [owner elem-id]
+;;   (reify
+;;     om/IDidUpdate
+;;     (did-update [_ prev-props prev-state]
+  ;;(println (str "table-sorter: owner: " owner "; elem-id: " elem-id))
+  (let [el (gdom/getElement elem-id)
+        ;; TODO om/get-node doesn't work; remove owner param
+        ;; (om/get-node owner elem-id)
+        ]
     (if (nil? el)
       (println (str "ERROR: (gdom/getElement " elem-id") is nil: " el))
       (let [component (TableSorter.)
@@ -89,6 +96,7 @@
         (.decorate component el)
         (.setSortFunction component 1 alphaSort)
         (.setSortFunction component 2 reverseSort)))))
+;; ))
 
 (l/defnd table
   [{:keys [app owner idx rows-displayed tname tdata] :as params}]
@@ -272,20 +280,14 @@
          construct-component
          app))
 
-      om/IDidMount
-      (did-mount [_]
-                 (table-sorter "table0")
-                 (table-sorter "table1")
-                 (table-sorter "table2")
-                 (table-sorter "sortMe")
+      om/IDidUpdate
+      (did-update [_ prev-props prev-state]
+                 ;; (println "view: owner: " owner)
+                 (table-sorter owner "sortMe")
+                 (table-sorter owner "table0")
+                 (table-sorter owner "table1")
+                 (table-sorter owner "table2")
                  )
-;;       om/IDidUpdate
-;;       (om/did-update [this prev-props prev-state]
-;;                  (table-sorter "table0")
-;;                  (table-sorter "table1")
-;;                  (table-sorter "table2")
-;;                  (table-sorter "sortMe")
-;;                  )
       )
   )
 
