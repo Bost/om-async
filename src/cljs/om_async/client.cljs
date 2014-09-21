@@ -4,6 +4,7 @@
             [om.core :as om :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
             [om-tools.dom :as dom :include-macros true]
+            [om.dom :as odom :include-macros true]
             ;; this is probably not needed at the moment
             [cljs.core.async :refer [put! chan <!]]
             [om-async.utils :as u]
@@ -81,34 +82,44 @@
       #js {}
       #js {:display "none"})))
 
-(l/defnd table-sorter
-  [owner elem-id]
-;;   (did-update [_ prev-props prev-state]
-;;   (l/infod src fn-name "owner" owner)
-;;   (l/infod src fn-name "elem-id" elem-id)
-  (let [el (gdom/getElement elem-id)
-        ;; TODO om/get-node doesn't work; remove owner param
-        om-el (om/get-node owner)
-;;         om-el (om/get-node owner elem-id)
-;;         om-el (om/get-node owner [:table0])
-;;         el om-el
-        ]
-    (l/infod src fn-name "om-el" om-el)
-;;     (l/infod src fn-name "el" el)
-    ;; TODO consider using a map defining {:column sort-type} created by the server
-    (if (nil? el)
-      (println (str "ERROR: (gdom/getElement " elem-id") is nil: " el))
-      (let [component (TableSorter.)
-            alphaSort goog.ui.TableSorter.alphaSort
-            numericSort goog.ui.TableSorter.numericSort
-            reverseSort (goog.ui.TableSorter.createReverseSort numericSort)]
-        (.decorate component el)
-        (.setSortFunction component 0 alphaSort)
-        (.setSortFunction component 1 reverseSort)
-        ))))
+(defcomponent table [{:keys [app owner header rows table-id] :as params}]
+  (render [_]
+          ;; (println "render: table-id: " table-id)
+          (dom/table {:id table-id
+                      :style (get-display (into params {:idx (:idx app)}))}
+                     (dom/thead
+                      (dom/tr
+                       (map #(dom/th (str %)) header)))
+                     (dom/tbody
+                      (render-row (into params {:rows rows :columns header})))))
+  (did-mount [_]
+             ;; (table-sorter owner table-id)
+             (let [
+                   el (gdom/getElement table-id)
+                   ;; el (om/get-node owner)
+                   ;; el (om/get-node owner [table-id])
+                   ;; el (om/get-node owner table-id)
+                   ]
+               ;; (println "el: " el)
+               ;; (println "el-id: " (:id el))
+
+               ;; TODO consider using a map defining {:column sort-type} created by the server
+               (if (nil? el)
+                 (println (str "ERROR: (gdom/getElement " table-id ") is nil: " el))
+                 (let [component (TableSorter.)
+                       alphaSort goog.ui.TableSorter.alphaSort
+                       numericSort goog.ui.TableSorter.numericSort
+                       reverseSort (goog.ui.TableSorter.createReverseSort numericSort)]
+                   (.decorate component el)
+                   (.setSortFunction component 0 alphaSort)
+                   (.setSortFunction component 1 reverseSort)
+                   ))
+               )
+             )
+  )
 
 ;; TODO rename table to extended-table (i.e. table with its table-control buttons)
-(l/defnd table
+(l/defnd table-controler
   [{:keys [app owner idx rows-displayed tname tdata] :as params}]
   (let [rows (into [] (map #(into [] (vals (nth tdata %)))
                            (range (count tdata))))
@@ -118,18 +129,20 @@
         ;; (:idx app) must be used (no @)
         ;; if binded in a let-statement outside
         ]
-    ;;     (l/infod src fn-name "params" params)
-    ;;     (l/infod src fn-name "owner" owner)
-    ;;     (l/infod src fn-name "rows-displayed" (:rows-displayed app))
-    ;;     (l/infod src fn-name "table: idx" (:idx app))
-    (dom/div tname
+    ;; (l/infod src fn-name "params" params)
+    ;; (l/infod src fn-name "owner" owner)
+    ;; (l/infod src fn-name "rows-displayed" (:rows-displayed app))
+    ;; (l/infod src fn-name "table: idx" (:idx app))
+    (dom/div {:id idx}
+             tname
              (dom/button {:onClick (fn [e]
                                      (oc/toggle-table (into params {:idx (:idx @app)}))
                                      )}
                          "toggle-table")
              (dom/span
               (map
-               #(dom/button {:onClick (fn [e]
+               #(dom/button {:ref "foo"
+                             :onClick (fn [e]
                                         (oc/displayed-rows
                                          (into params {:dbase (:dbase @app)
                                                        :table (:table @app)
@@ -140,14 +153,9 @@
                                                        })))}
                             (:name %)) buttons))
              (let [table-id (name (:idx app))]
-               (dom/table {:id table-id
-                           ;; :onMouseOver (fn [] (table-sorter table-id))
-                           :style (get-display (into params {:idx (:idx app)}))}
-                          (dom/thead
-                           (dom/tr
-                            (map #(dom/th (str %)) header)))
-                          (dom/tbody
-                           (render-row (into params {:rows rows :columns header}))))))))
+               (om/build
+                table (into params {:header header :rows rows :table-id table-id}))
+               ))))
 
 (l/defnd render-data
   [{:keys [tdata] :as params}]
@@ -159,7 +167,7 @@
         ks (into [] (keys data))
         ]
     ;;(l/infod src fn-name "ks" ks)
-    (table (into params {:tname full-tname
+    (table-controler (into params {:tname full-tname
                          :tdata rows ;; TODO seem like overwriting fn input - check it!
                          :row-keywords ks}))))
 
@@ -180,8 +188,8 @@
   [{:keys [app owner] :as params}]
   ;; (l/infod src fn-name "app" app)
   (if (zero? (count app))        ;; TODO get rid of 'if'
-    (dom/div "Fetching data...")
-    (dom/div
+    (dom/div {:id "fetching"} "Fetching data...")
+    (dom/div {:id "main"}
      (dom/button {:onClick (fn [e] (oc/deactivate-all params))} "deactivate-all")
      (map #(render (into params {
                                  :app-full app
@@ -220,20 +228,20 @@
                   {:dbase "employees" :table "departments" :rows-displayed 2 :idx (oc/kw-table 1)}
                   {:dbase "employees" :table "salaries"    :rows-displayed 4 :idx (oc/kw-table 2)}
                   ]}
-                ;;           {:select-rows-from [{:dbase "employees" :table "departments" :rows-displayed 2 :idx :table0}]}
+                ;; {:select-rows-from [{:dbase "employees" :table "departments" :rows-displayed 2 :idx :table0}]}
 
-                ;;           {:show-tables-from [{:dbase "employees" :idx 0}]}
+                ;; {:show-tables-from [{:dbase "employees" :idx 0}]}
 
                 ;; TODO this might work as :select-rows-from
-                ;;           {:show-tables-with-data-from [{:dbase "employees"}]}
+                ;; {:show-tables-with-data-from [{:dbase "employees"}]}
 
                 ;; TODO doesn't work: the hash-map app is empty
-                ;;           {:show-tables-with-data-from
-                ;;            [{:dbase (let [dbase (first (get-in app [:dbase0 :name]))]
-                ;;                       (l/infod src fn-name "app" app)
-                ;;                       (l/infod src fn-name "owner" owner)
-                ;;                       (l/infod src fn-name "dbase" dbase)
-                ;;                       dbase)}]}
+                ;; {:show-tables-with-data-from
+                ;;  [{:dbase (let [dbase (first (get-in app [:dbase0 :name]))]
+                ;;             (l/infod src fn-name "app" app)
+                ;;             (l/infod src fn-name "owner" owner)
+                ;;             (l/infod src fn-name "dbase" dbase)
+                ;;             dbase)}]}
 
                 ;; om/transact! propagates changes back to the original atom
                 :on-complete (fn [response]
@@ -247,17 +255,8 @@
                 }))
   (render-state [_ state]
                 ;; [_ {:keys [err-msg]}]
-                (render-multi {:app app :owner owner}))
-
-  (did-update [_ prev-props prev-state]
-              ;; (l/infod src fn-name "owner" owner)
-              ;; (l/infod src fn-name "prev-props" prev-props)
-              ;; (l/infod src fn-name "prev-state" prev-state)
-              (table-sorter owner "sortMe")
-              (table-sorter owner "table0")
-              (table-sorter owner "table1")
-              (table-sorter owner "table2")
-              )
+                (render-multi {:app app :owner owner}
+                              ))
   )
 
 ;; Rendering loop on a the "dbase0" DOM element
