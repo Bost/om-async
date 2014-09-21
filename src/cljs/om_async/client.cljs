@@ -2,7 +2,7 @@
 ;;   (:use [jayq.core :only [$ css html document-ready]])
   (:require [goog.dom :as gdom]
             [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
+            [om-tools.dom :as dom :include-macros true]
             ;; this is probably not needed at the moment
             [cljs.core.async :refer [put! chan <!]]
             [om-async.utils :as u]
@@ -44,19 +44,20 @@
         p (into params {:ks-data [:data idx-row column] :kw-active [:active]})]
 ;;     (l/infod src fn-name "ks-data" ks-data)
 ;;     (l/infod src fn-name "cell" cell)
-    (dom/td #js {:className (get-css p)
-                 :onClick (fn [e] (oc/activate (into p {:column column :elem-val td-val})))}
-            td-val)))
+    (dom/td {:class (get-css p)
+              :onClick (fn [e] (oc/activate (into p {:column column :elem-val td-val})))}
+            td-val)
+    ))
 
 (l/defnd tr
   [{:keys [css row columns] :as params}]
   (let [ column nil ]
-    (apply dom/tr #js {:className css}
-           (map (fn [cell-val col]
-                  (td (into params {:cell cell-val :column col})))
-                row
-                (cycle columns)
-                ))))
+    (dom/tr {:class css}
+             (map (fn [cell-val col]
+                    (td (into params {:cell cell-val :column col})))
+                  row
+                  (cycle columns)
+                  ))))
 
 (l/defnd render-row
   [{:keys [rows row-keywords] :as params}]
@@ -124,34 +125,33 @@
     ;;     (l/infod src fn-name "owner" owner)
     ;;     (l/infod src fn-name "rows-displayed" (:rows-displayed app))
     ;;     (l/infod src fn-name "table: idx" (:idx app))
-    (dom/div nil
-             tname
-             (dom/button #js {:onClick (fn [e]
-                                         (oc/toggle-table (into params {:idx (:idx @app)}))
-                                         )}
+    (dom/div tname
+             (dom/button {:onClick (fn [e]
+                                      (oc/toggle-table (into params {:idx (:idx @app)}))
+                                      )}
                          "toggle-table")
-             (apply dom/span nil
-                    (map
-                     #(dom/button #js {:onClick (fn [e]
-                                                  (oc/displayed-rows
-                                                   (into params {:dbase (:dbase @app)
-                                                                 :table (:table @app)
-                                                                 :rows-displayed (:rows-displayed @app)
-                                                                 :idx (:idx @app)
-                                                                 :fnc (:fnc %)
-                                                                 :exec-fnc? (:exec-fnc? %)
-                                                                 })))}
-                                  (:name %)) buttons))
+             (dom/span
+              (map
+               #(dom/button {:onClick (fn [e]
+                                         (oc/displayed-rows
+                                          (into params {:dbase (:dbase @app)
+                                                        :table (:table @app)
+                                                        :rows-displayed (:rows-displayed @app)
+                                                        :idx (:idx @app)
+                                                        :fnc (:fnc %)
+                                                        :exec-fnc? (:exec-fnc? %)
+                                                        })))}
+                             (:name %)) buttons))
              (let [table-id (name (:idx app))]
                ;;                (apply dom/div nil
-               (dom/table #js {:id table-id
-                               ;; :onMouseOver (fn [] (table-sorter table-id))
-                               :style (get-display (into params {:idx (:idx app)}))}
-                          (dom/thead nil
-                                     (apply dom/tr nil
-                                            (map #(dom/th nil (str %)) header)))
-                          (apply dom/tbody nil
-                                 (render-row (into params {:rows rows :columns header}))))
+               (dom/table {:id table-id
+                            ;; :onMouseOver (fn [] (table-sorter table-id))
+                            :style (get-display (into params {:idx (:idx app)}))}
+                           (dom/thead
+                            (dom/tr
+                             (map #(dom/th (str %)) header)))
+                           (dom/tbody
+                            (render-row (into params {:rows rows :columns header}))))
                )
              )
     )
@@ -176,7 +176,7 @@
   [{:keys [extended-data] :as params}]
   (let [id (into [] (map-indexed vector extended-data)) ;; TODO check what exactly do I need here
         rd (map #(render-data (into params {:tdata (second %)})) id)
-        r (apply dom/div nil (into [] rd))]
+        r (dom/div (into [] rd))]
     r))
 
 (l/defnd init [_]
@@ -186,7 +186,7 @@
 (l/defnd render
   [{:keys [app idx] :as params}]
   ;; (l/infod src fn-name "params" params)
-  (dom/div #js {:id idx}
+  (dom/div {:id idx}
            (render-data-vec
             (into params {:extended-data [app]}))))
 
@@ -196,12 +196,12 @@
   ;; TODO get rid of 'if'
 ;;   (reify om/IRenderState (render-state [_ state]
   (if (zero? (count app))
-    (dom/div nil "Fetching data...")
+    (dom/div "Fetching data...")
     (let [
-          t (dom/div nil "test")
+          t (dom/div "test")
           r
-          (apply dom/div nil
-                 (dom/button #js {:onClick (fn [e] (oc/deactivate-all params))} "deactivate-all")
+          (dom/div
+                 (dom/button {:onClick (fn [e] (oc/deactivate-all params))} "deactivate-all")
                  (map #(render (into params {
                                              :app-full app
                                              ;; the original value under :app is [{..}]; new value is just the {...}
@@ -214,7 +214,7 @@
       r
       )
     )
-;;   (om/build (dom/div nil "test") app)
+;;   (om/build (dom/div "test") app)
   )
 ;; ))
 

@@ -25,6 +25,7 @@
 
                  ;; [org.clojure/tools.logging "0.3.0"]
                  ;; [org.slf4j/slf4j-log4j12 "1.7.7"]
+                 [prismatic/om-tools "0.3.2"]
 
                  [clj-time "0.8.0"]
                  ]

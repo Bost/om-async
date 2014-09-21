@@ -4,7 +4,7 @@
             [goog.events :as events]
 ;;             [goog.dom :as gdom]
             [om.core :as om :include-macros true]
-;;             [om.dom :as dom :include-macros true]
+;;             [om-tools.dom :as tdom :include-macros true]
             [cljs.core.async :refer [put! chan <!]]
 ;;             [om-async.utils :as u]
             [om-async.logger :as l]
