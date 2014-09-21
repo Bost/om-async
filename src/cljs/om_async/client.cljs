@@ -2,6 +2,7 @@
 ;;   (:use [jayq.core :only [$ css html document-ready]])
   (:require [goog.dom :as gdom]
             [om.core :as om :include-macros true]
+            [om-tools.core :refer-macros [defcomponent]]
             [om-tools.dom :as dom :include-macros true]
             ;; this is probably not needed at the moment
             [cljs.core.async :refer [put! chan <!]]
@@ -12,7 +13,9 @@
             )
   (:import [goog.net XhrIo]
            [goog.ui TableSorter])
-  (:require-macros [om-async.logger :as l]))
+  (:require-macros [om-async.logger :as l]
+                   ;; defschema is needed by defcomponent
+                   [schema.macros :refer [defschema]]))
 
 (def src "client.cljs")
 
@@ -218,102 +221,75 @@
   )
 ;; ))
 
-;; 3rd param is a map, associate symbol toggle with the value of the
-;; :toggle keyword and "put" it in the opts map
-(l/defnd construct-component
+(defcomponent view
+  ;; "data - application state data (a cursor); owner - backing React component
+  ;; returns an Om-component, i.e. a model of om/IRender interface"
   [app owner]
-;;   (l/infod src fn-name "app" app)
-  (reify
-    om/IRenderState
-    (render-state [_ state]
-                  (l/infod src fn-name "state" state)
-                  (render-multi {:app app :owner owner}))
-    ))
+  ;; IInitState
+  ;; IWillMount
+  ;; IDidMount
+  ;; IShouldUpdate
+  ;; IWillReceiveProps
+  ;; IWillUpdate
+  ;; IDidUpdate
+  ;; IRender
+  ;; IRenderState
+  ;; IDisplayName
+  ;; IWillUnmount
+  (init-state [_] (init _))
 
-(l/defnd view
-;; "data - application state data (a cursor); owner - backing React component
-;; returns an Om-component, i.e. a model of om/IRender interface"
-  [app owner]
-    (reify
-;; IInitState
-;; IWillMount
-;; IDidMount
-;; IShouldUpdate
-;; IWillReceiveProps
-;; IWillUpdate
-;; IDidUpdate
-;; IRender
-;; IRenderState
-;; IDisplayName
-;; IWillUnmount
-      om/IInitState
-      (init-state [_] (init _))
+  (will-mount [_]
+              ;;(l/info src fn-name "will-mount")
+              (oc/edn-xhr
+               {:method :put
+                :url "fetch"
+                ;; TODO the idx should be specified in transfer.clj
+                :data
+                {:select-rows-from
+                 [
+                  ;; !!! Woa any key-value pair I stuff in pops up in the db.sql-select-rows-from fn.
+                  {:dbase "employees" :table "employees"   :rows-displayed 1 :idx (oc/kw-table 0)}
+                  {:dbase "employees" :table "departments" :rows-displayed 2 :idx (oc/kw-table 1)}
+                  {:dbase "employees" :table "salaries"    :rows-displayed 4 :idx (oc/kw-table 2)}
+                  ]}
+                ;;           {:select-rows-from [{:dbase "employees" :table "departments" :rows-displayed 2 :idx :table0}]}
 
-      om/IWillMount
-      (will-mount [_]
-        ;;(l/info src fn-name "will-mount")
-        (oc/edn-xhr
-         {:method :put
-          :url "fetch"
-          ;; TODO the idx should be specified in transfer.clj
-          :data
-          {:select-rows-from
-           [
-            ;; !!! Woa any key-value pair I stuff in pops up in the db.sql-select-rows-from fn.
-            {:dbase "employees" :table "employees"   :rows-displayed 1 :idx (oc/kw-table 0)}
-            {:dbase "employees" :table "departments" :rows-displayed 2 :idx (oc/kw-table 1)}
-            {:dbase "employees" :table "salaries"    :rows-displayed 4 :idx (oc/kw-table 2)}
-            ]}
-;;           {:select-rows-from [{:dbase "employees" :table "departments" :rows-displayed 2 :idx :table0}]}
+                ;;           {:show-tables-from [{:dbase "employees" :idx 0}]}
 
-;;           {:show-tables-from [{:dbase "employees" :idx 0}]}
+                ;; TODO this might work as :select-rows-from
+                ;;           {:show-tables-with-data-from [{:dbase "employees"}]}
 
-          ;; TODO this might work as :select-rows-from
-;;           {:show-tables-with-data-from [{:dbase "employees"}]}
+                ;; TODO doesn't work: the hash-map app is empty
+                ;;           {:show-tables-with-data-from
+                ;;            [{:dbase (let [dbase (first (get-in app [:dbase0 :name]))]
+                ;;                       (l/infod src fn-name "app" app)
+                ;;                       (l/infod src fn-name "owner" owner)
+                ;;                       (l/infod src fn-name "dbase" dbase)
+                ;;                       dbase)}]}
 
-          ;; TODO doesn't work: the hash-map app is empty
-;;           {:show-tables-with-data-from
-;;            [{:dbase (let [dbase (first (get-in app [:dbase0 :name]))]
-;;                       (l/infod src fn-name "app" app)
-;;                       (l/infod src fn-name "owner" owner)
-;;                       (l/infod src fn-name "dbase" dbase)
-;;                       dbase)}]}
+                ;; om/transact! propagates changes back to the original atom
+                :on-complete (fn [response]
+                               (let [er (t/extend-all response)
+                                     r (into [] er)]
+                                 ;; (l/infod src fn-name "r" r)
+                                 (om/transact! app []
+                                               (fn [_]
+                                                 ;;(l/infod src fn-name "app" response)
+                                                 r))))
+                }))
+  (render-state [_ state]
+                ;; [_ {:keys [err-msg]}]
+                (render-multi {:app app :owner owner}))
 
-          ;; om/transact! propagates changes back to the original atom
-          :on-complete (fn [response]
-                         (let [er (t/extend-all response)
-                               r (into [] er)]
-                           ;; (l/infod src fn-name "r" r)
-                           (om/transact! app []
-                                         (fn [_]
-                                           ;;(l/infod src fn-name "app" response)
-                                           r))))
-          }))
-      om/IRenderState
-      (render-state
-;;        [_ {:keys [err-msg]}]
-       [_ {}]
-
-        ;; (l/info src fn-name "render-state")
-        ;; om.core/build     - build single component
-        ;; om.core/build-all - build many components
-
-        (om/build
-         ;; render-multi
-         construct-component
-         app))
-
-      om/IDidUpdate
-      (did-update [_ prev-props prev-state]
-;;                   (l/infod src fn-name "owner" owner)
-;;                   (l/infod src fn-name "prev-props" prev-props)
-;;                   (l/infod src fn-name "prev-state" prev-state)
-                  (table-sorter owner "sortMe")
-                  (table-sorter owner "table0")
-                  (table-sorter owner "table1")
-                  (table-sorter owner "table2")
-                  )
-      )
+  (did-update [_ prev-props prev-state]
+              ;; (l/infod src fn-name "owner" owner)
+              ;; (l/infod src fn-name "prev-props" prev-props)
+              ;; (l/infod src fn-name "prev-state" prev-state)
+              (table-sorter owner "sortMe")
+              (table-sorter owner "table0")
+              (table-sorter owner "table1")
+              (table-sorter owner "table2")
+              )
   )
 
 ;; Rendering loop on a the "dbase0" DOM element
