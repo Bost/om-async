@@ -11,7 +11,7 @@
 (def files
   {:client.cljs [ "table"
                   "view"
-                  ;;    "construct-component"
+                  "construct-component"
                   ;;    "table"
                   ;;    "init"
                   ;;    "color"
@@ -24,6 +24,7 @@
                   "ks-other"
                   "render"
                   "get-display"
+                  "table-sorter"
                   ]
    :onclick.cljs [
                   "toggle-table"

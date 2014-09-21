@@ -78,15 +78,23 @@
       #js {}
       #js {:display "none"})))
 
-(defn table-sorter [owner elem-id]
+(l/defnd table-sorter
+  [owner elem-id]
 ;;   (reify
 ;;     om/IDidUpdate
 ;;     (did-update [_ prev-props prev-state]
-  ;;(println (str "table-sorter: owner: " owner "; elem-id: " elem-id))
+;;   (l/infod src fn-name "owner" owner)
+;;   (l/infod src fn-name "elem-id" elem-id)
   (let [el (gdom/getElement elem-id)
         ;; TODO om/get-node doesn't work; remove owner param
-        ;; (om/get-node owner elem-id)
+        om-el (om/get-node owner)
+;;         om-el (om/get-node owner elem-id)
+;;         om-el (om/get-node owner [:table0])
+;;         el om-el
         ]
+    (l/infod src fn-name "om-el" om-el)
+;;     (l/infod src fn-name "el" el)
+    ;; TODO consider using a map defining {:column sort-type} created by the server
     (if (nil? el)
       (println (str "ERROR: (gdom/getElement " elem-id") is nil: " el))
       (let [component (TableSorter.)
@@ -94,12 +102,16 @@
             numericSort goog.ui.TableSorter.numericSort
             reverseSort (goog.ui.TableSorter.createReverseSort numericSort)]
         (.decorate component el)
-        (.setSortFunction component 1 alphaSort)
-        (.setSortFunction component 2 reverseSort)))))
+        (.setSortFunction component 0 alphaSort)
+        (.setSortFunction component 1 reverseSort)
+        ))))
 ;; ))
 
 (l/defnd table
   [{:keys [app owner idx rows-displayed tname tdata] :as params}]
+;;   (reify
+;;     om/IRenderState
+;;     (render-state [_ app]
   (let [rows (into [] (map #(into [] (vals (nth tdata %)))
                            (range (count tdata))))
         header (into [] (keys (first tdata)))
@@ -142,7 +154,9 @@
                                  (render-row (into params {:rows rows :columns header}))))
                )
              )
-    ))
+    )
+  )
+;;    ))
 
 (l/defnd render-data
   [{:keys [tdata] :as params}]
@@ -180,30 +194,39 @@
   [{:keys [app owner] :as params}]
   ;; (l/infod src fn-name "app" app)
   ;; TODO get rid of 'if'
-;;   (reify
-;;     om/IRenderState
-;;     (render-state [_ {}]
-                  (if (zero? (count app))
-                    (dom/div nil  "Fetching data..." )
-                    (apply dom/div nil
-                           (dom/button #js {:onClick (fn [e] (oc/deactivate-all params))} "deactivate-all")
-;;                            (table-sorter "sortMe")
-                           (map #(render (into params {
-                                                       :app-full app
-                                                       ;; the original value under :app is [{..}]; new value is just the {...}
-                                                       :app (second %)
-                                                       :idx-table (first %)}))
-                                (into [] (map-indexed vector app)))
-                           )))
-;;     ))
+;;   (reify om/IRenderState (render-state [_ state]
+  (if (zero? (count app))
+    (dom/div nil "Fetching data...")
+    (let [
+          t (dom/div nil "test")
+          r
+          (apply dom/div nil
+                 (dom/button #js {:onClick (fn [e] (oc/deactivate-all params))} "deactivate-all")
+                 (map #(render (into params {
+                                             :app-full app
+                                             ;; the original value under :app is [{..}]; new value is just the {...}
+                                             :app (second %)
+                                             :idx-table (first %)}))
+                      (into [] (map-indexed vector app)))
+                 )]
+;;       (l/infod src fn-name "r" (type r))
+;;       (l/infod src fn-name "t" (type t))
+      r
+      )
+    )
+;;   (om/build (dom/div nil "test") app)
+  )
+;; ))
 
 ;; 3rd param is a map, associate symbol toggle with the value of the
 ;; :toggle keyword and "put" it in the opts map
-(defn construct-component
+(l/defnd construct-component
   [app owner]
+;;   (l/infod src fn-name "app" app)
   (reify
     om/IRenderState
-    (render-state [_ {}]
+    (render-state [_ state]
+                  (l/infod src fn-name "state" state)
                   (render-multi {:app app :owner owner}))
     ))
 
@@ -282,12 +305,14 @@
 
       om/IDidUpdate
       (did-update [_ prev-props prev-state]
-                 ;; (println "view: owner: " owner)
-                 (table-sorter owner "sortMe")
-                 (table-sorter owner "table0")
-                 (table-sorter owner "table1")
-                 (table-sorter owner "table2")
-                 )
+;;                   (l/infod src fn-name "owner" owner)
+;;                   (l/infod src fn-name "prev-props" prev-props)
+;;                   (l/infod src fn-name "prev-state" prev-state)
+                  (table-sorter owner "sortMe")
+                  (table-sorter owner "table0")
+                  (table-sorter owner "table1")
+                  (table-sorter owner "table2")
+                  )
       )
   )
 
