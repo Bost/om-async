@@ -49,8 +49,7 @@
 ;;     (l/infod src fn-name "cell" cell)
     (dom/td {:class (get-css p)
               :onClick (fn [e] (oc/activate (into p {:column column :elem-val td-val})))}
-            td-val)
-    ))
+            td-val)))
 
 (l/defnd tr
   [{:keys [css row columns] :as params}]
@@ -84,9 +83,7 @@
 
 (l/defnd table-sorter
   [owner elem-id]
-;;   (reify
-;;     om/IDidUpdate
-;;     (did-update [_ prev-props prev-state]
+;;   (did-update [_ prev-props prev-state]
 ;;   (l/infod src fn-name "owner" owner)
 ;;   (l/infod src fn-name "elem-id" elem-id)
   (let [el (gdom/getElement elem-id)
@@ -109,13 +106,10 @@
         (.setSortFunction component 0 alphaSort)
         (.setSortFunction component 1 reverseSort)
         ))))
-;; ))
 
+;; TODO rename table to extended-table (i.e. table with its table-control buttons)
 (l/defnd table
   [{:keys [app owner idx rows-displayed tname tdata] :as params}]
-;;   (reify
-;;     om/IRenderState
-;;     (render-state [_ app]
   (let [rows (into [] (map #(into [] (vals (nth tdata %)))
                            (range (count tdata))))
         header (into [] (keys (first tdata)))
@@ -130,36 +124,30 @@
     ;;     (l/infod src fn-name "table: idx" (:idx app))
     (dom/div tname
              (dom/button {:onClick (fn [e]
-                                      (oc/toggle-table (into params {:idx (:idx @app)}))
-                                      )}
+                                     (oc/toggle-table (into params {:idx (:idx @app)}))
+                                     )}
                          "toggle-table")
              (dom/span
               (map
                #(dom/button {:onClick (fn [e]
-                                         (oc/displayed-rows
-                                          (into params {:dbase (:dbase @app)
-                                                        :table (:table @app)
-                                                        :rows-displayed (:rows-displayed @app)
-                                                        :idx (:idx @app)
-                                                        :fnc (:fnc %)
-                                                        :exec-fnc? (:exec-fnc? %)
-                                                        })))}
-                             (:name %)) buttons))
+                                        (oc/displayed-rows
+                                         (into params {:dbase (:dbase @app)
+                                                       :table (:table @app)
+                                                       :rows-displayed (:rows-displayed @app)
+                                                       :idx (:idx @app)
+                                                       :fnc (:fnc %)
+                                                       :exec-fnc? (:exec-fnc? %)
+                                                       })))}
+                            (:name %)) buttons))
              (let [table-id (name (:idx app))]
-               ;;                (apply dom/div nil
                (dom/table {:id table-id
-                            ;; :onMouseOver (fn [] (table-sorter table-id))
-                            :style (get-display (into params {:idx (:idx app)}))}
-                           (dom/thead
-                            (dom/tr
-                             (map #(dom/th (str %)) header)))
-                           (dom/tbody
-                            (render-row (into params {:rows rows :columns header}))))
-               )
-             )
-    )
-  )
-;;    ))
+                           ;; :onMouseOver (fn [] (table-sorter table-id))
+                           :style (get-display (into params {:idx (:idx app)}))}
+                          (dom/thead
+                           (dom/tr
+                            (map #(dom/th (str %)) header)))
+                          (dom/tbody
+                           (render-row (into params {:rows rows :columns header}))))))))
 
 (l/defnd render-data
   [{:keys [tdata] :as params}]
@@ -182,44 +170,25 @@
         r (dom/div (into [] rd))]
     r))
 
-(l/defnd init [_]
-  ;; (l/infod src fn-name "_" _)
-  {})
-
 (l/defnd render
   [{:keys [app idx] :as params}]
   ;; (l/infod src fn-name "params" params)
   (dom/div {:id idx}
-           (render-data-vec
-            (into params {:extended-data [app]}))))
+           (render-data-vec (into params {:extended-data [app]}))))
 
 (l/defnd render-multi
   [{:keys [app owner] :as params}]
   ;; (l/infod src fn-name "app" app)
-  ;; TODO get rid of 'if'
-;;   (reify om/IRenderState (render-state [_ state]
-  (if (zero? (count app))
+  (if (zero? (count app))        ;; TODO get rid of 'if'
     (dom/div "Fetching data...")
-    (let [
-          t (dom/div "test")
-          r
-          (dom/div
-                 (dom/button {:onClick (fn [e] (oc/deactivate-all params))} "deactivate-all")
-                 (map #(render (into params {
-                                             :app-full app
-                                             ;; the original value under :app is [{..}]; new value is just the {...}
-                                             :app (second %)
-                                             :idx-table (first %)}))
-                      (into [] (map-indexed vector app)))
-                 )]
-;;       (l/infod src fn-name "r" (type r))
-;;       (l/infod src fn-name "t" (type t))
-      r
-      )
-    )
-;;   (om/build (dom/div "test") app)
-  )
-;; ))
+    (dom/div
+     (dom/button {:onClick (fn [e] (oc/deactivate-all params))} "deactivate-all")
+     (map #(render (into params {
+                                 :app-full app
+                                 ;; the original value under :app is [{..}]; new value is just the {...}
+                                 :app (second %)
+                                 :idx-table (first %)}))
+          (into [] (map-indexed vector app))))))
 
 (defcomponent view
   ;; "data - application state data (a cursor); owner - backing React component
@@ -236,7 +205,6 @@
   ;; IRenderState
   ;; IDisplayName
   ;; IWillUnmount
-  (init-state [_] (init _))
 
   (will-mount [_]
               ;;(l/info src fn-name "will-mount")
