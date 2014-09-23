@@ -4,9 +4,9 @@
             [om.core :as om :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
             [om-tools.dom :as dom :include-macros true]
-            [om.dom :as odom :include-macros true]
+            [om.dom :as orig-dom :include-macros true]
             ;; this is probably not needed at the moment
-            [cljs.core.async :refer [put! chan <!]]
+            [cljs.core.async :as async :refer [put! chan <!]]
             [om-async.utils :as u]
             [om-async.logger :as l]
             [om-async.onclick :as oc]

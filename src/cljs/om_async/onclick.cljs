@@ -5,7 +5,7 @@
 ;;             [goog.dom :as gdom]
             [om.core :as om :include-macros true]
 ;;             [om-tools.dom :as tdom :include-macros true]
-            [cljs.core.async :refer [put! chan <!]]
+            [cljs.core.async :as async :refer [put! chan <!]]
 ;;             [om-async.utils :as u]
             [om-async.logger :as l]
             [om-async.cli-transform :as t]
