@@ -94,23 +94,16 @@
                             (render-row (into params {:rows rows :columns header})))))
   (did-mount [_]
              ;; (table-sorter owner table-id)
-             (let [
-                   el (om/get-node owner)
-                   ]
-               ;; TODO consider using a map defining {:column sort-type} created by the server
-               (if (nil? el)
-                 (println (str "ERROR: (gdom/getElement " table-id ") is nil: " el))
-                 (let [component (TableSorter.)
-                       alphaSort goog.ui.TableSorter.alphaSort
-                       numericSort goog.ui.TableSorter.numericSort
-                       reverseSort (goog.ui.TableSorter.createReverseSort numericSort)]
-                   (.decorate component el)
-                   (.setSortFunction component 0 alphaSort)
-                   (.setSortFunction component 1 reverseSort)
-                   ))
-               )
-             )
-  )
+             ;; TODO consider using a map defining {:column sort-type} created by the server
+             (let [component (TableSorter.)
+                   alphaSort goog.ui.TableSorter.alphaSort
+                   numericSort goog.ui.TableSorter.numericSort
+                   reverseSort (goog.ui.TableSorter.createReverseSort numericSort)]
+               (.decorate component (om/get-node owner))
+               (.setSortFunction component 0 alphaSort)
+               (.setSortFunction component 1 reverseSort)
+               )))
+
 
 ;; TODO rename table to extended-table (i.e. table with its table-control buttons)
 (defcomponent table-controler
