@@ -82,11 +82,11 @@
       #js {}
       #js {:display "none"})))
 
-(defcomponent table [{:keys [app owner header rows table-id] :as params}]
+(defcomponent table [{:keys [owner header rows table-id] :as params}]
   (render [_]
-          ;; (println "render: table-id: " table-id)
+          ;; (println "table: table-id: " (keyword table-id))
           (dom/table {:id table-id
-                      :style (get-display (into params {:idx (:idx app)}))}
+                      :style (get-display (into params {:idx (keyword table-id)}))}
                      (dom/thead
                       (dom/tr
                        (map #(dom/th (str %)) header)))
@@ -121,8 +121,7 @@
 ;; TODO rename table to extended-table (i.e. table with its table-control buttons)
 (l/defnd table-controler
   [{:keys [app owner idx rows-displayed tname tdata] :as params}]
-  (let [rows (into [] (map #(into [] (vals (nth tdata %)))
-                           (range (count tdata))))
+  (let [
         header (into [] (keys (first tdata)))
         buttons [{:name "more-rows" :fnc inc :exec-fnc? (fn [_] true)}
                  {:name "less-rows" :fnc dec :exec-fnc? (fn [cnt-rows] (> cnt-rows 0))}]
@@ -152,10 +151,24 @@
                                                        :exec-fnc? (:exec-fnc? %)
                                                        })))}
                             (:name %)) buttons))
-             (let [table-id (name (:idx app))]
+             (let [table-id (name (:idx app))
+                   rows (into [] (map #(into [] (vals (nth tdata %)))
+                                      (range (count tdata))))
+                   ]
+               (println "tdata:" tdata)
                (om/build
                 table (into params {:header header :rows rows :table-id table-id}))
                ))))
+
+(def tdata [{:emp_no {:val 10001}, :from_date {:val "1988-06-24 22:00:00"}, :to_date {:val "1989-06-24 22:00:00"}, :salary {:val 66074}}
+            {:emp_no {:val 10001}, :from_date {:val "1989-06-24 22:00:00"}, :to_date {:val "1990-06-24 22:00:00"}, :salary {:val 66596}}
+            {:emp_no {:val 10001}, :from_date {:val "1986-06-25 22:00:00"}, :to_date {:val "1987-06-25 22:00:00"}, :salary {:val 60117}}
+            {:emp_no {:val 10001}, :from_date {:val "1987-06-25 22:00:00"}, :to_date {:val "1988-06-24 22:00:00"}, :salary {:val 62102}}])
+
+(into []
+      (for [[v i] (map vector tdata (range))]
+        (into [] (vals (nth tdata i)))))
+
 
 (l/defnd render-data
   [{:keys [tdata] :as params}]
@@ -260,7 +273,7 @@
   )
 
 ;; Rendering loop on a the "dbase0" DOM element
-(om/root view ;; fn of 2 args: application state data,
-              ;;               backing React component (owner)
-         app-state  ;; atom containing application state
-         {:target (gdom/getElement "dbase0")}) ;; dbase0 is in index.html
+;; (om/root view ;; fn of 2 args: application state data,
+;;               ;;               backing React component (owner)
+;;          app-state  ;; atom containing application state
+;;          {:target (gdom/getElement "dbase0")}) ;; dbase0 is in index.html
