@@ -34,7 +34,7 @@
 ;; (defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no elem is filtered out
 
 (l/defnd get-css
-  [{:keys [owner default] :as params}]
+  [{:keys [default] :as params} owner]
   (let [ks (oc/full-ks params)
         active (om/get-state owner ks)
         r (if active "active" default)]
@@ -42,39 +42,39 @@
     r))
 
 (l/defnd td
-  [{:keys [cell idx-row column] :as params}]
+  [{:keys [cell idx-row column] :as params} owner]
   (let [td-val (get-in cell [:val])
         ;; TODO walking over the data from the server doesn't work properly
         p (into params {:ks-data [:data idx-row column] :kw-active [:active]})]
 ;;     (l/infod src fn-name "ks-data" ks-data)
 ;;     (l/infod src fn-name "cell" cell)
-    (dom/td {:class (get-css p)
-              :onClick (fn [e] (oc/activate (into p {:column column :elem-val td-val})))}
+    (dom/td {:class (get-css p owner)
+              :onClick (fn [e] (oc/activate (into p {:column column :elem-val td-val}) owner))}
             td-val)))
 
 (l/defnd tr
-  [{:keys [css row columns] :as params}]
+  [{:keys [css row columns] :as params} owner]
   (let [ column nil ]
     (dom/tr {:class css}
              (map (fn [cell-val col]
-                    (td (into params {:cell cell-val :column col})))
+                    (td (into params {:cell cell-val :column col}) owner))
                   row
                   (cycle columns)
                   ))))
 
 (l/defnd render-row
-  [{:keys [rows row-keywords] :as params}]
+  [{:keys [rows row-keywords] :as params} owner]
   (map (fn [css row idx-row]
          (tr (into params {:css css
                            :row row
                            :idx-row idx-row
-                           })))
+                           }) owner))
        (cycle ["" "odd"]) ;; gives the css
        rows               ;; gives the row
        row-keywords))
 
 (l/defnd get-display
-  [{:keys [owner idx] :as params}]
+  [{:keys [idx] :as params} owner]
 ;;   (l/infod src fn-name "owner" owner)
 ;;   (l/infod src fn-name "idx" idx)
   (let [display (om/get-state owner [idx :display])]
@@ -86,12 +86,13 @@
   [{:keys [header rows table-id] :as params} owner]
   (render-state [_ state]
                 (dom/table {:id table-id
-                            :style (get-display (into params {:idx (keyword table-id)}))}
+                            :style (get-display (into params {:idx (keyword table-id)}) owner)}
                            (dom/thead
                             (dom/tr
-                             (map #(dom/th (str %)) header)))
+                             (for [h header]
+                               (dom/th (str h)))))
                            (dom/tbody
-                            (render-row (into params {:rows rows :columns header})))))
+                            (render-row (into params {:rows rows :columns header}) owner))))
   (did-mount [_]
              ;; (table-sorter owner table-id)
              ;; TODO consider using a map defining {:column sort-type} created by the server
@@ -142,7 +143,6 @@
                               table (into params {:header header
                                                   :rows rows
                                                   :table-id (name (:idx app))
-                                                  :owner owner
                                                   })
                              ))))))
 

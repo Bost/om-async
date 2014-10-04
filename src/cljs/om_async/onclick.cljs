@@ -83,7 +83,7 @@
               (om/set-state! owner table-ktirj-active active))))))))
 
 (defn activate
-  [{:keys [app-full app owner ks-data column elem-val] :as params}]
+  [{:keys [app-full app ks-data column elem-val] :as params} owner]
   ;; TODO (js* "debugger;") seems to cause LightTable freeze
   (let [ks (full-ks params)
         active (om/get-state owner ks)]
