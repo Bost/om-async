@@ -139,39 +139,27 @@
                                      )}
                          "toggle-table")
              (dom/span
-              (map
-               #(dom/button {:ref "foo"
+              (for [button buttons]
+                (dom/button {:ref "foo"
                              :onClick (fn [e]
                                         (oc/displayed-rows
                                          (into params {:dbase (:dbase @app)
                                                        :table (:table @app)
                                                        :rows-displayed (:rows-displayed @app)
                                                        :idx (:idx @app)
-                                                       :fnc (:fnc %)
-                                                       :exec-fnc? (:exec-fnc? %)
+                                                       :fnc (:fnc button)
+                                                       :exec-fnc? (:exec-fnc? button)
                                                        })))}
-                            (:name %)) buttons))
+                            (:name button))))
              (let [table-id (name (:idx app))
-                   rows (into [] (map #(into [] (vals (nth tdata %)))
-                                      (range (count tdata))))
-                   ]
-               (println "tdata:" tdata)
+                   rows (for [d tdata]
+                          (vals d))]
                (om/build
                 table (into params {:header header :rows rows :table-id table-id}))
                ))))
 
-(def tdata [{:emp_no {:val 10001}, :from_date {:val "1988-06-24 22:00:00"}, :to_date {:val "1989-06-24 22:00:00"}, :salary {:val 66074}}
-            {:emp_no {:val 10001}, :from_date {:val "1989-06-24 22:00:00"}, :to_date {:val "1990-06-24 22:00:00"}, :salary {:val 66596}}
-            {:emp_no {:val 10001}, :from_date {:val "1986-06-25 22:00:00"}, :to_date {:val "1987-06-25 22:00:00"}, :salary {:val 60117}}
-            {:emp_no {:val 10001}, :from_date {:val "1987-06-25 22:00:00"}, :to_date {:val "1988-06-24 22:00:00"}, :salary {:val 62102}}])
-
-(into []
-      (for [[v i] (map vector tdata (range))]
-        (into [] (vals (nth tdata i)))))
-
-
 (l/defnd render-data
-  [{:keys [tdata] :as params}]
+  [{:keys [tdata] :as params} owner]
   (let [dbname (get-in tdata [:dbase])
         tname (get-in tdata [:table])
         full-tname (str dbname "." tname)
@@ -184,49 +172,44 @@
                          :tdata rows ;; TODO seem like overwriting fn input - check it!
                          :row-keywords ks}))))
 
-(l/defnd render-data-vec
-  [{:keys [extended-data] :as params}]
-  (let [id (into [] (map-indexed vector extended-data)) ;; TODO check what exactly do I need here
-        rd (map #(render-data (into params {:tdata (second %)})) id)
-        r (dom/div (into [] rd))]
-    r))
+(defcomponent render-data-vec-c
+  [{:keys [extended-data] :as params} owner]
+  (render-state [_ state]
+                (dom/div
+                 (for [e extended-data]
+                   (render-data (into params {:tdata e}) owner)))))
 
-(l/defnd render
-  [{:keys [app idx] :as params}]
-  ;; (l/infod src fn-name "params" params)
-  (dom/div {:id idx}
-           (render-data-vec (into params {:extended-data [app]}))))
+(defcomponent render
+  [{:keys [app-full app idx-table] :as params} owner]
+  (render-state [_ state]
+                (dom/div {:id idx-table}
+                         (om/build render-data-vec-c
+                                   {:app-full app-full :app app :idx-table idx-table :extended-data [app] :owner owner})
+                         )))
 
-(l/defnd render-multi
-  [{:keys [app owner] :as params}]
-  ;; (l/infod src fn-name "app" app)
-  (if (zero? (count app))        ;; TODO get rid of 'if'
-    (dom/div {:id "fetching"} "Fetching data...")
-    (dom/div {:id "main"}
-     (dom/button {:onClick (fn [e] (oc/deactivate-all params))} "deactivate-all")
-     (map #(render (into params {
-                                 :app-full app
-                                 ;; the original value under :app is [{..}]; new value is just the {...}
-                                 :app (second %)
-                                 :idx-table (first %)}))
-          (into [] (map-indexed vector app))))))
+(defcomponent render-multi-c
+  [app owner]
+  (render-state [_ state]
+                (let [
+                      params {:app app :owner owner}]
+                  (if (zero? (count app))        ;; TODO get rid of 'if'
+                    (dom/div {:id "fetching"} "Fetching data...")
+                    (dom/div {:id "main"}
+                             (dom/button {:onClick (fn [e] (oc/deactivate-all params))} "deactivate-all")
+                             (for [[idx app-idx] (map-indexed vector app)]
+                               (let [params-new (into params {:app-full app
+                                                              :app app-idx :idx-table idx})]
+;;                                  (println params-new)
+;;                                  (render params-new)
+                                 (om/build render params-new)
+                                 )
+                             )
+                    )))))
 
 (defcomponent view
   ;; "data - application state data (a cursor); owner - backing React component
   ;; returns an Om-component, i.e. a model of om/IRender interface"
   [app owner]
-  ;; IInitState
-  ;; IWillMount
-  ;; IDidMount
-  ;; IShouldUpdate
-  ;; IWillReceiveProps
-  ;; IWillUpdate
-  ;; IDidUpdate
-  ;; IRender
-  ;; IRenderState
-  ;; IDisplayName
-  ;; IWillUnmount
-
   (will-mount [_]
               ;;(l/info src fn-name "will-mount")
               (oc/edn-xhr
@@ -268,12 +251,10 @@
                 }))
   (render-state [_ state]
                 ;; [_ {:keys [err-msg]}]
-                (render-multi {:app app :owner owner}
+;;                 (render-multi {:app app :owner owner}
+                (om/build render-multi-c app
                               ))
   )
 
-;; Rendering loop on a the "dbase0" DOM element
-;; (om/root view ;; fn of 2 args: application state data,
-;;               ;;               backing React component (owner)
-;;          app-state  ;; atom containing application state
-;;          {:target (gdom/getElement "dbase0")}) ;; dbase0 is in index.html
+(om/root view app-state  ;; atom containing application state
+         {:target (gdom/getElement "dbase0")}) ;; dbase0 is in index.html
