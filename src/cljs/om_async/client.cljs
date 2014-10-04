@@ -75,7 +75,6 @@
 
 (l/defnd get-display
   [{:keys [idx] :as params} owner]
-;;   (l/infod src fn-name "owner" owner)
 ;;   (l/infod src fn-name "idx" idx)
   (let [display (om/get-state owner [idx :display])]
     (if (or (nil? display) display)
@@ -102,9 +101,7 @@
                    reverseSort (goog.ui.TableSorter.createReverseSort numericSort)]
                (.decorate component (om/get-node owner))
                (.setSortFunction component 0 alphaSort)
-               (.setSortFunction component 1 reverseSort)
-               )))
-
+               (.setSortFunction component 1 reverseSort))))
 
 ;; TODO rename table to extended-table (i.e. table with its table-control buttons)
 (defcomponent table-controler
@@ -177,11 +174,10 @@
                                    {:app-full app-full :app app :idx-table idx-table :extended-data [app]})
                          )))
 
-(defcomponent render-multi-c
+(defcomponent render-multi
   [app owner]
   (render-state [_ state]
-                (let [
-                      params {:app app :owner owner}]
+                (let [params {:app app :owner owner}]
                   (if (zero? (count app))        ;; TODO get rid of 'if'
                     (dom/div {:id "fetching"} "Fetching data...")
                     (dom/div {:id "main"}
@@ -189,12 +185,7 @@
                              (for [[idx app-idx] (map-indexed vector app)]
                                (let [params-new (into params {:app-full app
                                                               :app app-idx :idx-table idx})]
-;;                                  (println params-new)
-;;                                  (render params-new)
-                                 (om/build render params-new)
-                                 )
-                             )
-                    )))))
+                                 (om/build render params-new))))))))
 
 (defcomponent view
   ;; "data - application state data (a cursor); owner - backing React component
@@ -241,9 +232,7 @@
                 }))
   (render-state [_ state]
                 ;; [_ {:keys [err-msg]}]
-;;                 (render-multi {:app app :owner owner}
-                (om/build render-multi-c app
-                              ))
+                (om/build render-multi app))
   )
 
 (om/root view app-state  ;; atom containing application state
