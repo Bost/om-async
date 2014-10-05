@@ -123,7 +123,6 @@
 ;; TODO rename table to extended-table (i.e. table with its table-control buttons)
 (defcomponent table-controler [app owner]
   (render-state [_ state]
-;;                 (println app)
                 (dom/div
                  (for [table app]
                    (let [dbname (get-in table [:dbase])
@@ -144,7 +143,9 @@
                                         (for [button buttons]
                                           (dom/button {:ref "foo"
                                                        :onClick (fn [e]
-                                                                  (oc/displayed-rows {:dbase (:dbase @table)
+                                                                  (oc/displayed-rows app
+                                                                                     {:owner owner
+                                                                                      :dbase (:dbase @table)
                                                                                       :table (:table @table)
                                                                                       :rows-displayed (:rows-displayed @table)
                                                                                       :idx (:idx @table)
@@ -158,7 +159,8 @@
                                                  :rows data
                                                  :table-id (name (:idx table))
                                                  :idx-table (:idx table)
-                                                 })))))))
+                                                 })
+                              ))))))
 (defcomponent render-multi [app owner]
   (render-state [_ state]
                 (if (zero? (count app))        ;; TODO get rid of 'if'
@@ -204,11 +206,8 @@
                 :on-complete (fn [response]
                                (let [er (t/extend-all response)
                                      r (into [] er)]
-                                 ;; (l/infod src fn-name "r" r)
                                  (om/transact! app []
-                                               (fn [_]
-                                                 ;;(l/infod src fn-name "app" response)
-                                                 r))))
+                                               (fn [_] r))))
                 }))
   (render-state [_ state]
                 ;; [_ {:keys [err-msg]}]
