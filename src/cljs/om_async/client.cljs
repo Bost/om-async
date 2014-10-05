@@ -55,43 +55,49 @@
 (l/defnd tr
   [{:keys [css row columns] :as params} owner]
   (let [ column nil ]
+;;     (println "row: " row)
+;;     (println "columns: " columns)
     (dom/tr {:class css}
-             (map (fn [cell-val col]
-                    (td (into params {:cell cell-val :column col}) owner))
-                  row
-                  (cycle columns)
-                  ))))
+            (for [col-kw (keys row)]
+;;               (println "col-kw: " col-kw)
+              (td (into params {:cell (col-kw row) :column col-kw}) owner)
+              ))))
 
 (l/defnd render-row
-  [{:keys [rows row-keywords] :as params} owner]
-  (map (fn [css row idx-row]
-         (tr (into params {:css css
-                           :row row
-                           :idx-row idx-row
-                           }) owner))
-       (cycle ["" "odd"]) ;; gives the css
-       rows               ;; gives the row
-       row-keywords))
+  [{:keys [rows] :as params} owner]
+;;   (println "rows: " rows)
+;;   (println "(keys rows): " (keys rows))
+  (for [[idx-row row-kw] (map-indexed vector (keys rows))]
+;;     (println "row: " row)
+;;     (println "idx-row: " idx-row)
+    (tr (into params {:css ""
+                      :row (row-kw rows)
+                      :idx-row idx-row
+                      }) owner)
+    ))
 
 (l/defnd get-display
-  [{:keys [idx] :as params} owner]
+  [idx owner]
 ;;   (l/infod src fn-name "idx" idx)
   (let [display (om/get-state owner [idx :display])]
     (if (or (nil? display) display)
       #js {}
       #js {:display "none"})))
 
-(defcomponent table
+(defcomponent table-c
   [{:keys [header rows table-id] :as params} owner]
   (render-state [_ state]
+;;                 (println "header: " header)
+;;                 (println "table-id: " table-id)
+;;                 (println "rows: " rows)
                 (dom/table {:id table-id
-                            :style (get-display (into params {:idx (keyword table-id)}) owner)}
+                            :style (get-display (keyword table-id) owner)}
                            (dom/thead
                             (dom/tr
                              (for [h header]
                                (dom/th (str h)))))
                            (dom/tbody
-                            (render-row (into params {:rows rows :columns header}) owner))))
+                            (render-row {:rows rows :columns header} owner))))
   (did-mount [_]
              ;; (table-sorter owner table-id)
              ;; TODO consider using a map defining {:column sort-type} created by the server
@@ -104,88 +110,49 @@
                (.setSortFunction component 1 reverseSort))))
 
 ;; TODO rename table to extended-table (i.e. table with its table-control buttons)
-(defcomponent table-controler
-  [{:keys [app rows-displayed tname tdata] :as params} owner]
-  (render-state [_ state]
-                (let [
-                      header (into [] (keys (first tdata)))
-                      buttons [{:name "more-rows" :fnc inc :exec-fnc? (fn [_] true)}
-                               {:name "less-rows" :fnc dec :exec-fnc? (fn [cnt-rows] (> cnt-rows 0))}]
-                      ;; (:idx app) must be used (no @)
-                      ;; if binded in a let-statement outside
-                      ]
-                  (dom/div {:id (str "div-" (name (:idx app)))}
-                           tname
-                           (dom/button {:onClick (fn [e]
-                                                   (oc/toggle-table (into params {:idx (:idx @app)
-                                                                                  }))
-                                                   )}
-                                       "toggle-table")
-                           (dom/span {:id (str "span-" (name (:idx app)))}
-                            (for [button buttons]
-                              (dom/button {:ref "foo"
-                                           :onClick (fn [e]
-                                                      (oc/displayed-rows
-                                                       (into params {:dbase (:dbase @app)
-                                                                     :table (:table @app)
-                                                                     :rows-displayed (:rows-displayed @app)
-                                                                     :idx (:idx @app)
-                                                                     :fnc (:fnc button)
-                                                                     :exec-fnc? (:exec-fnc? button)
-                                                                     })))}
-                                          (:name button))))
-                           (let [rows (for [d tdata]
-                                        (vals d))]
-                             (om/build
-                              table (into params {:header header
-                                                  :rows rows
-                                                  :table-id (name (:idx app))
-                                                  })
-                             ))))))
-
-(defcomponent render-data
-  [{:keys [tdata] :as params} owner]
-  (render-state [_ state]
-                (let [dbname (get-in tdata [:dbase])
-                      tname (get-in tdata [:table])
-                      full-tname (str dbname "." tname)
-                      data (get-in tdata [:data])
-                      rows (into [] (vals data))
-                      ks (into [] (keys data))
-                      ]
-                  ;;(l/infod src fn-name "ks" ks)
-                  (om/build table-controler (into params {:tname full-tname
-                                                          :tdata rows ;; TODO seem like overwriting fn input - check it!
-                                                          :row-keywords ks
-                                                          })))))
-
-(defcomponent render-data-vec
-  [{:keys [extended-data] :as params} owner]
+(defcomponent table-controler [app owner]
   (render-state [_ state]
                 (dom/div
-                 (for [e extended-data]
-                   (om/build render-data (into params {:tdata e}))))))
+                 (for [table app]
+                   (let [dbname (get-in table [:dbase])
+                         tname (get-in table [:table])
+                         full-tname (str dbname "." tname)
+                         data (get-in table [:data])
 
-(defcomponent render
-  [{:keys [app-full app idx-table] :as params} owner]
-  (render-state [_ state]
-                (dom/div {:id (str "render-" idx-table)}
-                         (om/build render-data-vec
-                                   {:app-full app-full :app app :idx-table idx-table :extended-data [app]})
-                         )))
+                         header (into [] (keys (:row0 data)))
+                         buttons [{:name "more-rows" :fnc inc :exec-fnc? (fn [_] true)}
+                                  {:name "less-rows" :fnc dec :exec-fnc? (fn [cnt-rows] (> cnt-rows 0))}]
+                         ]
+                     (dom/div {:id (str "div-" (name (:idx table)))}
+                              tname
+                              (dom/button {:onClick (fn [e]
+                                                      (oc/toggle-table {:idx (:idx @table)}))}
+                                          "toggle-table")
+                              (dom/span {:id (str "span-" (name (:idx table)))}
+                                        (for [button buttons]
+                                          (dom/button {:ref "foo"
+                                                       :onClick (fn [e]
+                                                                  (oc/displayed-rows {:dbase (:dbase @table)
+                                                                                      :table (:table @table)
+                                                                                      :rows-displayed (:rows-displayed @table)
+                                                                                      :idx (:idx @table)
+                                                                                      :fnc (:fnc button)
+                                                                                      :exec-fnc? (:exec-fnc? button)
+                                                                                      }))}
+                                                      (:name button))))
 
-(defcomponent render-multi
-  [app owner]
+                              (om/build table-c {:header header
+                                                 :rows data
+                                                 :table-id (name (:idx table))
+                                                 })))))))
+
+(defcomponent render-multi [app owner]
   (render-state [_ state]
-                (let [params {:app app :owner owner}]
-                  (if (zero? (count app))        ;; TODO get rid of 'if'
-                    (dom/div {:id "fetching"} "Fetching data...")
-                    (dom/div {:id "main"}
-                             (dom/button {:onClick (fn [e] (oc/deactivate-all params))} "deactivate-all")
-                             (for [[idx app-idx] (map-indexed vector app)]
-                               (let [params-new (into params {:app-full app
-                                                              :app app-idx :idx-table idx})]
-                                 (om/build render params-new))))))))
+                (if (zero? (count app))        ;; TODO get rid of 'if'
+                  (dom/div {:id "fetching"} "Fetching data...")
+                  (dom/div {:id "main"}
+                           (dom/button {:onClick (fn [e] (oc/deactivate-all app owner))} "deactivate-all")
+                           (om/build table-controler app)))))
 
 (defcomponent view
   ;; "data - application state data (a cursor); owner - backing React component

@@ -116,7 +116,7 @@
 
 (defn deactivate-all
   "Deactivate all active React GUI components"
-  [{:keys [owner] :as params}]
+  [app owner]
   (println "TODO implement deactivate-all; use clojure/walk?"))
 
 (defn displayed-elems [elem add-remove-N]
