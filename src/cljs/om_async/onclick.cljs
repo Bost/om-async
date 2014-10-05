@@ -88,28 +88,18 @@
               (om/set-state! owner table-ktirj-active active)
               )))))))
 
+(true? true)
 (defn activate
   [{:keys [app ks-data column elem-val] :as params} owner]
   ;; TODO (js* "debugger;") seems to cause LightTable freeze
-  (let [ks-params (full-ks params)
-        node     (om/get-node owner)
-        active-owner     (om/get-state owner)
-        active-ks-params (om/get-state owner ks-params)
-        ]
+  (let [active (om/get-state owner :active)]
     ;; we're not allowed to use cursors outside of the render phase as
     ;; this is almost certainly a concurrency bug!
     ;; (om/transact! app ks (fn [] (not active))) ;; change application state; use with get-in
     ;; (om/set-state! owner ks (not active))  ;; change local component state
 
-    (println "node.id" (.-id node))
-    (println "ks-params" ks-params)
-    (println "active-owner" active-owner "; not: " (not active-owner))
-    (println "active-ks-params" active-ks-params "; not: " (not active-ks-params))
-    ;; (l/infod src fn-name "ks-data" ks-data)
-    ;; (println "app" @app)
-    ;; (l/infod src fn-name "owner" owner)
-    (toggle-activate @app owner (last ks-data) elem-val (not active-ks-params))
-;;     (om/set-state! owner ks-params (not active-ks-params))
+;;     (toggle-activate @app owner (last ks-data) elem-val (not active-ks-params))
+    (om/set-state! owner :active (not active))
 
     (edn-xhr
      {:method :put

@@ -33,26 +33,8 @@
 (defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no elem is filtered out
 ;; (defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no elem is filtered out
 
-(l/defnd get-css
-  [{:keys [default ks] :as params} owner]
-  (let [ks (oc/full-ks params)
-        active (om/get-state owner ks)
-        r (if active "active" default)]
-;;     (om/transact! app ks (fn [] (not active)))
-;;     (println "params" params)
-;;     (println "default" default)
-;;     (println "get-css ks" ks)
-;;     (println "get-css active" active)
-;;     (println "get-css get-state" (om/get-state owner))
-;;     (println "r" r)
-    r))
-
 (defcomponent td
   [{:keys [app cell idx-table idx-row column] :as params} owner]
-;;   (did-mount [_]
-;;              (let [node (om/get-node owner)]
-;;                )
-;;              )
   (render-state [_ state]
                 (let [td-val (get-in cell [:val])
                       ;; TODO walking over the data from the server doesn't work properly
@@ -63,14 +45,9 @@
                                       :column column
                                       :elem-val td-val
                                       })]
-                  ;;     (l/infod src fn-name "ks-data" ks-data)
-                  ;;     (l/infod src fn-name "cell" cell)
                   (dom/td {:id (str idx-table "-" idx-row "-" column "-" td-val)
-                           :class (get-css p owner)
-                           :onClick (fn [e]
-;;                                       (println "onClick")
-                                      (oc/activate p owner))
-                           }
+                           :class (if (om/get-state owner :active) "active" default)
+                           :onClick (fn [e] (oc/activate p owner))}
                           td-val))))
 
 (defcomponent tr
