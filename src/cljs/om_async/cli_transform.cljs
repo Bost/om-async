@@ -40,9 +40,8 @@
     r))
 
 (defn extend-all [tfull]
-  (let [ks (into [] (keys tfull))
-        rks (map #(xtable tfull %) ks)
-        r (into [] (apply concat (into [] rks)))
-        ]
-    ;; (l/infod src fn-name "r" r)
+  (let [x (for [k (keys tfull)]
+            (xtable tfull k))
+        r (into [] (apply concat x))]
+;;     (println "r" r)
     r))

@@ -134,9 +134,30 @@
         ;; TODO extend-table must be done in the client.cljs
         ]
     ;; (l/infod src fn-name "rvec" rvec)
-    ;; (l/infod src fn-name "rdata" rdata)
+    ;;(println "rdata" rdata)
     rdata
     ))
+
+;; {:table2 {:data {:row3 {:emp_no 10001, :salary 66596, :from_date 1989-06-24 22:00:00, :to_date 1990-06-24 22:00:00},
+;;                  :row2 {:emp_no 10001, :salary 66074, :from_date 1988-06-24 22:00:00, :to_date 1989-06-24 22:00:00},
+;;                  :row1 {:emp_no 10001, :salary 62102, :from_date 1987-06-25 22:00:00, :to_date 1988-06-24 22:00:00},
+;;                  :row0 {:emp_no 10001, :salary 60117, :from_date 1986-06-25 22:00:00, :to_date 1987-06-25 22:00:00}},
+;;           :dbase employees,
+;;           :table salaries,
+;;           :rows-displayed 4,
+;;           :idx :table2},
+;;  :table1 {:data {:row1 {:dept_no d005, :dept_name Development},
+;;                  :row0 {:dept_no d009, :dept_name Customer Service}},
+;;           :dbase employees,
+;;           :table departments,
+;;           :rows-displayed 2,
+;;           :idx :table1},
+
+;;  :table0 {:data {:row0 {:emp_no 10001, :birth_date 1953-09-01 23:00:00, :first_name Georgi, :last_name Facello, :gender M, :hire_date 1986-06-25 22:00:00}},
+;;           :dbase employees,
+;;           :table employees,
+;;           :rows-displayed 1,
+;;           :idx :table0}}
 
 (l/defnd m-show-tables-from [params data]
 ;;   (l/infod src fn-name "params" params)

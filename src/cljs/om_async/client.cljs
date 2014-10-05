@@ -46,7 +46,7 @@
                                       :elem-val td-val
                                       })]
                   (dom/td {:id (str idx-table "-" idx-row "-" column "-" td-val)
-                           :class (if (om/get-state owner :active) "active" default)
+                           :class (if (om/get-state owner :active) "active" nil)
                            :onClick (fn [e] (oc/activate p owner))}
                           td-val))))
 
@@ -124,43 +124,46 @@
 (defcomponent table-controler [app owner]
   (render-state [_ state]
                 (dom/div
-                 (for [table app]
-                   (let [dbname (get-in table [:dbase])
-                         tname (get-in table [:table])
-                         full-tname (str dbname "." tname)
-                         data (get-in table [:data])
+                 (let [dbname (get-in app [:dbase])
+                       dbdata (get-in app [:data])]
+                   (for [table-key (keys dbdata)]
+                     (let [table (table-key dbdata)
+                           tname (get-in table [:table])
+                           full-tname (str dbname "." tname)
+                           data (get-in table [:data])
 
-                         header (into [] (keys (:row0 data)))
-                         buttons [{:name "more-rows" :fnc inc :exec-fnc? (fn [_] true)}
-                                  {:name "less-rows" :fnc dec :exec-fnc? (fn [cnt-rows] (> cnt-rows 0))}]
-                         ]
-                     (dom/div {:id (str "div-" (name (:idx table)))}
-                              (str tname "-" (name (:idx table)))
-                              (dom/button {:onClick (fn [e]
-                                                      (oc/toggle-table {:idx (:idx @table)}))}
-                                          "toggle-table")
-                              (dom/span {:id (str "span-" (name (:idx table)))}
-                                        (for [button buttons]
-                                          (dom/button {:ref "foo"
-                                                       :onClick (fn [e]
-                                                                  (oc/displayed-rows app
-                                                                                     {:owner owner
-                                                                                      :dbase (:dbase @table)
-                                                                                      :table (:table @table)
-                                                                                      :rows-displayed (:rows-displayed @table)
-                                                                                      :idx (:idx @table)
-                                                                                      :fnc (:fnc button)
-                                                                                      :exec-fnc? (:exec-fnc? button)
-                                                                                      }))}
-                                                      (:name button))))
+                           header (into [] (keys (:row0 data)))
+                           buttons [{:name "more-rows" :fnc inc :exec-fnc? (fn [_] true)}
+                                    {:name "less-rows" :fnc dec :exec-fnc? (fn [cnt-rows] (> cnt-rows 0))}]
+                           ]
+                       (dom/div {:id (str "div-" (name (:idx table)))}
+                                (str tname "-" (name (:idx table)))
+                                (dom/button {:onClick (fn [e]
+                                                        (oc/toggle-table {:idx (:idx @table)}))}
+                                            "toggle-table")
+                                (dom/span {:id (str "span-" (name (:idx table)))}
+                                          (for [button buttons]
+                                            (dom/button {:ref "foo"
+                                                         :onClick (fn [e]
+                                                                    (oc/displayed-rows app
+                                                                                       {:owner owner
+                                                                                        :dbase (:dbase @table)
+                                                                                        :table (:table @table)
+                                                                                        :rows-displayed (:rows-displayed @table)
+                                                                                        :idx (:idx @table)
+                                                                                        :fnc (:fnc button)
+                                                                                        :exec-fnc? (:exec-fnc? button)
+                                                                                        }))}
+                                                        (:name button))))
 
-                              (om/build table-c {:app app
-                                                 :header header
-                                                 :rows data
-                                                 :table-id (name (:idx table))
-                                                 :idx-table (:idx table)
-                                                 })
-                              ))))))
+                                (om/build table-c {:app app
+                                                   :header header
+                                                   :rows data
+                                                   :table-id (name (:idx table))
+                                                   :idx-table (:idx table)
+                                                   })
+                                )))))))
+
 (defcomponent render-multi [app owner]
   (render-state [_ state]
                 (if (zero? (count app))        ;; TODO get rid of 'if'
@@ -185,7 +188,7 @@
                   ;; !!! Woa any key-value pair I stuff in pops up in the db.sql-select-rows-from fn.
                   {:dbase "employees" :table "employees"   :rows-displayed 1 :idx (oc/kw-table 0)}
                   {:dbase "employees" :table "departments" :rows-displayed 2 :idx (oc/kw-table 1)}
-                  {:dbase "employees" :table "salaries"    :rows-displayed 4 :idx (oc/kw-table 2)}
+                  {:dbase "employees" :table "salaries"    :rows-displayed 2 :idx (oc/kw-table 2)}
                   ]}
                 ;; {:select-rows-from [{:dbase "employees" :table "departments" :rows-displayed 2 :idx :table0}]}
 
@@ -204,15 +207,25 @@
 
                 ;; om/transact! propagates changes back to the original atom
                 :on-complete (fn [response]
-                               (let [er (t/extend-all response)
-                                     r (into [] er)]
-                                 (om/transact! app []
-                                               (fn [_] r))))
+                               (let [
+                                     all-tables (t/extend-all response)
+                                     all-tables-data (for [t all-tables]
+                                                       (dissoc t :dbase))
+                                     indexes (for [d all-tables-data]
+                                               (:idx d))
+                                     indexed-tables (for [[i d] (map vector indexes all-tables-data)]
+                                                      {i d})
+
+                                     dbase-data {:dbase "employees"
+                                                 :data (into {}
+                                                             (apply concat indexed-tables))}
+                                     ]
+                                 ;; (println "dbase-data" dbase-data)
+                                 (om/transact! app [] (fn [_] dbase-data))))
                 }))
   (render-state [_ state]
                 ;; [_ {:keys [err-msg]}]
-                (om/build render-multi app))
-  )
+                (om/build render-multi app)))
 
 (om/root view app-state  ;; atom containing application state
          {:target (gdom/getElement "dbase0")}) ;; dbase0 is in index.html
