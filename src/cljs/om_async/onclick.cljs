@@ -141,7 +141,7 @@
 (defn displayed-rows
   "Display +N / -N rows"
   [app {:keys [owner dbase table rows-displayed idx fnc exec-fnc?] :as params}]
-;;   (println "app" (type app) (count @app) )
+;;   (println "app" @app)
 ;;   (println "params" params)
   (if (exec-fnc? rows-displayed)
     (edn-xhr
@@ -152,9 +152,15 @@
                                  :rows-displayed (fnc rows-displayed)
                                  :idx idx}]}
       :on-complete (fn [response]
-                     (let [er (t/extend-all response)
-                           r (into [] er)]
-                       ;; om/transact! propagates changes back to the original atom
-                       (om/transact! app [;; TODO specify korks here
-                                          ] (fn [_] r ))))
+                     (let [korks [:data idx]
+                           new-data (t/extend-all response)
+                           new-data-stripped (get-in new-data korks)
+                           ]
+                       ;; (println "response" response)
+                       ;; (println "new-data" new-data)
+                       ;; (println "new-data-stripped" new-data-stripped)
+                       ;om/transact! propagates changes back to the original atom
+                       ;; (om/transact! app korks (fn [_] new-data-stripped))
+                       (om/update! app korks new-data-stripped)
+                       ))
       })))

@@ -147,14 +147,17 @@
                                                          :onClick (fn [e]
                                                                     (oc/displayed-rows app
                                                                                        {:owner owner
-                                                                                        :dbase (:dbase @table)
+                                                                                        :dbase dbname
                                                                                         :table (:table @table)
                                                                                         :rows-displayed (:rows-displayed @table)
                                                                                         :idx (:idx @table)
                                                                                         :fnc (:fnc button)
                                                                                         :exec-fnc? (:exec-fnc? button)
                                                                                         }))}
-                                                        (:name button))))
+                                                        (:name button)))
+                                          "table-size "
+                                          (str "rows-displayed: " (:rows-displayed table))
+                                          )
 
                                 (om/build table-c {:app app
                                                    :header header
@@ -207,21 +210,7 @@
 
                 ;; om/transact! propagates changes back to the original atom
                 :on-complete (fn [response]
-                               (let [
-                                     all-tables (t/extend-all response)
-                                     all-tables-data (for [t all-tables]
-                                                       (dissoc t :dbase))
-                                     indexes (for [d all-tables-data]
-                                               (:idx d))
-                                     indexed-tables (for [[i d] (map vector indexes all-tables-data)]
-                                                      {i d})
-
-                                     dbase-data {:dbase "employees"
-                                                 :data (into {}
-                                                             (apply concat indexed-tables))}
-                                     ]
-                                 ;; (println "dbase-data" dbase-data)
-                                 (om/transact! app [] (fn [_] dbase-data))))
+                               (om/transact! app [] (fn [_] (t/extend-all response))))
                 }))
   (render-state [_ state]
                 ;; [_ {:keys [err-msg]}]

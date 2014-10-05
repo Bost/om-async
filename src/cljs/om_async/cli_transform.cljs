@@ -40,8 +40,18 @@
     r))
 
 (defn extend-all [tfull]
-  (let [x (for [k (keys tfull)]
-            (xtable tfull k))
-        r (into [] (apply concat x))]
-;;     (println "r" r)
-    r))
+  (let [all-xtable (for [k (keys tfull)]
+                     (xtable tfull k))
+        all-tables-data (for [t (apply concat all-xtable)]
+                          (dissoc t :dbase))
+        indexes (for [d all-tables-data]
+                  (:idx d))
+        indexed-tables (for [[i d] (map vector indexes all-tables-data)]
+                         {i d})
+
+        dbase-data {:dbase "employees"
+                    :data (into {}
+                                (apply concat indexed-tables))}
+        ]
+    ;; (println "dbase-data" dbase-data)
+    dbase-data))
