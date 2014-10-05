@@ -34,47 +34,77 @@
 ;; (defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no elem is filtered out
 
 (l/defnd get-css
-  [{:keys [default] :as params} owner]
+  [{:keys [default ks] :as params} owner]
   (let [ks (oc/full-ks params)
         active (om/get-state owner ks)
         r (if active "active" default)]
-    ;; (om/transact! app ks (fn [] (not active)))
+;;     (om/transact! app ks (fn [] (not active)))
+;;     (println "params" params)
+;;     (println "default" default)
+;;     (println "get-css ks" ks)
+;;     (println "get-css active" active)
+;;     (println "get-css get-state" (om/get-state owner))
+;;     (println "r" r)
     r))
 
-(l/defnd td
-  [{:keys [cell idx-row column] :as params} owner]
-  (let [td-val (get-in cell [:val])
-        ;; TODO walking over the data from the server doesn't work properly
-        p (into params {:ks-data [:data idx-row column] :kw-active [:active]})]
-;;     (l/infod src fn-name "ks-data" ks-data)
-;;     (l/infod src fn-name "cell" cell)
-    (dom/td {:class (get-css p owner)
-              :onClick (fn [e] (oc/activate (into p {:column column :elem-val td-val}) owner))}
-            td-val)))
+(defcomponent td
+  [{:keys [app cell idx-table idx-row column] :as params} owner]
+;;   (did-mount [_]
+;;              (let [node (om/get-node owner)]
+;;                )
+;;              )
+  (render-state [_ state]
+                (let [td-val (get-in cell [:val])
+                      ;; TODO walking over the data from the server doesn't work properly
+                      p (into params {:ks-data [:data idx-row column]
+                                      :kw-active [:active]
+                                      :idx-table idx-table
+                                      :idx-row idx-row
+                                      :column column
+                                      :elem-val td-val
+                                      })]
+                  ;;     (l/infod src fn-name "ks-data" ks-data)
+                  ;;     (l/infod src fn-name "cell" cell)
+                  (dom/td {:id (str idx-table "-" idx-row "-" column "-" td-val)
+                           :class (get-css p owner)
+                           :onClick (fn [e]
+;;                                       (println "onClick")
+                                      (oc/activate p owner))
+                           }
+                          td-val))))
 
-(l/defnd tr
-  [{:keys [css row columns] :as params} owner]
-  (let [ column nil ]
-;;     (println "row: " row)
-;;     (println "columns: " columns)
-    (dom/tr {:class css}
-            (for [col-kw (keys row)]
-;;               (println "col-kw: " col-kw)
-              (td (into params {:cell (col-kw row) :column col-kw}) owner)
-              ))))
+(defcomponent tr
+  [{:keys [app css row columns idx-table idx-row] :as params} owner]
+  (render-state [_ state]
+                (let [ column nil ]
+                  ;;     (println "row: " row)
+                  ;;     (println "columns: " columns)
+                  (dom/tr {:class css}
+                          (for [col-kw (keys row)]
+                            ;; (println "col-kw: " col-kw)
+                            (om/build td {:app app
+                                          :cell (col-kw row)
+                                          :column col-kw
+                                          :idx-table idx-table
+                                          :idx-row idx-row
+                                          }))))))
 
-(l/defnd render-row
-  [{:keys [rows] :as params} owner]
-;;   (println "rows: " rows)
-;;   (println "(keys rows): " (keys rows))
-  (for [[idx-row row-kw] (map-indexed vector (keys rows))]
-;;     (println "row: " row)
-;;     (println "idx-row: " idx-row)
-    (tr (into params {:css ""
-                      :row (row-kw rows)
-                      :idx-row idx-row
-                      }) owner)
-    ))
+(defcomponent render-rows
+  [{:keys [app rows idx-table] :as params} owner]
+  ;;   (println "rows: " rows)
+  ;;   (println "(keys rows): " (keys rows))
+  ;;   (println "idx-table" idx-table)
+  (render-state [_ state]
+                (dom/tbody
+                 (for [row-kw (keys rows)]
+                   ;;     (println "row: " row)
+                   ;;     (println "idx-row: " idx-row)
+                   (om/build tr {:app app
+                                 :css ""
+                                 :row (row-kw rows)
+                                 :idx-table idx-table
+                                 :idx-row row-kw
+                                 })))))
 
 (l/defnd get-display
   [idx owner]
@@ -85,19 +115,23 @@
       #js {:display "none"})))
 
 (defcomponent table-c
-  [{:keys [header rows table-id] :as params} owner]
+  [{:keys [app header rows table-id idx-table] :as params} owner]
   (render-state [_ state]
-;;                 (println "header: " header)
-;;                 (println "table-id: " table-id)
-;;                 (println "rows: " rows)
+                ;;                 (println "header: " header)
+                ;;                 (println "table-id: " table-id)
+                ;;                 (println "rows: " rows)
+                ;;                 (println "idx-table" idx-table)
                 (dom/table {:id table-id
                             :style (get-display (keyword table-id) owner)}
                            (dom/thead
                             (dom/tr
                              (for [h header]
                                (dom/th (str h)))))
-                           (dom/tbody
-                            (render-row {:rows rows :columns header} owner))))
+                           (om/build render-rows {:app app
+                                                  :rows rows
+                                                  :columns header
+                                                  :idx-table idx-table
+                                                  })))
   (did-mount [_]
              ;; (table-sorter owner table-id)
              ;; TODO consider using a map defining {:column sort-type} created by the server
@@ -112,6 +146,7 @@
 ;; TODO rename table to extended-table (i.e. table with its table-control buttons)
 (defcomponent table-controler [app owner]
   (render-state [_ state]
+;;                 (println app)
                 (dom/div
                  (for [table app]
                    (let [dbname (get-in table [:dbase])
@@ -124,7 +159,7 @@
                                   {:name "less-rows" :fnc dec :exec-fnc? (fn [cnt-rows] (> cnt-rows 0))}]
                          ]
                      (dom/div {:id (str "div-" (name (:idx table)))}
-                              tname
+                              (str tname "-" (name (:idx table)))
                               (dom/button {:onClick (fn [e]
                                                       (oc/toggle-table {:idx (:idx @table)}))}
                                           "toggle-table")
@@ -141,11 +176,12 @@
                                                                                       }))}
                                                       (:name button))))
 
-                              (om/build table-c {:header header
+                              (om/build table-c {:app app
+                                                 :header header
                                                  :rows data
                                                  :table-id (name (:idx table))
+                                                 :idx-table (:idx table)
                                                  })))))))
-
 (defcomponent render-multi [app owner]
   (render-state [_ state]
                 (if (zero? (count app))        ;; TODO get rid of 'if'
