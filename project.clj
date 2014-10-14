@@ -8,15 +8,17 @@
 
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/clojurescript "0.0-2322"]
-                 [ring/ring "1.3.1"]
-                 [org.clojure/core.async "0.1.338.0-5c5012-alpha"]
-                 [om "0.7.3"]
-                 [compojure "1.1.9"]
+                 [ring/ring "1.3.2"]
+                 [org.clojure/core.async "0.1.346.0-17112a-alpha"]
+                 [om "0.8.0-alpha2"]
+                 [compojure "1.2.1"]
                  [fogus/ring-edn "0.2.0"]
                  ;; [com.datomic/datomic-free "0.9.4699"]
 
-                 [org.clojure/java.jdbc "0.3.5"]
-                 [mysql/mysql-connector-java "5.1.32"]
+                 [org.clojure/java.jdbc "0.3.6"]
+                 ;; TODO take a look at [clojure.jdbc "0.3.0"]
+
+                 [mysql/mysql-connector-java "5.1.34"]
 
                  [korma "0.4.0"] ;; sql for clojure
 
@@ -25,16 +27,14 @@
 
                  ;; [org.clojure/tools.logging "0.3.0"]
                  ;; [org.slf4j/slf4j-log4j12 "1.7.7"]
-                 [prismatic/om-tools "0.3.2"]
-
+                 [prismatic/om-tools "0.3.6"]
+                 [com.keminglabs/cljx "0.4.0" :exclusions [org.clojure/clojure]]
                  [clj-time "0.8.0"]
                  ]
 
   :plugins [[lein-cljsbuild "1.0.3"]
-            [com.keminglabs/cljx "0.4.0"
-             :exclusions [org.clojure/clojure]]
+            [com.keminglabs/cljx "0.4.0" :exclusions [org.clojure/clojure]]
             ]
-
   :source-paths ["src/clj" "src/cljs"]
   :resource-paths ["resources"]
 
