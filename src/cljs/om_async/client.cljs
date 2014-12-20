@@ -180,7 +180,6 @@
   ;; returns an Om-component, i.e. a model of om/IRender interface"
   [app owner]
   (will-mount [_]
-              ;;(l/info src fn-name "will-mount")
               (oc/edn-xhr
                {:method :put
                 :url "fetch"
@@ -210,9 +209,14 @@
 
                 ;; om/transact! propagates changes back to the original atom
                 :on-complete (fn [response]
-                               (om/transact! app [] (fn [_] (t/extend-all response))))
+                               (om/transact! app [] (fn [_]
+                                                      (println "transacting...")
+                                                      (t/extend-all response)
+;;                                                       (println "transacting done")
+                                                      )))
                 }))
   (render-state [_ state]
+                (println "rendering...")
                 ;; [_ {:keys [err-msg]}]
                 (om/build render-multi app)))
 

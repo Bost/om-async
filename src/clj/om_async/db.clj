@@ -25,13 +25,19 @@
 ;;   (oc/edn-xhr { .. :data {:select-rows-from [ .. ]}}) and ... job done!
 ;;   It pops up here just like that!"
   [{:keys [dbase table rows-displayed] :as params}]
-  ;; (l/infod src fn-name "params" params)
-  ;; (l/infod src fn-name "dbase" dbase)
-  ;; (l/infod src fn-name "table" table)
-  (defdb db (mysql (db-connect dbase)))
-  (let [r (select table (limit rows-displayed))]
-    ;; (l/infod src fn-name "r " r)
-    r))
+  (l/infod src fn-name "params" params)
+  (l/infod src fn-name "dbase" dbase)
+  (l/infod src fn-name "table" table)
+  (l/infod src fn-name "rows-displayed" rows-displayed)
+  (let [max-rows 10
+        rows-displayed-limited (min max-rows rows-displayed)]
+    (if (> rows-displayed max-rows)
+      (l/warn src ("Number of selected rows limited to " rows-displayed-limited)))
+    (defdb db (mysql (db-connect dbase)))
+    (l/infod src fn-name "rows-displayed-limited" rows-displayed-limited)
+    (let [r (select table (limit rows-displayed-limited))]
+      ;; (l/infod src fn-name "r " r)
+      r)))
 
 ;; (sql-select-rows-from u/e u/s)
 

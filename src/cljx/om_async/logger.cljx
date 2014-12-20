@@ -25,32 +25,41 @@
                   "render"
                   "get-display"
                   "table-sorter"
+                  "new-to-old"
                   ]
    :onclick.cljs [
                   "toggle-table"
                   "displayed-rows"
+                  "edn-xhr"
                   ]
-   :transform.clj [
-                   ;;    "fetch"
-                   ;; "encode-table"
-                   ;; "process-select-rows-from"
-                   ;;    "m-show-tables-from"
-                   ;;    "m-select-rows-from"
-                   ;;    "m-show-tables-with-data-from"
-                   ;;    "process-show-tables-with-data-from"
-                   ]
-   :server.clj [
-                ;;    "routes-PUT-select-id"
-                ;;    "routes-PUT-fetch"
-                ;;    "process-sql"
-                ]
+   :cli_transform.cljs [
+;;                         "extend-table"
+                        "xtable"
+                        "extend-all"
+                        ]
+;;    :transform.clj [
+;;                    "fetch"
+;;                    ;; "encode-table"
+;;                    "process-select-rows-from"
+;;                    "process-select-rows-from-new"
+;;                    ;;    "m-show-tables-from"
+;;                    "m-select-rows-from"
+;;                    "m-select-rows-from-new"
+;;                    ;;    "m-show-tables-with-data-from"
+;;                    ;;    "process-show-tables-with-data-from"
+;;                    "process-sql"
+;;                    ]
+;;    :server.clj [
+;;                 ;;    "routes-PUT-select-id"
+;;                 "routes-PUT-fetch"
+;;                 ]
    :utils [
            ;;    "convert-to-korks"
            ]
 
    :db.clj [
             "sql-show-tables-from"
-            ;;    "sql-select-rows-from"
+;;             "sql-select-rows-from"
             ;;    "fn-name"
             ]
    }
@@ -58,6 +67,10 @@
 
 ;; TODO use (partial ..)
 (defn infod [src fn-name def-name def-val]
+;;   (println "src" src)
+;;   (println "fn-name" fn-name)
+;;   (println "def-name" def-name)
+;;   (println "def-val" def-val)
   (let [fns ((keyword src) files)]
     (if fns
       (if (u/in? fns fn-name)
@@ -68,11 +81,21 @@
 
 ;; TODO macro: choose between clojure.pprint/pprint (clj) & println (cljs)
 ;; TODO see (JSON/stringify obj nil 2)
-;; (defn info [src fn-name msg]
-;;   (if (u/contains-value? files src)
-;;     (if (u/contains-value? functions fn-name)
-;;       (println
-;;        (str src "; " fn-name "; " msg)))))
+(defn info [src fn-name msg]
+;;   (println "src" src)
+;;   (println "fn-name" fn-name)
+;;   (println "msg" msg)
+;;   (println "files" files)
+  (if (u/contains-value? ((keyword src) files) fn-name)
+    (if true ;; (u/contains-value? functions fn-name)
+      (println
+       (str src "; " fn-name "; " msg)))))
+
+(defn warn [src fn-name msg]
+  (println
+   (str "WARN " src "; " fn-name "; " msg)))
+
+(keyword "client.cljs")
 
 ;; (defn error [src fn-name msg]
 ;;   (let [separator "========="]

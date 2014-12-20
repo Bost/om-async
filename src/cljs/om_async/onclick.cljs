@@ -29,10 +29,11 @@
 
 (def ^:private http-req-methods {:get "GET" :put "PUT" :post "POST" :delete "DELETE"})
 
-(defn edn-xhr
-  "XMLHttpRequest: send HTTP/HTTPS async requests to a web server and load the
-  server response data back into the script"
+;; "XMLHttpRequest: send HTTP/HTTPS async requests to a web server and load the
+;; server response data back into the script"
+(l/defnd edn-xhr
   [{:keys [method url data on-complete]}]
+;;   (l/infod src fn-name "url" url)
   (let [xhr (XhrIo.)]  ;; instantiate a basic class for handling XMLHttpRequests.
     (events/listen xhr goog.net.EventType.COMPLETE
       (fn [e]
@@ -88,7 +89,6 @@
               (om/set-state! owner table-ktirj-active active)
               )))))))
 
-(true? true)
 (defn activate
   [{:keys [app ks-data column elem-val] :as params} owner]
   ;; TODO (js* "debugger;") seems to cause LightTable freeze
@@ -138,8 +138,8 @@
     (l/infod src fn-name "displayed" displayed)
     (om/set-state! owner korks (not displayed))))
 
-(defn displayed-rows
-  "Display +N / -N rows"
+;; "Display +N / -N rows"
+(l/defnd displayed-rows
   [app {:keys [owner dbase table rows-displayed idx fnc exec-fnc?] :as params}]
 ;;   (println "app" @app)
 ;;   (println "params" params)
@@ -158,7 +158,8 @@
                            ]
                        ;; (println "response" response)
                        ;; (println "new-data" new-data)
-                       ;; (println "new-data-stripped" new-data-stripped)
+                       ;; (l/infod src fn-name "new-data-stripped" new-data-stripped)
+                       (println "new-data-stripped" new-data-stripped)
                        ;om/transact! propagates changes back to the original atom
                        ;; (om/transact! app korks (fn [_] new-data-stripped))
                        (om/update! app korks new-data-stripped)
