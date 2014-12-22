@@ -218,3 +218,27 @@
 
 (om/root view app-state  ;; atom containing application state
          {:target (gdom/getElement "dbase0")}) ;; dbase0 is in index.html
+
+;; TODO convert hash map under :date from new to the old structure
+(defn new-to-old [n]
+  (let [src {:name :select-rows-from-new
+             :data {:dbase0 {:name "employees"
+                             :data {:table0 {:name "employees"
+                                             :data {:rows-displayed 1}}
+                                    :table1 {:name "departments"
+                                             :data {:rows-displayed 2}}
+                                    :table2 {:name "salaries"
+                                             :data {:rows-displayed 2}}
+                                    }}}}
+        dst {:select-rows-from
+             [
+              ;; !!! Woa any key-value pair I stuff in pops up in the db.sql-select-rows-from fn.
+              {:dbase "employees" :table "employees"   :rows-displayed 1 :idx (oc/kw-table 0)}
+              {:dbase "employees" :table "departments" :rows-displayed 2 :idx (oc/kw-table 1)}
+              {:dbase "employees" :table "salaries"    :rows-displayed 2 :idx (oc/kw-table 2)}
+              ]}
+        r (get-in src [:name :data :dbase0 :name])
+        ]
+    r))
+
+(new-to-old nil)
