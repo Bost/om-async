@@ -242,12 +242,27 @@
               {:dbase "employees" :table "salaries"    :rows-displayed 2 :idx (oc/kw-table 2)}
               ]
              }
-        get-table-name [:data :dbase0 :data :table0 :name]
-        get-dbase-name [:data :dbase0 :name]
-        get-rows-displayed [:data :dbase0 :data :table0 :data :rows-displayed]
-        r (get-in src get-rows-displayed)
+
+        ;; TODO iterater over all dbases and tables
+        kw-dbase           (nth (keys (get-in src [:data])) 0)
+        idx-dbase          (subs (name kw-dbase) (count "dbase") (count (name kw-dbase)))
+        kw-table           (nth (keys (get-in src [:data kw-dbase :data])) 1)
+        idx-table          (subs (name kw-table) (count "table") (count (name kw-table)))
+
+        get-table-name     [:data kw-dbase :data kw-table :name]
+        table-name         (get-in src get-table-name)
+
+        get-dbase-name     [:data kw-dbase :name]
+        dbase-name         (get-in src get-dbase-name)
+
+        get-rows-displayed [:data kw-dbase :data kw-table :data :rows-displayed]
+        rows-displayed     (get-in src get-rows-displayed)
         ]
-    (println "r: " r)
+    (println "kw-dbase:" kw-dbase)
+    (println "idx-dbase:" idx-dbase)
+    (println "kw-table:" kw-table)
+    (println "idx-table:" idx-table)
+    (println "r:" {:dbase dbase-name :table table-name :rows-displayed rows-displayed :idx kw-table})
 ;;     (l/infod src fn-name "r" r)
     r))
 
