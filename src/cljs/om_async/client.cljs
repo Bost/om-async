@@ -224,7 +224,7 @@
          {:target (gdom/getElement "dbase0")}) ;; dbase0 is in index.html
 
 ;; TODO convert hash map under :date from new to the old structure
-(defn new-to-old [n]
+(l/defnd new-to-old [n]
   (let [src {:name :select-rows-from-new
              :data {:dbase0 {:name "employees"
                              :data {:table0 {:name "employees"
@@ -240,9 +240,15 @@
               {:dbase "employees" :table "employees"   :rows-displayed 1 :idx (oc/kw-table 0)}
               {:dbase "employees" :table "departments" :rows-displayed 2 :idx (oc/kw-table 1)}
               {:dbase "employees" :table "salaries"    :rows-displayed 2 :idx (oc/kw-table 2)}
-              ]}
-        r (get-in src [:name :data :dbase0 :name])
+              ]
+             }
+        get-table-name [:data :dbase0 :data :table0 :name]
+        get-dbase-name [:data :dbase0 :name]
+        get-rows-displayed [:data :dbase0 :data :table0 :data :rows-displayed]
+        r (get-in src get-rows-displayed)
         ]
+    (println "r: " r)
+;;     (l/infod src fn-name "r" r)
     r))
 
 (new-to-old nil)
