@@ -21,6 +21,7 @@
   )
 
 (l/defnd limit-rows-displayed [rows-displayed]
+  (l/infod src fn-name "rows-displayed" rows-displayed)
   (let [max-rows 10
         rows-displayed-limited (min max-rows rows-displayed)]
     (if (> rows-displayed max-rows)
@@ -37,13 +38,10 @@
   (l/infod src fn-name "params" params)
   (l/infod src fn-name "dbase" dbase)
   (l/infod src fn-name "table" table)
-  (l/infod src fn-name "rows-displayed" rows-displayed)
   (defdb db (mysql (db-connect dbase)))
   (let [r (select table (limit (limit-rows-displayed rows-displayed)))]
     ;; (l/infod src fn-name "r " r)
     r))
-
-;; (sql-select-rows-from u/e u/s)
 
 (l/defnd sql-show-tables-from
   [{:keys [dbase rows-displayed] :as params}]

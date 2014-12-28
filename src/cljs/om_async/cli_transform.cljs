@@ -1,15 +1,15 @@
 (ns om-async.cli-transform
-;;   (:require [om-async.logger :as l])
-;;   (:require-macros [om-async.logger :as l])
-  )
+  (:require [om-async.logger :as l])
+  (:require-macros [om-async.logger :as l]))
 
-;; (def src "cli-transform.cljs")
+(def src "cli_transform.cljs")
 
-(defn extend-map [m]
-  ;; "Turns {:a 1, :b 2} to {:a {:val 1, :active false}, :b {:val 2, :active false}}"
-  "Turns {:a 1, :b 2} to {:a {:val 1}, :b {:val 2}}.
-  Seems like the :active is not needed because of local component changing using
-  (om/set-state! owner ks (not active))"
+;; ;; "Turns {:a 1, :b 2} to {:a {:val 1, :active false}, :b {:val 2, :active false}}"
+;; "Turns {:a 1, :b 2} to {:a {:val 1}, :b {:val 2}}.
+;; Seems like the :active is not needed because of local component changing using
+;; (om/set-state! owner ks (not active))"
+(l/defnd extend-map [m]
+  (l/infod src fn-name "m" m)
   (reduce-kv (fn [m k v]
                (assoc m k {:val v
                            ;; :active false

@@ -72,19 +72,31 @@
 
 ;; TODO paredit grow right should jump over comment
 
-(defn process-show-tables-from [dbase]
-  (process-sql db/sql-show-tables-from dbase))
+(defn process-show-tables-from [obj]
+  (process-sql db/sql-show-tables-from obj))
+
+;; TODO DRY! see onclick/kw-table
+(defn kw-table [idx]
+  (keyword (str "table" idx)))
 
 (l/defnd process-show-tables-with-data-from
-  [{:keys [dbase] :as params}]
-  ;; (l/infod src fn-name "dbase" dbase)
-  (let [list-tables (map first (table-vals (db/show-tables-from params)))
+;;   [obj]
+  [{:keys [dbase rows-displayed] :as params}]
+  (l/infod src fn-name "params" params)
+  (let [
+        tvs (table-vals (db/show-tables-from params))
+        list-tables (map first tvs)
         tables (into [] list-tables)
-        count-tables (count tables)]
-    ;; (l/infod src "process-show-tables-with-data-from" "tables: " tables)
-    (map #(process-select-rows-from {:dbase dbase :table %1 :idx %2})
+        count-tables (count tables)
+        ]
+;;     (l/infod src fn-name "tvs" tvs)
+    (l/infod src fn-name "tables" tables)
+    (l/infod src fn-name "count-tables" count-tables)
+    (map #(process-select-rows-from
+           {:dbase dbase :table %1 :rows-displayed 3 :idx (kw-table %2)})
          tables
-         (into [] (range count-tables)))))
+         (into [] (range count-tables)))
+    ))
 
 (l/defnd process-request [params idx]
   (let [table ((u/kw :table :name idx) params)

@@ -33,11 +33,12 @@
                   "edn-xhr"
                   ]
    :cli_transform.cljs [
-;;                         "extend-table"
+                        "extend-table"
+                        "extend-map"
                         "xtable"
                         "extend-all"
                         ]
-;;    :transform.clj [
+   :transform.clj [
 ;;                    "fetch"
 ;;                    ;; "encode-table"
 ;;                    "process-select-rows-from"
@@ -46,9 +47,9 @@
 ;;                    "m-select-rows-from"
 ;;                    "m-select-rows-from-new"
 ;;                    ;;    "m-show-tables-with-data-from"
-;;                    ;;    "process-show-tables-with-data-from"
+                      "process-show-tables-with-data-from"
 ;;                    "process-sql"
-;;                    ]
+                   ]
 ;;    :server.clj [
 ;;                 ;;    "routes-PUT-select-id"
 ;;                 "routes-PUT-fetch"
@@ -58,8 +59,9 @@
            ]
 
    :db.clj [
+            "limit-rows-displayed"
             "sql-show-tables-from"
-;;             "sql-select-rows-from"
+            "sql-select-rows-from"
             ;;    "fn-name"
             ]
    }

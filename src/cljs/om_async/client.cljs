@@ -259,16 +259,21 @@
 ;;                                          :table0 {:name "departments"
 ;;                                                   :data {:rows-displayed 2}}
 ;;                                          }}}})
-
-                (new-to-old
-                 {:name :show-tables-from
-                  :data {:dbase0 {:name "employees"
-                                  :data {
-                                         :table0 {:name "all-tables"
-                                                  :data {:rows-displayed 3}}}}}})
+;;                 (new-to-old
+;;                  {:name :show-tables-from
+;;                   :data {:dbase0 {:name "employees"
+;;                                   :data {
+;;                                          :table0 {:name "all-tables"
+;;                                                   :data {:rows-displayed 3}}}}}})
 
                 ;; TODO this might work as :select-rows-from
-                ;; {:show-tables-with-data-from [{:dbase "employees"}]}
+;;                 (new-to-old
+;;                  {:name :show-tables-with-data-from
+;;                   :data {:dbase0 {:name "employees"
+;;                                   :data {
+;;                                          :table0 {:name "all-tables"
+;;                                                   :data {:rows-displayed 3}}}}}})
+                {:show-tables-with-data-from [{:dbase "employees" :rows-displayed 4}]}
 
                 ;; TODO doesn't work: the hash-map app is empty
                 ;; {:show-tables-with-data-from
