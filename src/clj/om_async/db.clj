@@ -15,10 +15,19 @@
    :user "root"
    :password ""})
 
-(defentity ist
-   (table :information_schema.tables)
+(defentity information_schema-tables
+  (table :information_schema.tables)
   ;; (entity-fields :table_schema :table_name :table_type :engine)
   )
+
+(l/defnd limit-rows-displayed [rows-displayed]
+  (let [max-rows 10
+        rows-displayed-limited (min max-rows rows-displayed)]
+    (if (> rows-displayed max-rows)
+      (l/warn src ("Number of selected rows limited to " rows-displayed-limited)))
+    (l/infod src fn-name "rows-displayed-limited" rows-displayed-limited)
+    rows-displayed-limited
+    ))
 
 (l/defnd sql-select-rows-from
 ;;   "Just put a key-val pair in the client to the
@@ -29,27 +38,23 @@
   (l/infod src fn-name "dbase" dbase)
   (l/infod src fn-name "table" table)
   (l/infod src fn-name "rows-displayed" rows-displayed)
-  (let [max-rows 10
-        rows-displayed-limited (min max-rows rows-displayed)]
-    (if (> rows-displayed max-rows)
-      (l/warn src ("Number of selected rows limited to " rows-displayed-limited)))
-    (defdb db (mysql (db-connect dbase)))
-    (l/infod src fn-name "rows-displayed-limited" rows-displayed-limited)
-    (let [r (select table (limit rows-displayed-limited))]
-      ;; (l/infod src fn-name "r " r)
-      r)))
+  (defdb db (mysql (db-connect dbase)))
+  (let [r (select table (limit (limit-rows-displayed rows-displayed)))]
+    ;; (l/infod src fn-name "r " r)
+    r))
 
 ;; (sql-select-rows-from u/e u/s)
 
 (l/defnd sql-show-tables-from
-  [{:keys [dbase] :as params}]
+  [{:keys [dbase rows-displayed] :as params}]
   ;; (l/infod src fn-name "dbase" dbase)
-  (select ist
+  (select information_schema-tables
           (fields ;;:table_schema
            :table_name)
           (where {:table_schema (name dbase)
                   :table_type "BASE TABLE"
-                  :engine "InnoDB"})))
+                  :engine "InnoDB"})
+          (limit (limit-rows-displayed rows-displayed))))
 
 (def show-tables-from (memoize sql-show-tables-from))
 
