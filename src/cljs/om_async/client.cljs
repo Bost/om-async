@@ -241,20 +241,31 @@
                {:method :put
                 :url "fetch"
                 :data
+;;                 (new-to-old
+;;                  {:name :select-rows-from
+;;                   :data {:dbase0 {:name "employees"
+;;                                   :data {
+;;                                          :table0 {:name "employees"
+;;                                                   :data {:rows-displayed 1}}
+;;                                          :table1 {:name "departments"
+;;                                                   :data {:rows-displayed 2}}
+;;                                          :table2 {:name "salaries"
+;;                                                   :data {:rows-displayed 2}}
+;;                                          }}}})
+;;                 (new-to-old
+;;                  {:name :select-rows-from
+;;                   :data {:dbase0 {:name "employees"
+;;                                   :data {
+;;                                          :table0 {:name "departments"
+;;                                                   :data {:rows-displayed 2}}
+;;                                          }}}})
+
                 (new-to-old
-                 {:name :select-rows-from
+                 {:name :show-tables-from
                   :data {:dbase0 {:name "employees"
                                   :data {
-                                         :table0 {:name "employees"
-                                                  :data {:rows-displayed 1}}
-                                         :table1 {:name "departments"
-                                                  :data {:rows-displayed 2}}
-                                         :table2 {:name "salaries"
-                                                  :data {:rows-displayed 2}}
-                                         }}}})
-                ;; {:select-rows-from [{:dbase "employees" :table "departments" :rows-displayed 2 :idx :table0}]}
-
-                ;; {:show-tables-from [{:dbase "employees" :idx 0}]}
+                                         :table0 {:name "all-tables"
+                                                  :data {:rows-displayed 3}}}}}})
 
                 ;; TODO this might work as :select-rows-from
                 ;; {:show-tables-with-data-from [{:dbase "employees"}]}
