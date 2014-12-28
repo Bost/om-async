@@ -189,10 +189,10 @@
         fetch-fn (kw-fetch-fn fetch-fns)
         manipulator-fn (kw-fetch-fn manipulator-fns)
         params (kw-fetch-fn edn-params)]
-    ;; (l/infod src fn-name "kw-fetch-fn" kw-fetch-fn)
-    ;; (l/infod src fn-name "fetch-fn" fetch-fn)
-    ;; (l/infod src fn-name "manipulator-fn" manipulator-fn)
-    ;; (l/infod src fn-name "params" params)
+    (l/infod src fn-name "kw-fetch-fn" kw-fetch-fn)
+    (l/infod src fn-name "fetch-fn" fetch-fn)
+    (l/infod src fn-name "manipulator-fn" manipulator-fn)
+    (l/infod src fn-name "params" params)
     (let [raw-data (into [] (map fetch-fn params))
           r (identity
              ;;first
