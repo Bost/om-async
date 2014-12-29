@@ -65,13 +65,12 @@
   (encode-table table (sql-fn params) idx))
 
 (l/defnd process-select-rows-from [obj]
-  ;; (l/infod src fn-name "obj" obj)
-  (let [r (process-sql db/sql-select-rows-from obj)]
-    ;; (l/infod src fn-name "r" r)
+  (l/infod src fn-name "obj" obj)
+  (let [r (into [] (process-sql db/sql-select-rows-from obj))]
+    (l/infod src fn-name "r" r)
     r))
 
 ;; TODO paredit grow right should jump over comment
-
 (defn process-show-tables-from [obj]
   (process-sql db/sql-show-tables-from obj))
 
@@ -82,7 +81,7 @@
 (l/defnd process-show-tables-with-data-from
 ;;   [obj]
   [{:keys [dbase rows-displayed] :as params}]
-  (l/infod src fn-name "params" params)
+;;   (l/infod src fn-name "params" params)
   (let [
         tvs (table-vals (db/show-tables-from params))
         list-tables (map first tvs)
@@ -90,13 +89,33 @@
         count-tables (count tables)
         ]
 ;;     (l/infod src fn-name "tvs" tvs)
-    (l/infod src fn-name "tables" tables)
-    (l/infod src fn-name "count-tables" count-tables)
-    (map #(process-select-rows-from
-           {:dbase dbase :table %1 :rows-displayed 3 :idx (kw-table %2)})
-         tables
-         (into [] (range count-tables)))
-    ))
+;;     (l/infod src fn-name "tables" tables)
+;;     (l/infod src fn-name "count-tables" count-tables)
+    (let [rw (map #(process-select-rows-from
+                    {:dbase dbase :table %1 :rows-displayed 2 :idx (kw-table %2)})
+                  tables
+                  (into [] (range count-tables)))
+          ;; this is the content of rw:
+;;           rw ([{:dept_no "d009", :dept_name "Customer Service"}
+;;                {:dept_no "d005", :dept_name "Development"}]
+;;               [{:emp_no 10001, :dept_no "d005", :from_date "1986-06-25 22:00:00", :to_date "9998-12-31 23:00:00"}
+;;                {:emp_no 10002, :dept_no "d007", :from_date "1996-08-02 22:00:00", :to_date "9998-12-31 23:00:00"}])
+          rr (process-select-rows-from
+              {:dbase "employees" :table "employees" :rows-displayed 2 :idx (kw-table 0)})
+          ]
+      (l/infod src fn-name "rr" rr)
+      (l/infod src fn-name "rw" rw)
+      rr)))
+
+(def rr
+  [{:emp_no 10001, :birth_date "1953-09-01 23:00:00", :first_name "Georgi", :last_name "Facello", :gender "M", :hire_date "1986-06-25 22:00:00"}
+   {:emp_no 10002, :birth_date "1964-06-01 23:00:00", :first_name "Bezalel", :last_name "Simmel", :gender "F", :hire_date "1985-11-20 23:00:00"}])
+(def rw (
+  [{:dept_no "d009", :dept_name "Customer Service"}
+   {:dept_no "d005", :dept_name "Development"}]
+  [{:emp_no 10001, :dept_no "d005", :from_date "1986-06-25 22:00:00", :to_date "9998-12-31 23:00:00"}
+   {:emp_no 10002, :dept_no "d007", :from_date "1996-08-02 22:00:00", :to_date "9998-12-31 23:00:00"}]))
+
 
 (l/defnd process-request [params idx]
   (let [table ((u/kw :table :name idx) params)
@@ -150,39 +169,17 @@
     rdata
     ))
 
-;; {:table2 {:data {:row3 {:emp_no 10001, :salary 66596, :from_date 1989-06-24 22:00:00, :to_date 1990-06-24 22:00:00},
-;;                  :row2 {:emp_no 10001, :salary 66074, :from_date 1988-06-24 22:00:00, :to_date 1989-06-24 22:00:00},
-;;                  :row1 {:emp_no 10001, :salary 62102, :from_date 1987-06-25 22:00:00, :to_date 1988-06-24 22:00:00},
-;;                  :row0 {:emp_no 10001, :salary 60117, :from_date 1986-06-25 22:00:00, :to_date 1987-06-25 22:00:00}},
-;;           :dbase employees,
-;;           :table salaries,
-;;           :rows-displayed 4,
-;;           :idx :table2},
-;;  :table1 {:data {:row1 {:dept_no d005, :dept_name Development},
-;;                  :row0 {:dept_no d009, :dept_name Customer Service}},
-;;           :dbase employees,
-;;           :table departments,
-;;           :rows-displayed 2,
-;;           :idx :table1},
-
-;;  :table0 {:data {:row0 {:emp_no 10001, :birth_date 1953-09-01 23:00:00, :first_name Georgi, :last_name Facello, :gender M, :hire_date 1986-06-25 22:00:00}},
-;;           :dbase employees,
-;;           :table employees,
-;;           :rows-displayed 1,
-;;           :idx :table0}}
-
 (l/defnd m-show-tables-from [params data]
-;;   (l/infod src fn-name "params" params)
-;;  (def params [{:dbase "employees" :idx 0}]})
-;;   (l/infod src fn-name "data" data)
-;; (def data [({:table_name "departments"} {:table_name "dept_emp"} {:table_name "dept_manager"}
-;;             {:table_name "employees"} {:table_name "salaries"} {:table_name "titles"})])
+  ;; (l/infod src fn-name "params" params)
+  ;; (def params [{:dbase "employees" :idx 0}]})
+  ;; (l/infod src fn-name "data" data)
+  ;; (def data [({:table_name "departments"} {:table_name "dept_emp"} {:table_name "dept_manager"}
+  ;;             {:table_name "employees"} {:table_name "salaries"} {:table_name "titles"})])
   (m-select-rows-from params data))
 
 (l/defnd m-show-tables-with-data-from [params data]
   ;; (l/infod src fn-name "params" params)
   ;; (l/infod src fn-name "data" data)
-;;   (into [] (first data))
   (m-select-rows-from params data))
 
 (defn m-request [p]
@@ -208,9 +205,10 @@
     (let [raw-data (into [] (map fetch-fn params))
           r (identity
              ;;first
-             (manipulator-fn params raw-data))]
+             (manipulator-fn params raw-data))
+          ]
       ;; (l/infod src fn-name "raw-data" raw-data)
-      ;; (l/infod src fn-name "r" r)
+      (l/infod src fn-name "r" r)
       r)))
 
 (l/defnd request [edn-params]

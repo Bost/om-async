@@ -26,6 +26,7 @@
                   "get-display"
                   "table-sorter"
                   "new-to-old"
+                  ":on-complete"
                   ]
    :onclick.cljs [
                   "toggle-table"
@@ -33,36 +34,36 @@
                   "edn-xhr"
                   ]
    :cli_transform.cljs [
-                        "extend-table"
-                        "extend-map"
-                        "xtable"
+;;                         "extend-table"
+;;                         "extend-map"
+;;                         "xtable"
                         "extend-all"
                         ]
    :transform.clj [
-;;                    "fetch"
-;;                    ;; "encode-table"
+                   "fetch"
+;;                    "encode-table"
 ;;                    "process-select-rows-from"
 ;;                    "process-select-rows-from-new"
-;;                    ;;    "m-show-tables-from"
+;;                    "m-show-tables-from"
 ;;                    "m-select-rows-from"
 ;;                    "m-select-rows-from-new"
-;;                    ;;    "m-show-tables-with-data-from"
-                      "process-show-tables-with-data-from"
+;;                    "m-show-tables-with-data-from"
+                   "process-show-tables-with-data-from"
 ;;                    "process-sql"
                    ]
-;;    :server.clj [
-;;                 ;;    "routes-PUT-select-id"
+   :server.clj [
+;;                 "routes-PUT-select-id"
 ;;                 "routes-PUT-fetch"
-;;                 ]
+                ]
    :utils [
-           ;;    "convert-to-korks"
+;;            "convert-to-korks"
            ]
 
    :db.clj [
-            "limit-rows-displayed"
-            "sql-show-tables-from"
-            "sql-select-rows-from"
-            ;;    "fn-name"
+;;             "limit-rows-displayed"
+;;             "sql-show-tables-from"
+;;             "sql-select-rows-from"
+;;                "fn-name"
             ]
    }
   )

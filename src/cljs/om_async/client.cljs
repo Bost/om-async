@@ -252,13 +252,15 @@
 ;;                                          :table2 {:name "salaries"
 ;;                                                   :data {:rows-displayed 2}}
 ;;                                          }}}})
+
 ;;                 (new-to-old
 ;;                  {:name :select-rows-from
 ;;                   :data {:dbase0 {:name "employees"
 ;;                                   :data {
-;;                                          :table0 {:name "departments"
+;;                                          :table0 {:name "employees"
 ;;                                                   :data {:rows-displayed 2}}
 ;;                                          }}}})
+
 ;;                 (new-to-old
 ;;                  {:name :show-tables-from
 ;;                   :data {:dbase0 {:name "employees"
@@ -273,7 +275,9 @@
 ;;                                   :data {
 ;;                                          :table0 {:name "all-tables"
 ;;                                                   :data {:rows-displayed 3}}}}}})
-                {:show-tables-with-data-from [{:dbase "employees" :rows-displayed 4}]}
+
+                {:show-tables-with-data-from
+                 [{:dbase "employees" :table "tbl" :rows-displayed 2 :idx (oc/kw-table 0)}]}
 
                 ;; TODO doesn't work: the hash-map app is empty
                 ;; {:show-tables-with-data-from
@@ -287,6 +291,7 @@
                 :on-complete (fn [response]
                                (om/transact! app [] (fn [_]
                                                       ;; (println "transacting...")
+                                                      (l/info src ":on-complete" (str "response: " response))
                                                       (t/extend-all response)
                                                       )))
                 }))
@@ -297,3 +302,5 @@
 
 (om/root view app-state  ;; atom containing application state
          {:target (gdom/getElement "dbase0")}) ;; dbase0 is in index.html
+
+(println "-------------------------------------------------")
