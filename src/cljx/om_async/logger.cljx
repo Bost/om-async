@@ -40,7 +40,7 @@
                         "extend-all"
                         ]
    :transform.clj [
-                   "fetch"
+;;                    "fetch"
 ;;                    "encode-table"
 ;;                    "process-select-rows-from"
 ;;                    "process-select-rows-from-new"

@@ -268,24 +268,8 @@
 ;;                                          :table0 {:name "all-tables"
 ;;                                                   :data {:rows-displayed 3}}}}}})
 
-                ;; TODO this might work as :select-rows-from
-;;                 (new-to-old
-;;                  {:name :show-tables-with-data-from
-;;                   :data {:dbase0 {:name "employees"
-;;                                   :data {
-;;                                          :table0 {:name "all-tables"
-;;                                                   :data {:rows-displayed 3}}}}}})
-
                 {:show-tables-with-data-from
-                 [{:dbase "employees" :table "tbl" :rows-displayed 2 :idx (oc/kw-table 0)}]}
-
-                ;; TODO doesn't work: the hash-map app is empty
-                ;; {:show-tables-with-data-from
-                ;;  [{:dbase (let [dbase (first (get-in app [:dbase0 :name]))]
-                ;;             (l/infod src fn-name "app" app)
-                ;;             (l/infod src fn-name "owner" owner)
-                ;;             (l/infod src fn-name "dbase" dbase)
-                ;;             dbase)}]}
+                 [{:dbase "employees" :table "dbase-tables" :rows-displayed 2 :idx (oc/kw-table 0)}]}
 
                 ;; om/transact! propagates changes back to the original atom
                 :on-complete (fn [response]
