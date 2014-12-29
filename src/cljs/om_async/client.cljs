@@ -268,8 +268,12 @@
 ;;                                          :table0 {:name "all-tables"
 ;;                                                   :data {:rows-displayed 3}}}}}})
 
-                {:show-tables-with-data-from
-                 [{:dbase "employees" :table "dbase-tables" :rows-displayed 2 :idx (oc/kw-table 0)}]}
+                (new-to-old
+                 {:name :show-tables-with-data-from
+                  :data {:dbase0 {:name "employees"
+                                  :data {
+                                         :table0 {:name "all-tables-with-data-from"
+                                                  :data {:rows-displayed 2}}}}}})
 
                 ;; om/transact! propagates changes back to the original atom
                 :on-complete (fn [response]
