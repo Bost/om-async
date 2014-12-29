@@ -175,63 +175,6 @@
                            (dom/button {:onClick (fn [e] (oc/deactivate-all app owner))} "deactivate-all")
                            (om/build table-controler app)))))
 
-(l/defnd table-new-to-old [src
-                     ;;idx-kw-dbase idx-kw-table
-                     kw-dbase kw-table
-                     ]
-  (let [
-        ;;kw-dbase           (nth (keys (get-in src [:data])) idx-kw-dbase)
-        ;;idx-dbase          (subs (name kw-dbase) (count "dbase") (count (name kw-dbase)))
-        ;;kw-table           (nth (keys (get-in src [:data kw-dbase :data])) idx-kw-table)
-        ;;idx-table          (subs (name kw-table) (count "table") (count (name kw-table)))
-
-        get-table-name     [:data kw-dbase :data kw-table :name]
-        table-name         (get-in src get-table-name)
-
-        get-dbase-name     [:data kw-dbase :name]
-        dbase-name         (get-in src get-dbase-name)
-
-        get-rows-displayed [:data kw-dbase :data kw-table :data :rows-displayed]
-        rows-displayed     (get-in src get-rows-displayed)
-        r {:dbase dbase-name :table table-name :rows-displayed rows-displayed :idx kw-table}
-        ]
-;;     (println "kw-dbase:" kw-dbase)
-;;     (println "idx-dbase:" idx-dbase)
-;;     (println "kw-table:" kw-table)
-;;     (println "idx-table:" idx-table)
-;;     (println "r:" r)
-;;     (l/infod src fn-name "r" r)
-    r))
-
-(l/defnd new-to-old [src]
-  (let [src
-        src
-;;         {:name :select-rows-from
-;;          :data {:dbase0 {:name "employees"
-;;                          :data {:table0 {:name "employees"
-;;                                          :data {:rows-displayed 1}}
-;;                                 :table1 {:name "departments"
-;;                                          :data {:rows-displayed 2}}
-;;                                 :table2 {:name "salaries"
-;;                                          :data {:rows-displayed 2}}
-;;                                 }}}}
-        ]
-    {(:name src)
-     (into []
-           (for [kw-dbase (keys (get-in src [:data]))
-                 kw-table (keys (get-in src [:data kw-dbase :data]))]
-             (table-new-to-old src kw-dbase kw-table)
-             )
-           )}
-;;     {:select-rows-from
-;;      [
-;;       ;; !!! Woa any key-value pair I stuff in pops up in the db.sql-select-rows-from fn.
-;;       {:dbase "employees" :table "employees"   :rows-displayed 1 :idx (oc/kw-table 0)}
-;;       {:dbase "employees" :table "departments" :rows-displayed 2 :idx (oc/kw-table 1)}
-;;       {:dbase "employees" :table "salaries"    :rows-displayed 2 :idx (oc/kw-table 2)}
-;;       ]}
-    ))
-
 (defcomponent view
   ;; "data - application state data (a cursor); owner - backing React component
   ;; returns an Om-component, i.e. a model of om/IRender interface"
@@ -241,39 +184,35 @@
                {:method :put
                 :url "fetch"
                 :data
-;;                 (new-to-old
-;;                  {:name :select-rows-from
-;;                   :data {:dbase0 {:name "employees"
-;;                                   :data {
-;;                                          :table0 {:name "employees"
-;;                                                   :data {:rows-displayed 1}}
-;;                                          :table1 {:name "departments"
-;;                                                   :data {:rows-displayed 2}}
-;;                                          :table2 {:name "salaries"
-;;                                                   :data {:rows-displayed 2}}
-;;                                          }}}})
+                {:name :select-rows-from
+                 :data {:dbase0 {:name "employees"
+                                 :data {
+                                        :table0 {:name "employees"
+                                                 :data {:rows-displayed 1}}
+                                        :table1 {:name "departments"
+                                                 :data {:rows-displayed 2}}
+                                        :table2 {:name "salaries"
+                                                 :data {:rows-displayed 2}}
+                                        }}}}
 
-;;                 (new-to-old
-;;                  {:name :select-rows-from
-;;                   :data {:dbase0 {:name "employees"
-;;                                   :data {
-;;                                          :table0 {:name "employees"
-;;                                                   :data {:rows-displayed 2}}
-;;                                          }}}})
+;;                 {:name :select-rows-from
+;;                  :data {:dbase0 {:name "employees"
+;;                                  :data {
+;;                                         :table0 {:name "employees"
+;;                                                  :data {:rows-displayed 2}}
+;;                                         }}}}
 
-;;                 (new-to-old
-;;                  {:name :show-tables-from
-;;                   :data {:dbase0 {:name "employees"
-;;                                   :data {
-;;                                          :table0 {:name "all-tables"
-;;                                                   :data {:rows-displayed 3}}}}}})
+;;                 {:name :show-tables-from
+;;                  :data {:dbase0 {:name "employees"
+;;                                  :data {
+;;                                         :table0 {:name "all-tables"
+;;                                                  :data {:rows-displayed 3}}}}}}
 
-                (new-to-old
-                 {:name :show-tables-with-data-from
-                  :data {:dbase0 {:name "employees"
-                                  :data {
-                                         :table0 {:name "all-tables-with-data-from"
-                                                  :data {:rows-displayed 2}}}}}})
+;;                 {:name :show-tables-with-data-from
+;;                  :data {:dbase0 {:name "employees"
+;;                                  :data {
+;;                                         :table0 {:name "all-tables-with-data-from"
+;;                                                  :data {:rows-displayed 2}}}}}}
 
                 ;; om/transact! propagates changes back to the original atom
                 :on-complete (fn [response]
