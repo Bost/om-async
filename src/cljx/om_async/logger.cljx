@@ -62,6 +62,7 @@
            ]
 
    :db.clj [
+            "data-with-column-value"
 ;;             "limit-rows-displayed"
 ;;             "sql-show-tables-from"
 ;;             "sql-select-rows-from"

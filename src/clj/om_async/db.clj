@@ -89,16 +89,32 @@
   (has-many employees)   ; (has-many employees {:fk :emp_no})
   (entity-fields :emp_no :from_date :title :to_date))
 
-;; find out if any of the entities contain given column exists among the entities
-(defn has-column? [entities column]
-  (let [partial-results (for [e entities]
-                          (u/contains-value? (:fields e) column))]
-    (u/contains-value? partial-results true))
-  )
+(l/defnd entities-with-column [entities col]
+  (let [ewc (for [e entities]
+              (if (u/contains-value? (:fields e) col)
+                (:name e)
+                ;; e
+                nil))
+        r (into [] (remove nil? ewc))]
+    (l/infod src fn-name "r " r)
+    r))
 
-(has-column? all-entities :emp_no)
-;; (map #(ns-unmap *ns* %) (keys (ns-interns *ns*)))
+(l/defnd data-with-column-value
+  [{:keys [column value] :as edn-params}]
+  (let [entities-wc (entities-with-column all-entities column)]
+    (l/infod src fn-name "entities-wc" entities-wc)
+    (let [r (for [e entities-wc]
+              (into [] (select e
+                      (where {column value})
+                      (limit 1)))
+              )
+          ;; TODO put the {:dbase ... :table ... } into result r
+          ;; r (into [] (remove nil? ewc))
+          ]
+      (l/infod src fn-name "r" r)
+      r)))
 
+(data-with-column-value {:column :emp_no :value 10001})
 (def sources [employees departments])
 (def intermediate [dept_emp dept_manager])
 (def sinks [titles salaries])

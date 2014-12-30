@@ -226,27 +226,31 @@
         (l/infod src fn-name "r" r)
         r))))
 
+;; reuqest puts partial results together
 (l/defnd request [edn-params]
   (l/infod src fn-name "edn-params" edn-params)
-;;   (let [
-;;         kw-fetch-fn (nth (keys edn-params) 0)
-;;         fetch-fn (kw-fetch-fn fetch-fns)
-;;         manipulator-fn (kw-fetch-fn manipulator-fns)
-;;         params (kw-fetch-fn edn-params)
-;;         val-params (into [] (vals params))
-;;         ]
-;;     ;; (l/info src fn-name (str "kw-fetch-fn: " kw-fetch-fn))
-;;     ;; (l/info src fn-name (str "fetch-fn: " fetch-fn))
-;;     ;; (l/info src fn-name (str "manipulator-fn: " manipulator-fn))
-;;     ;; (l/info src fn-name (str "params: " params))
-;;     ;; (l/info src fn-name (str "val-params: " val-params))
-;;     (let [f0 (fetch-fn params 0)] ;; onClick sends just 1 value
-;;       ;; (l/info src fn-name (str "f0: " f0))
-;;       (let [data (manipulator-fn f0)]
-;;         ;; (l/infod src fn-name "data" data)
-;;         data)))
-  "TODO send edn-params to db.clj; db.clj should find entities with given :column"
-  )
+  (let [
+        ewc (db/data-with-column-value edn-params)
+        r ewc
+        ;; kw-fetch-fn (nth (keys edn-params) 0)
+        ;; fetch-fn (kw-fetch-fn fetch-fns)
+        ;; manipulator-fn (kw-fetch-fn manipulator-fns)
+        ;; params (kw-fetch-fn edn-params)
+        ;; val-params (into [] (vals params))
+        ]
+    ;;   ;; (l/info src fn-name (str "kw-fetch-fn: " kw-fetch-fn))
+    ;;   ;; (l/info src fn-name (str "fetch-fn: " fetch-fn))
+    ;;   ;; (l/info src fn-name (str "manipulator-fn: " manipulator-fn))
+    ;;   ;; (l/info src fn-name (str "params: " params))
+    ;;   ;; (l/info src fn-name (str "val-params: " val-params))
+    ;;   (let [f0 (fetch-fn params 0)] ;; onClick sends just 1 value
+    ;;     ;; (l/info src fn-name (str "f0: " f0))
+    ;;     (let [data (manipulator-fn f0)]
+    ;;       ;; (l/infod src fn-name "data" data)
+    ;;       data)))
+    ;; "TODO send edn-params to db.clj; db.clj should find entities with given :column"
+    (l/infod src fn-name "r" r)
+    r))
 
 ;; clean the REPL - works only in clojure not in clojurescript
 ;; (map #(ns-unmap *ns* %) (keys (ns-interns *ns*)))
