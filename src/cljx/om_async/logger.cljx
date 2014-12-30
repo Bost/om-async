@@ -40,15 +40,15 @@
 ;;                         "extend-all"
                         ]
    :transform.clj [
-                   "fetch"
+;;                    "get-params-for-fetch"
+;;                    "fetch"
 ;;                    "encode-table"
 ;;                    "process-select-rows-from"
-;;                    "process-select-rows-from-new"
 ;;                    "m-show-tables-from"
 ;;                    "m-select-rows-from"
 ;;                    "m-select-rows-from-new"
 ;;                    "m-show-tables-with-data-from"
-                   "process-show-tables-with-data-from"
+;;                    "process-show-tables-with-data-from"
 ;;                    "process-sql"
                    ]
    :server.clj [

@@ -158,8 +158,7 @@
                            ]
                        ;; (println "response" response)
                        ;; (println "new-data" new-data)
-                       ;; (l/infod src fn-name "new-data-stripped" new-data-stripped)
-                       (println "new-data-stripped" new-data-stripped)
+                       (l/infod src fn-name "new-data-stripped" new-data-stripped)
                        ;om/transact! propagates changes back to the original atom
                        ;; (om/transact! app korks (fn [_] new-data-stripped))
                        (om/update! app korks new-data-stripped)

@@ -191,16 +191,9 @@
                                                  :data {:rows-displayed 1}}
                                         :table1 {:name "departments"
                                                  :data {:rows-displayed 2}}
-                                        :table2 {:name "salaries"
-                                                 :data {:rows-displayed 2}}
-                                        }}}}
-
-;;                 {:name :select-rows-from
-;;                  :data {:dbase0 {:name "employees"
-;;                                  :data {
-;;                                         :table0 {:name "employees"
+;;                                         :table2 {:name "salaries"
 ;;                                                  :data {:rows-displayed 2}}
-;;                                         }}}}
+                                        }}}}
 
 ;;                 {:name :show-tables-from
 ;;                  :data {:dbase0 {:name "employees"
