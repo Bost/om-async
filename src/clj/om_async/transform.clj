@@ -44,9 +44,8 @@
                (assoc m k (convert-val v))) {} m))
 
 (l/defnd encode-table
-  [table data idx]
-  ;; TODO fix this keymap
-  ;;   [{:keys [table data idx] :as params}]
+  [{:keys [table data idx] :as params}]
+  ;; "idx is index for the keyword :table in the returned hash-map"
 
   ;; (l/infod src fn-name "table" table)
   ;; (l/infod src fn-name "data" data)
@@ -62,7 +61,9 @@
   ;; (l/infod src fn-name "dbase" dbase)
   ;; (l/infod src fn-name "table" table)
   ;; (l/infod src fn-name "idx " idx)
-  (encode-table table (sql-fn params) idx))
+  (encode-table {:table table :data (sql-fn params) :idx idx})
+  ;; table (sql-fn params) idx)
+  )
 
 (l/defnd process-select-rows-from [obj]
   (l/infod src fn-name "obj" obj)
@@ -104,7 +105,7 @@
 
 (l/defnd process-request [params idx]
   (let [table ((u/kw :table :name idx) params)
-        data (encode-table table (db/s params idx) idx)]
+        data (encode-table {:table table :data (db/s params idx) :idx idx})]
     ;; (l/infod src fn-name "table" table)
     ;; (l/infod src fn-name "data" data)
     data))
