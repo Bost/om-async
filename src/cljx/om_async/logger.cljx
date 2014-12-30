@@ -37,7 +37,7 @@
 ;;                         "extend-table"
 ;;                         "extend-map"
 ;;                         "xtable"
-                        "extend-all"
+;;                         "extend-all"
                         ]
    :transform.clj [
 ;;                    "fetch"

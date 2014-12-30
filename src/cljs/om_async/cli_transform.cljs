@@ -55,5 +55,9 @@
                                 (apply concat indexed-tables))}
         ]
     (l/infod src fn-name "all-xtable" all-xtable)
-    ;; (println "dbase-data" dbase-data)
+    (l/infod src fn-name "dbase-data" dbase-data)
     dbase-data))
+
+;; clean the REPL - works only in clojure not in clojurescript
+;; (map #(ns-unmap *ns* %) (keys (ns-interns *ns*)))
+

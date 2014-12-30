@@ -176,9 +176,43 @@
                       :request                     m-request
                       })
 
-(l/defnd fetch [edn-params]
-  ;; (l/infod src fn-name "edn-params" edn-params)
+
+(l/defnd table-new-to-old [src kw-dbase kw-table]
+  (let [
+        ;;idx-kw-dbase idx-kw-table
+        ;;kw-dbase           (nth (keys (get-in src [:data])) idx-kw-dbase)
+        ;;idx-dbase          (subs (name kw-dbase) (count "dbase") (count (name kw-dbase)))
+        ;;kw-table           (nth (keys (get-in src [:data kw-dbase :data])) idx-kw-table)
+        ;;idx-table          (subs (name kw-table) (count "table") (count (name kw-table)))
+
+        get-table-name     [:data kw-dbase :data kw-table :name]
+        table-name         (get-in src get-table-name)
+
+        get-dbase-name     [:data kw-dbase :name]
+        dbase-name         (get-in src get-dbase-name)
+
+        get-rows-displayed [:data kw-dbase :data kw-table :data :rows-displayed]
+        rows-displayed     (get-in src get-rows-displayed)
+        r {:dbase dbase-name :table table-name :rows-displayed rows-displayed :idx kw-table}
+        ]
+;;     (println "kw-dbase:" kw-dbase)
+;;     (println "idx-dbase:" idx-dbase)
+;;     (println "kw-table:" kw-table)
+;;     (println "idx-table:" idx-table)
+;;     (println "r:" r)
+;;     (l/infod src fn-name "r" r)
+    r))
+
+(l/defnd new-to-old [src]
+  {(:name src)
+   (into [] (for [kw-dbase (keys (get-in src [:data]))
+                  kw-table (keys (get-in src [:data kw-dbase :data]))]
+              (table-new-to-old src kw-dbase kw-table)))})
+
+(l/defnd fetch [new-edn-params]
+  ;; (l/infod src fn-name "new-edn-params" new-edn-params)
   (let [;; TODO get the content of N-th key? this could be done better
+        edn-params (new-to-old new-edn-params)
         kw-fetch-fn (nth (keys edn-params) 0)
         fetch-fn (kw-fetch-fn fetch-fns)
         manipulator-fn (kw-fetch-fn manipulator-fns)
@@ -187,12 +221,12 @@
     (l/infod src fn-name "fetch-fn" fetch-fn)
     (l/infod src fn-name "manipulator-fn" manipulator-fn)
     (l/infod src fn-name "params" params)
-    (let [raw-data (into [] (map fetch-fn params))
+    (let [data (into [] (map fetch-fn params))
           r (identity
              ;;first
-             (manipulator-fn params raw-data))
+             (manipulator-fn params data))
           ]
-      ;; (l/infod src fn-name "raw-data" raw-data)
+      ;; (l/infod src fn-name "data" data)
       (l/infod src fn-name "r" r)
       r)))
 
@@ -214,3 +248,6 @@
       (let [data (manipulator-fn f0)]
         ;; (l/infod src fn-name "data" data)
         data))))
+
+;; clean the REPL - works only in clojure not in clojurescript
+;; (map #(ns-unmap *ns* %) (keys (ns-interns *ns*)))

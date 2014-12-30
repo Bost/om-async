@@ -113,5 +113,8 @@
         (where {:dept_no "d006"})
         (limit 2))
 
+;; clean the REPL - works only in clojure not in clojurescript
+;; (map #(ns-unmap *ns* %) (keys (ns-interns *ns*)))
+
 (s {:dbaseN0 "employees", :tableN0 "departments",
     :colN0 "dept_name", :rowV0 "Development"} 0)
