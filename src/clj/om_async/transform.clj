@@ -204,19 +204,19 @@
     r))
 
 (l/defnd new-to-old [src]
-  {(:name src)
-   (into [] (for [kw-dbase (keys (get-in src [:data]))
-                  kw-table (keys (get-in src [:data kw-dbase :data]))]
-              (table-new-to-old src kw-dbase kw-table)))})
+  (into [] (for [kw-dbase (keys (get-in src [:data]))
+                 kw-table (keys (get-in src [:data kw-dbase :data]))]
+             (table-new-to-old src kw-dbase kw-table))))
 
-(l/defnd fetch [new-edn-params]
+(l/defnd fetch [edn-params]
   ;; (l/infod src fn-name "new-edn-params" new-edn-params)
   (let [;; TODO get the content of N-th key? this could be done better
-        edn-params (new-to-old new-edn-params)
-        kw-fetch-fn (nth (keys edn-params) 0)
+        kw-fetch-fn (:name edn-params)
         fetch-fn (kw-fetch-fn fetch-fns)
         manipulator-fn (kw-fetch-fn manipulator-fns)
-        params (kw-fetch-fn edn-params)]
+        params (new-to-old edn-params)
+        ]
+    (l/infod src fn-name "edn-params" edn-params)
     (l/infod src fn-name "kw-fetch-fn" kw-fetch-fn)
     (l/infod src fn-name "fetch-fn" fetch-fn)
     (l/infod src fn-name "manipulator-fn" manipulator-fn)
