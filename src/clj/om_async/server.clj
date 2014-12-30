@@ -61,4 +61,3 @@
 
 ;; clean the REPL - works only in clojure not in clojurescript
 ;; (map #(ns-unmap *ns* %) (keys (ns-interns *ns*)))
-

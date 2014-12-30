@@ -61,25 +61,43 @@
 (declare salaries titles departments dept_emp dept_manager employees salaries titles)
 (def all-entities #{salaries titles departments dept_emp dept_manager employees})
 
-;; empty entity definitions
-(for [e all-entities]
-  (defentity e))
-;; (defentity titles)
-;; (defentity salaries)
-;; (defentity dept_emp)
-;; (defentity dept_manager)
-
 (defentity departments
   (pk :dept_no)
-  (has-many dept_emp)
-  (has-many dept_manager))
+  (entity-fields :dept_no :dept_name))
+
+(defentity dept_emp
+  (has-many employees)   ; (has-many employees {:fk :emp_no})
+  (has-many departments) ; (has-many departments {:fk :dept_no})
+  (entity-fields :emp_no :dept_no :from_date :to_date))
+
+(defentity dept_manager
+  (has-many employees)   ; (has-many employees {:fk :emp_no})
+  (has-many departments) ; (has-many departments {:fk :dept_no})
+  (entity-fields :emp_no :dept_no :from_date :to_date))
 
 (defentity employees
   (pk :emp_no)
-  (has-many salaries)
-  (has-many titles)
-  (has-many dept_manager)
-  (has-many dept_emp))
+  (entity-fields :emp_no :birth_date :first_name :last_name :gender :hire_date))
+
+(defentity salaries
+  (pk :from_date)
+  (has-many employees)   ; (has-many employees {:fk :emp_no})
+  (entity-fields :emp_no :from_date :salary :to_date))
+
+(defentity titles
+  (pk :from_date)
+  (has-many employees)   ; (has-many employees {:fk :emp_no})
+  (entity-fields :emp_no :from_date :title :to_date))
+
+;; find out if any of the entities contain given column exists among the entities
+(defn has-column? [entities column]
+  (let [partial-results (for [e entities]
+                          (u/contains-value? (:fields e) column))]
+    (u/contains-value? partial-results true))
+  )
+
+(has-column? all-entities :emp_no)
+;; (map #(ns-unmap *ns* %) (keys (ns-interns *ns*)))
 
 (def sources [employees departments])
 (def intermediate [dept_emp dept_manager])
@@ -116,17 +134,8 @@
         (where {:dept_no "d006"})
         (limit 2))
 
-;; clean the REPL - works only in clojure not in clojurescript
-;; (map #(ns-unmap *ns* %) (keys (ns-interns *ns*)))
-
 (s {:dbaseN0 "employees", :tableN0 "departments",
     :colN0 "dept_name", :rowV0 "Development"} 0)
-
-(def all-entities #{salaries titles departments dept_emp dept_manager employees})
-(doseq [e all-entities]
-  (println "e:" e)
-  (println "(keys e):" (keys e))
-  )
 
 ;; clean the REPL - works only in clojure not in clojurescript
 ;; (map #(ns-unmap *ns* %) (keys (ns-interns *ns*)))
