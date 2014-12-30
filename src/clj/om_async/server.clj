@@ -37,13 +37,16 @@
   (PUT "/select/:id"
        {params :params edn-params :edn-params}
        (let [fn-name "routes-PUT-select-id"]
-         (l/infod src fn-name "id" (:id params))
+         ;; (l/infod src fn-name "id" (:id params))
          (l/infod src fn-name "edn-params" edn-params)
-         (l/infod src fn-name "params" params)
-         (let [data {:response (:request edn-params)}
-               ;;(trans/request edn-params)
+         ;; (l/infod src fn-name "params" params)
+         (let [
+               r (trans/request (:request params))
+               data {:response (:request edn-params)
+                     :TODO "db.clj: search in all entities for :column with given :value"}
                ]
-           (l/infod src fn-name "data" data)
+           (l/infod src fn-name "r" r)
+           (l/infod src fn-name "data " data)
            (response (merge data {:status :ok})))
          ))
 

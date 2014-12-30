@@ -32,6 +32,7 @@
                   "toggle-table"
                   "displayed-rows"
                   "edn-xhr"
+                  "activate-:on-complete"
                   ]
    :cli_transform.cljs [
 ;;                         "extend-table"
@@ -42,6 +43,7 @@
    :transform.clj [
 ;;                    "get-params-for-fetch"
 ;;                    "fetch"
+                   "request"
 ;;                    "encode-table"
 ;;                    "process-select-rows-from"
 ;;                    "m-show-tables-from"
@@ -52,7 +54,7 @@
 ;;                    "process-sql"
                    ]
    :server.clj [
-;;                 "routes-PUT-select-id"
+                "routes-PUT-select-id"
 ;;                 "routes-PUT-fetch"
                 ]
    :utils [

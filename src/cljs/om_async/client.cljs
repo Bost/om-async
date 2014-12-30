@@ -188,11 +188,11 @@
                  :data {:dbase0 {:name "employees"
                                  :data {
                                         :table0 {:name "employees"
-                                                 :data {:rows-displayed 1}}
+                                                 :data {:rows-displayed 2}}
                                         :table1 {:name "departments"
                                                  :data {:rows-displayed 2}}
-;;                                         :table2 {:name "salaries"
-;;                                                  :data {:rows-displayed 2}}
+                                        :table2 {:name "salaries"
+                                                 :data {:rows-displayed 2}}
                                         }}}}
 
 ;;                 {:name :show-tables-from

@@ -61,10 +61,13 @@
 (declare salaries titles departments dept_emp dept_manager employees salaries titles)
 (def all-entities #{salaries titles departments dept_emp dept_manager employees})
 
-(defentity titles)
-(defentity salaries)
-(defentity dept_emp)
-(defentity dept_manager)
+;; empty entity definitions
+(for [e all-entities]
+  (defentity e))
+;; (defentity titles)
+;; (defentity salaries)
+;; (defentity dept_emp)
+;; (defentity dept_manager)
 
 (defentity departments
   (pk :dept_no)
@@ -118,3 +121,12 @@
 
 (s {:dbaseN0 "employees", :tableN0 "departments",
     :colN0 "dept_name", :rowV0 "Development"} 0)
+
+(def all-entities #{salaries titles departments dept_emp dept_manager employees})
+(doseq [e all-entities]
+  (println "e:" e)
+  (println "(keys e):" (keys e))
+  )
+
+;; clean the REPL - works only in clojure not in clojurescript
+;; (map #(ns-unmap *ns* %) (keys (ns-interns *ns*)))

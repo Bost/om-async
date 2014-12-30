@@ -89,7 +89,7 @@
               (om/set-state! owner table-ktirj-active active)
               )))))))
 
-(defn activate
+(l/defnd activate
   [{:keys [app ks-data column elem-val] :as params} owner]
   ;; TODO (js* "debugger;") seems to cause LightTable freeze
   (let [active (om/get-state owner :active)]
@@ -105,10 +105,11 @@
      {:method :put
       :url (str "select/" column)
       ;; value under :data can't be a just a "value". (TODO see if only hash-map is accepted)
-      :data {:request elem-val}
+      :data {:request {:column column :value elem-val}}
       :on-complete (fn [response]
-                     (let [fn-name "onClick-onComplete"]
-                       (println (str "Server response: " response))
+                     (let [fn-name "activate-:on-complete"]
+                       (l/infod src fn-name "response" response)
+                       ;; (println (str "Server response: " response))
                        ;; change application state; use with get-in
                        ;; (om/transact! app ks-data
                        ;;               (fn []
