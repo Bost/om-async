@@ -7,11 +7,11 @@
   :jvm-opts ^:replace ["-Xmx1g" "-server"]
 
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-2322"]
+                 [org.clojure/clojurescript "0.0-2371"]
                  [ring/ring "1.3.2"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
-                 [om "0.8.0-alpha2"]
-                 [compojure "1.2.1"]
+                 [om "0.8.0-beta5"]
+                 [compojure "1.3.1"]
                  [fogus/ring-edn "0.2.0"]
                  ;; [com.datomic/datomic-free "0.9.4699"]
 
@@ -27,24 +27,24 @@
 
                  ;; [org.clojure/tools.logging "0.3.0"]
                  ;; [org.slf4j/slf4j-log4j12 "1.7.7"]
-                 [prismatic/om-tools "0.3.6"]
-                 [com.keminglabs/cljx "0.4.0" :exclusions [org.clojure/clojure]]
+                 [prismatic/om-tools "0.3.10"]
+                 ;; [com.keminglabs/cljx "0.5.0" :exclusions [org.clojure/clojure]]
                  [clj-time "0.8.0"]
                  ]
 
-  :plugins [[lein-cljsbuild "1.0.3"]
-            [com.keminglabs/cljx "0.4.0" :exclusions [org.clojure/clojure]]
+  :plugins [[lein-cljsbuild "1.0.4"]
+            [com.keminglabs/cljx "0.5.0"
+             ;;:exclusions [org.clojure/clojure]
+             ]
             ]
   :source-paths ["src/clj" "src/cljs"]
   :resource-paths ["resources"]
 
   :cljx {:builds [{:source-paths ["src/cljx"]
-                   ;; :output-path "target/classes"
                    :output-path "src/clj"
                    :rules :clj}
 
                   {:source-paths ["src/cljx"]
-                   ;; :output-path "target/classes"
                    :output-path "src/cljs"
                    :rules :cljs}]}
 
@@ -52,7 +52,10 @@
     :builds [{:id "dev"
               :source-paths ["src/clj" "src/cljs"]
               :compiler {
+                ;; :output-to default: target/cljsbuild-main.js
                 :output-to "resources/public/js/main.js"
                 :output-dir "resources/public/js/out"
+                ;; can not use :optimizations :whitespace
+                ;; otherwise the build process complains
                 :optimizations :none
                 :source-map true}}]})
