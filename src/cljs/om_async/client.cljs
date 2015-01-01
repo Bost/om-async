@@ -34,12 +34,13 @@
 ;; (defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no elem is filtered out
 
 (defcomponent td
-  [{:keys [app cell idx-table idx-row column] :as params} owner]
+  [{:keys [app dbase cell idx-table idx-row column] :as params} owner]
   (render-state [_ state]
                 (let [td-val (get-in cell [:val])
                       ;; TODO walking over the data from the server doesn't work properly
                       p (into params {:ks-data [:data idx-row column]
                                       :kw-active [:active]
+                                      :dbase dbase
                                       :idx-table idx-table
                                       :idx-row idx-row
                                       :column column
@@ -51,7 +52,7 @@
                           td-val))))
 
 (defcomponent tr
-  [{:keys [app css row columns idx-table idx-row] :as params} owner]
+  [{:keys [app dbase css row columns idx-table idx-row] :as params} owner]
   (render-state [_ state]
                 (let [ column nil ]
                   ;;     (println "row: " row)
@@ -60,6 +61,7 @@
                           (for [col-kw (keys row)]
                             ;; (println "col-kw: " col-kw)
                             (om/build td {:app app
+                                          :dbase dbase
                                           :cell (col-kw row)
                                           :column col-kw
                                           :idx-table idx-table
@@ -67,7 +69,7 @@
                                           }))))))
 
 (defcomponent render-rows
-  [{:keys [app rows idx-table] :as params} owner]
+  [{:keys [app dbase rows idx-table] :as params} owner]
   ;;   (println "rows: " rows)
   ;;   (println "(keys rows): " (keys rows))
   ;;   (println "idx-table" idx-table)
@@ -77,6 +79,7 @@
                    ;;     (println "row: " row)
                    ;;     (println "idx-row: " idx-row)
                    (om/build tr {:app app
+                                 :dbase dbase
                                  :css ""
                                  :row (row-kw rows)
                                  :idx-table idx-table
@@ -92,7 +95,7 @@
       #js {:display "none"})))
 
 (defcomponent table-c
-  [{:keys [app header rows table-id idx-table] :as params} owner]
+  [{:keys [app dbase header rows table-id idx-table] :as params} owner]
   (render-state [_ state]
                 ;;                 (println "header: " header)
                 ;;                 (println "table-id: " table-id)
@@ -105,6 +108,7 @@
                              (for [h header]
                                (dom/th (str h)))))
                            (om/build render-rows {:app app
+                                                  :dbase dbase
                                                   :rows rows
                                                   :columns header
                                                   :idx-table idx-table
@@ -160,6 +164,7 @@
                                           )
 
                                 (om/build table-c {:app app
+                                                   :dbase dbname
                                                    :header header
                                                    :rows data
                                                    :table-id (name (:idx table))

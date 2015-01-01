@@ -40,7 +40,7 @@
        (let [fn-name "routes-PUT-select-id"]
          ;; (l/infod src fn-name "id" (:id params))
          (l/infod src fn-name "edn-params" edn-params)
-         ;; (l/infod src fn-name "params" params)
+         (l/infod src fn-name "params" params)
          (let [
                data (trans/request (:request params))
 ;;                data {:response (:request edn-params)
