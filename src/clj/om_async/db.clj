@@ -3,6 +3,7 @@
             ;; [om-async.logger-pprint :as l]
             [om-async.logger :as l]
             [om-async.utils :as u]
+            [clojure.pprint :as pp] ; for debug purposes
             )
   (:use [korma.db]
         [korma.core]
@@ -89,9 +90,11 @@
   (has-many employees)   ; (has-many employees {:fk :emp_no})
   (entity-fields :emp_no :from_date :title :to_date))
 
-(l/defnd entities-with-column [entities col]
+(l/defnd entities-with-column
+  [{:keys [entities column] :as params}]
+  (l/infod src fn-name "entities" entities)
   (let [ewc (for [e entities]
-              (if (u/contains-value? (:fields e) col)
+              (if (u/contains-value? (:fields e) column)
                 (:name e)
                 ;; e
                 nil))
@@ -99,9 +102,10 @@
     (l/infod src fn-name "r " r)
     r))
 
+;; TODO data-with-column-value: dbase parameter should be taken into account
 (l/defnd data-with-column-value
-  [{:keys [column value] :as edn-params}]
-  (let [entities-wc (entities-with-column all-entities column)]
+  [{:keys [dbase column value] :as edn-params}]
+  (let [entities-wc (entities-with-column {:entities all-entities :column column})]
     (l/infod src fn-name "entities-wc" entities-wc)
     (let [r (for [e entities-wc]
               (into [] (select e
@@ -114,7 +118,8 @@
       (l/infod src fn-name "r" r)
       r)))
 
-(data-with-column-value {:column :emp_no :value 10001})
+(data-with-column-value {:dbase "employees" :column :emp_no :value 10001})
+
 (def sources [employees departments])
 (def intermediate [dept_emp dept_manager])
 (def sinks [titles salaries])

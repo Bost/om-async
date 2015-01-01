@@ -8,6 +8,7 @@
             ;; [datomic.api :as d]
             [om-async.transform :as trans]
             [om-async.logger :as l]
+            [clojure.pprint :as pp] ; for debug purposes
             ))
 
 ;; Functions for Ring here. TODO consider moving them to ring.cljs
@@ -47,7 +48,11 @@
                ]
 ;;            (l/infod src fn-name "r" r)
            (l/infod src fn-name "data" data)
-           (response (merge data {:status :ok})))
+           (response
+            ;; TODO server.clj add {:status :ok} to response; onclick.cljs extract {:status :ok} from response
+            ;;(merge data {:status :ok})
+            data
+                     ))
          ))
 
   (route/files "/" {:root "resources/public"}))

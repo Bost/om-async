@@ -5,6 +5,7 @@
             [om-async.logger :as l]
             [clj-time.format :as tf]
             [clj-time.coerce :as tc]
+            [clojure.pprint :as pp] ; for debug purposes
             ))
 
 ;; Transformation layer between Ring and DB access functions here.
@@ -178,32 +179,33 @@
                       })
 
 
-(l/defnd get-params-for-fetch [src]
+(l/defnd get-params-for-fetch [xhr-data]
+  (l/infod src fn-name "xhr-data" xhr-data)
   (into []
-        (for [kw-dbase (keys (get-in src [:data]))
-              kw-table (keys (get-in src [:data kw-dbase :data]))]
+        (for [kw-dbase (keys (get-in xhr-data [:data]))
+              kw-table (keys (get-in xhr-data [:data kw-dbase :data]))]
           (let [
                 ;;idx-kw-dbase idx-kw-table
-                ;;kw-dbase           (nth (keys (get-in src [:data])) idx-kw-dbase)
+                ;;kw-dbase           (nth (keys (get-in xhr-data [:data])) idx-kw-dbase)
                 ;;idx-dbase          (subs (name kw-dbase) (count "dbase") (count (name kw-dbase)))
-                ;;kw-table           (nth (keys (get-in src [:data kw-dbase :data])) idx-kw-table)
+                ;;kw-table           (nth (keys (get-in xhr-data [:data kw-dbase :data])) idx-kw-table)
                 ;;idx-table          (subs (name kw-table) (count "table") (count (name kw-table)))
 
                 get-table-name     [:data kw-dbase :data kw-table :name]
-                table-name         (get-in src get-table-name)
+                table-name         (get-in xhr-data get-table-name)
 
                 get-dbase-name     [:data kw-dbase :name]
-                dbase-name         (get-in src get-dbase-name)
+                dbase-name         (get-in xhr-data get-dbase-name)
 
                 get-rows-displayed [:data kw-dbase :data kw-table :data :rows-displayed]
-                rows-displayed     (get-in src get-rows-displayed)
+                rows-displayed     (get-in xhr-data get-rows-displayed)
                 r {:dbase dbase-name :table table-name :rows-displayed rows-displayed :idx kw-table}
                 ]
             ;; (l/infod src fn-name "kw-dbase" kw-dbase)
             ;; (l/infod src fn-name "idx-dbase" idx-dbase)
             ;; (l/infod src fn-name "kw-table" kw-table)
             ;; (l/infod src fn-name "idx-table" idx-table)
-            ;; (l/infod src fn-name "r" r)
+            (l/infod src fn-name "r" r)
             r)
           )))
 
@@ -226,12 +228,24 @@
         (l/infod src fn-name "r" r)
         r))))
 
+(l/defnd get-params-for-select [entities]
+  (let [hm (for [[i e] (map-indexed vector entities-wc)]
+            {:dbase "employees", :table e, :rows-displayed 2, :idx (u/kw-table i)})
+        r (into [] hm)]
+    (l/infod src fn-name "r" r)
+    r))
+
 ;; reuqest puts partial results together
 (l/defnd request [edn-params]
   (l/infod src fn-name "edn-params" edn-params)
   (let [
-        ewc (db/data-with-column-value edn-params)
-        r ewc
+        data (db/data-with-column-value edn-params)
+        column (:column edn-params)
+        entities-wc (db/entities-with-column {:entities db/all-entities :column column})
+        params (get-params-for-select entities-wc)
+
+        r (m-select-rows-from params data)
+        ;; data
         ;; kw-fetch-fn (nth (keys edn-params) 0)
         ;; fetch-fn (kw-fetch-fn fetch-fns)
         ;; manipulator-fn (kw-fetch-fn manipulator-fns)
@@ -241,15 +255,17 @@
     ;;   ;; (l/info src fn-name (str "kw-fetch-fn: " kw-fetch-fn))
     ;;   ;; (l/info src fn-name (str "fetch-fn: " fetch-fn))
     ;;   ;; (l/info src fn-name (str "manipulator-fn: " manipulator-fn))
-    ;;   ;; (l/info src fn-name (str "params: " params))
+;;     (l/infod src fn-name "column" column)
+;;     (l/infod src fn-name "entities-wc" entities-wc)
+;;     (l/infod src fn-name "params" params)
     ;;   ;; (l/info src fn-name (str "val-params: " val-params))
     ;;   (let [f0 (fetch-fn params 0)] ;; onClick sends just 1 value
     ;;     ;; (l/info src fn-name (str "f0: " f0))
     ;;     (let [data (manipulator-fn f0)]
-    ;;       ;; (l/infod src fn-name "data" data)
+;;     (l/infod src fn-name "data" data)
     ;;       data)))
     ;; "TODO send edn-params to db.clj; db.clj should find entities with given :column"
-    (l/infod src fn-name "r" r)
+;;     (l/infod src fn-name "r" r)
     r))
 
 ;; clean the REPL - works only in clojure not in clojurescript

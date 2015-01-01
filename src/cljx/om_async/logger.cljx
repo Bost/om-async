@@ -26,13 +26,14 @@
                   "get-display"
                   "table-sorter"
                   "new-to-old"
-;;                   ":on-complete"
+                  "view-:on-complete"
                   ]
    :onclick.cljs [
                   "toggle-table"
                   "displayed-rows"
                   "edn-xhr"
-                  "activate-:on-complete"
+;;                   "activate-:on-complete"
+                  "activate"
                   ]
    :cli_transform.cljs [
 ;;                         "extend-table"
@@ -41,8 +42,8 @@
 ;;                         "extend-all"
                         ]
    :transform.clj [
-;;                    "get-params-for-fetch"
-;;                    "fetch"
+                   "get-params-for-fetch"
+                   "fetch"
                    "request"
 ;;                    "encode-table"
 ;;                    "process-select-rows-from"
@@ -54,7 +55,7 @@
 ;;                    "process-sql"
                    ]
    :server.clj [
-                "routes-PUT-select-id"
+;;                 "routes-PUT-select-id"
 ;;                 "routes-PUT-fetch"
                 ]
    :utils [
@@ -62,6 +63,7 @@
            ]
 
    :db.clj [
+            "entities-with-colum"
             "data-with-column-value"
 ;;             "limit-rows-displayed"
 ;;             "sql-show-tables-from"

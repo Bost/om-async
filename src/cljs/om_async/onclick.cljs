@@ -90,7 +90,7 @@
               )))))))
 
 (l/defnd activate
-  [{:keys [app ks-data column elem-val] :as params} owner]
+  [{:keys [app dbase ks-data column elem-val] :as params} owner]
   ;; TODO (js* "debugger;") seems to cause LightTable freeze
   (let [active (om/get-state owner :active)]
     ;; we're not allowed to use cursors outside of the render phase as
@@ -105,16 +105,16 @@
      {:method :put
       :url (str "select/" column)
       ;; value under :data can't be a just a "value". (TODO see if only hash-map is accepted)
-      :data {:request {:column column :value elem-val}}
+      :data {:request {:dbase dbase :column column :value elem-val}}
       :on-complete (fn [response]
-                     (let [fn-name "activate-:on-complete"]
-                       (l/infod src fn-name "response" response)
-                       ;; (println (str "Server response: " response))
-                       ;; change application state; use with get-in
-                       ;; (om/transact! app ks-data
-                       ;;               (fn []
-                       ;;                 {:val (str "# " (:response response) " #")}))
-                       ))
+                     ;; change application state; use with get-in
+                     (om/transact! app [] (fn [_]
+                                            ;; (println "transacting...")
+                                            (let [fn-name "activate-:on-complete"]
+                                              (l/infod src fn-name "response" response)
+                                              ;; TODO server.clj add {:status :ok} to response; onclick.cljs extract {:status :ok} from response
+                                              (t/extend-all response))))
+                     )
       })))
 
 (defn deactivate-all

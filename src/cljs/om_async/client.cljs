@@ -211,9 +211,9 @@
                 :on-complete (fn [response]
                                (om/transact! app [] (fn [_]
                                                       ;; (println "transacting...")
-                                                      (l/info src ":on-complete" (str "response: " response))
-                                                      (t/extend-all response)
-                                                      )))
+                                                      (let [fn-name "view-:on-complete"]
+                                                        (l/infod src fn-name "response" response)
+                                                        (t/extend-all response)))))
                 }))
   (render-state [_ state]
                 ;; (println "rendering...")
