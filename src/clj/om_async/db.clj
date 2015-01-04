@@ -44,41 +44,32 @@
     r))
 
 (l/defnd sql-select-rows-from
-;;   "Just put a key-val pair in the client to the
-;;   (oc/edn-xhr { .. :data {:select-rows-from [ .. ]}}) and ... job done!
-;;   It pops up here just like that!"
+  ;; "Just put a key-val pair in the client to the
+  ;; (oc/edn-xhr { .. :data {:select-rows-from [ .. ]}}) and ... job done!
+  ;; It pops up here just like that!"
   [{:keys [dbase table rows-displayed] :as params}]
-;;   (l/infod src fn-name "params" params)
+  ;; (l/infod src fn-name "params" params)
   (defdb db (mysql (db-connect dbase)))
-  (let [ro (select table (limit (limit-rows-displayed rows-displayed)))
-        rn (into [] ro)
-        r ro
-        ]
-;;     (l/infod src fn-name "ro" ro)
-;;     (l/infod src fn-name "rn" rn)
-;;     (l/infod src fn-name "r" r)
+  (let [r (select table
+                  (limit (limit-rows-displayed rows-displayed)))]
     r))
+
+(declare salaries titles departments dept_emp dept_manager employees salaries titles)
+(def all-entities #{salaries titles departments dept_emp dept_manager employees})
 
 ;; TODO data-with-column-value: dbase parameter should be taken into account
 (l/defnd data-with-column-value
   [{:keys [dbase table rows-displayed column value] :as edn-params}]
   (let [entities-wc (entities-with-column {:entities all-entities :column column})]
     (l/infod src fn-name "entities-wc" entities-wc)
-    (let [r ;;(for [e entities-wc]
-              (into [] (select
-                      table
-                      ;; e
-                      (where {column value})
-                      (limit (limit-rows-displayed rows-displayed))))
-              ;;)
+    (let [r (select table
+                    (where {column value})
+                    (limit (limit-rows-displayed rows-displayed)))
           ;; TODO put the {:dbase ... :table ... } into result r
-          ;; r (into [] (remove nil? ewc))
-          r (into [] r)
+          ;; r (remove nil? r)
           ]
       (l/infod src fn-name "r" r)
       r)))
-
-;; (data-with-column-value {:dbase "employees" :column :emp_no :value 10001})
 
 (l/defnd sql-show-tables-from
   [{:keys [dbase rows-displayed] :as params}]
@@ -92,11 +83,7 @@
           (limit (limit-rows-displayed rows-displayed))))
 
 (def show-tables-from (memoize sql-show-tables-from))
-
 ;; (sql-show-tables-from u/e)
-
-(declare salaries titles departments dept_emp dept_manager employees salaries titles)
-(def all-entities #{salaries titles departments dept_emp dept_manager employees})
 
 (defentity departments
   (pk :dept_no)

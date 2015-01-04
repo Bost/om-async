@@ -58,24 +58,18 @@
 (l/defnd process-sql [sql-fn {:keys [dbase table idx] :as params}]
   ;; "idx is index for the keyword :table in the returned hash-map"
   (l/infod src fn-name "params" params)
-  ;; (l/infod src fn-name "dbase" dbase)
-  ;; (l/infod src fn-name "table" table)
-  ;; (l/infod src fn-name "idx " idx)
-  (encode-table {:table table :data (sql-fn params) :idx idx})
-  ;; table (sql-fn params) idx)
-  )
+  (encode-table {:table table :data (sql-fn params) :idx idx}))
 
 (l/defnd process-data-with-column-value [obj]
   (l/infod src fn-name "obj" obj)
-  (let [r (process-sql db/data-with-column-value obj)
-        r (into [] r)]
-;;     (l/infod src fn-name "r" r)
+  (let [r (process-sql db/data-with-column-value obj)]
+    ;; (l/infod src fn-name "r" r)
     r))
 
 (l/defnd process-select-rows-from [obj]
   (l/infod src fn-name "obj" obj)
-  (let [r (into [] (process-sql db/sql-select-rows-from obj))]
-    (l/infod src fn-name "r" r)
+  (let [r (process-sql db/sql-select-rows-from obj)]
+    ;; (l/infod src fn-name "r" r)
     r))
 
 ;; TODO paredit grow right should jump over comment
@@ -137,15 +131,11 @@
     ;; (l/infod src fn-name "rx" rx)
     rx))
 
-
-(l/defnd data-new-to-old [n]
-  [(into () n)])
-
 (l/defnd m-select-rows-from [params data]
   ;; (l/infod src fn-name "params" params)
-  ;; (def params [{:dbase "employees", :table "departments", :idx 0}])
-;;   (l/infod src fn-name "data" data)
+  ;; (l/infod src fn-name "data" data)
   (let [
+;;         params [{:dbase "employees", :table "departments", :idx 0}])
 ;;         data [[{:dept_no "d009", :dept_name "Customer Service"}
 ;;                {:dept_no "d005", :dept_name "Development"}]]
         rlist
@@ -165,10 +155,7 @@
 
 (l/defnd m-show-tables-from [params data]
   ;; (l/infod src fn-name "params" params)
-  ;; (def params [{:dbase "employees" :idx 0}]})
   ;; (l/infod src fn-name "data" data)
-  ;; (def data [({:table_name "departments"} {:table_name "dept_emp"} {:table_name "dept_manager"}
-  ;;             {:table_name "employees"} {:table_name "salaries"} {:table_name "titles"})])
   (m-select-rows-from params data))
 
 (l/defnd m-show-tables-with-data-from [params data]
@@ -184,7 +171,6 @@
                       :show-tables-with-data-from  m-show-tables-with-data-from
                       :request                     m-request
                       })
-
 
 (l/defnd get-params-for-fetch [xhr-data]
   (l/infod src fn-name "xhr-data" xhr-data)
@@ -243,7 +229,7 @@
     (l/infod src fn-name "r" r)
     r))
 
-;; reuqest puts partial results together
+;; TODO merge functions request and fetch
 (l/defnd request
   [{:keys [dbase column value] :as edn-params}]
   (l/infod src fn-name "edn-params" edn-params)
@@ -251,20 +237,13 @@
         entities-wc (db/entities-with-column {:entities db/all-entities :column column})
         params (get-params-for-select (into edn-params {:entities entities-wc}))
 
-        fetch-fn process-data-with-column-value
+        fetch-fn       process-data-with-column-value
         manipulator-fn m-select-rows-from
-
-        ;; kw-fetch-fn (nth (keys edn-params) 0)
-        ;; fetch-fn (kw-fetch-fn fetch-fns)
-        ;; manipulator-fn (kw-fetch-fn manipulator-fns)
-        ;; val-params (into [] (vals params))
         ]
     (l/infod src fn-name "params" params)
     (let [data (into [] (map fetch-fn params))]
       (l/infod src fn-name "data" data)
       (let [r (manipulator-fn params data)]
-;;         (l/infod src fn-name "r" r)
-;;         (l/infod src fn-name "r0" r0)
         r))))
 
 ;; clean the REPL - works only in clojure not in clojurescript
