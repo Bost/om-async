@@ -147,7 +147,7 @@
                              {:data (m-x p [d])}))
                     params data))
         rvec (into [] rlist)
-        ks (into [] (map #(keyword (str "table" %)) (range (count rvec))))
+        ks (into [] (map u/kw-table (range (count rvec))))
         rdata (zipmap ks rvec)
         ;; TODO extend-table must be done in the client.cljs
         ]
