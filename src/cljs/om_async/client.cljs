@@ -126,55 +126,67 @@
                (.setSortFunction component 0 alphaSort)
                (.setSortFunction component 1 reverseSort))))
 
+;; TODO DRY!: displayed? in client.cljs and onclick.cljs are the same
+(l/defnd displayed? [owner korks]
+  (let [displayed-state (om/get-state owner korks)
+        displayed (if (nil? displayed-state) true displayed-state)]
+    displayed))
+
 ;; TODO rename table to extended-table (i.e. table with its table-control buttons)
-(defcomponent table-controler [app owner]
+(defcomponent table-controller [app owner]
   (render-state [_ state]
-                (dom/div
-                 (let [dbname (get-in app [:dbase])
-                       dbdata (get-in app [:data])]
-                   (for [table-key (keys dbdata)]
-                     (let [table (table-key dbdata)
-                           tname (get-in table [:table])
-                           full-tname (str dbname "." tname)
-                           data (get-in table [:data])
-                           rows-displayed (count data)
+                (let [fn-name "defcomponent-table-controller"]
+                  (dom/div
+                   (let [dbname (get-in app [:dbase])
+                         dbdata (get-in app [:data])
+                         ]
+                     (for [table-key (keys dbdata)]
+                       (let [table (table-key dbdata)
+                             tname (get-in table [:table])
+                             full-tname (str dbname "." tname)
+                             data (get-in table [:data])
+                             rows-displayed (count data)
+                             displayed (displayed? owner [(:idx table) :display])
 
-                           header (into [] (keys (:row0 data)))
-                           buttons [
-                                    ;; max 5 rows displayed per table on the client
-                                    {:name "more-rows" :fnc inc :exec-fnc? (fn [cnt-rows] (< cnt-rows 5))}
-                                    {:name "less-rows" :fnc dec :exec-fnc? (fn [cnt-rows] (> cnt-rows 0))}]
-                           ]
-                       (dom/div {:id (str "div-" (name (:idx table)))}
-                                (str tname "-" (name (:idx table)))
-                                (dom/button {:onClick (fn [e]
-                                                        (oc/toggle-table {:idx (:idx @table)}))}
-                                            "toggle-table")
-                                (dom/span {:id (str "span-" (name (:idx table)))}
-                                          (for [button buttons]
-                                            (dom/button {:ref "foo"
-                                                         :onClick (fn [e]
-                                                                    (oc/displayed-rows app
-                                                                                       {:owner owner
-                                                                                        :dbase dbname
-                                                                                        :table (:table @table)
-                                                                                        :rows-displayed rows-displayed
-                                                                                        :idx (:idx @table)
-                                                                                        :fnc (:fnc button)
-                                                                                        :exec-fnc? (:exec-fnc? button)
-                                                                                        }))}
-                                                        (:name button)))
-                                          "table-size "
-                                          (str "rows-displayed: " rows-displayed))
+                             header (into [] (keys (:row0 data)))
+                             buttons [
+                                      ;; max 5 rows displayed per table on the client
+                                      {:name "more-rows" :fnc inc :exec-fnc? (fn [cnt-rows] (< cnt-rows 5))}
+                                      {:name "less-rows" :fnc dec :exec-fnc? (fn [cnt-rows] (> cnt-rows 0))}]
+                             ]
+                         (dom/div {:id (str "div-" (name (:idx table)))}
+                                  (str tname "-" (name (:idx table)))
+                                  (dom/button {:onClick (fn [e]
+                                                          (oc/toggle-table {:owner owner :idx (:idx @table)}))}
+                                              "toggle-table")
+                                  (dom/span {:id (str "span-" (name (:idx table)))}
+                                            (for [button buttons]
+                                              (dom/button {:ref "foo"
+                                                           :onClick (fn [e]
+                                                                      (oc/displayed-rows app
+                                                                                         {:owner owner
+                                                                                          :dbase dbname
+                                                                                          :table (:table @table)
+                                                                                          :rows-displayed rows-displayed
+                                                                                          :idx (:idx @table)
+                                                                                          :fnc (:fnc button)
+                                                                                          :exec-fnc? (:exec-fnc? button)
+                                                                                          }))}
+                                                          (:name button)))
+                                            "table-size "
+                                            (str "rows-displayed: " rows-displayed)
+                                            ;; (str "; displayed: " displayed)
+                                            )
 
-                                (om/build table-c {:app app
-                                                   :dbase dbname
-                                                   :header header
-                                                   :rows data
-                                                   :table-id (name (:idx table))
-                                                   :idx-table (:idx table)
-                                                   })
-                                )))))))
+                                  (if displayed
+                                    (om/build table-c {:app app
+                                                       :dbase dbname
+                                                       :header header
+                                                       :rows data
+                                                       :table-id (name (:idx table))
+                                                       :idx-table (:idx table)
+                                                       }))
+                                  ))))))))
 
 (defcomponent render-multi [app owner]
   (render-state [_ state]
@@ -182,7 +194,7 @@
                   (dom/div {:id "fetching"} "Fetching data...")
                   (dom/div {:id "main"}
                            (dom/button {:onClick (fn [e] (oc/deactivate-all app owner))} "deactivate-all")
-                           (om/build table-controler app)))))
+                           (om/build table-controller app)))))
 
 (defcomponent view
   ;; "data - application state data (a cursor); owner - backing React component

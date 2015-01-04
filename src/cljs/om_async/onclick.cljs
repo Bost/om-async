@@ -134,9 +134,12 @@
   (let [korks [idx :display]
         displayed-state (om/get-state owner korks)
         ;; TODO proper initialisation of table displayed state
+        ]
+    (l/infod src fn-name "displayed-state" displayed-state)
+    (let [
         displayed (if (nil? displayed-state) true displayed-state)]
     (l/infod src fn-name "displayed" displayed)
-    (om/set-state! owner korks (not displayed))))
+    (om/set-state! owner korks (not displayed)))))
 
 ;; "Display +N / -N rows"; TODO better name for idx (values like :table0)
 (l/defnd displayed-rows

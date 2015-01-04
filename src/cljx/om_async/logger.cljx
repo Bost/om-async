@@ -20,6 +20,7 @@
 ;;                   "onClick-onComplete"
 ;;                   "onClick"
 ;;                   "defcomponent-td"
+;;                   "defcomponent-table-controller"
                   "render-multi"
                   "ks-other"
                   "render"

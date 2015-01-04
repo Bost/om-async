@@ -79,7 +79,7 @@
           (where {:table_schema (name dbase)
                   :table_type "BASE TABLE"
                   :engine "InnoDB"})
-          (limit (limit-rows-displayed rows-displayed))))
+          (limit (calc-row-limit rows-displayed))))
 
 (def show-tables-from (memoize sql-show-tables-from))
 ;; (sql-show-tables-from u/e)
