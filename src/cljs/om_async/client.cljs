@@ -36,20 +36,22 @@
 (defcomponent td
   [{:keys [app dbase cell idx-table idx-row column] :as params} owner]
   (render-state [_ state]
-                (let [td-val (get-in cell [:val])
-                      ;; TODO walking over the data from the server doesn't work properly
-                      p (into params {:ks-data [:data idx-row column]
-                                      :kw-active [:active]
-                                      :dbase dbase
-                                      :idx-table idx-table
-                                      :idx-row idx-row
-                                      :column column
-                                      :elem-val td-val
-                                      })]
-                  (dom/td {:id (str idx-table "-" idx-row "-" column "-" td-val)
-                           :class (if (om/get-state owner :active) "active" nil)
-                           :onClick (fn [e] (oc/activate p owner))}
-                          td-val))))
+                (let [fn-name "defcomponent-td"]
+                  (let [td-val (get-in cell [:val])
+                        ;; TODO walking over the data from the server doesn't work properly
+                        p (into params {:ks-data [:data idx-row column]
+                                        :kw-active [:active]
+                                        :dbase dbase
+                                        :idx-table idx-table
+                                        :idx-row idx-row
+                                        :column column
+                                        :elem-val td-val
+                                        })]
+                    (l/infod src fn-name "p" p)
+                    (dom/td {:id (str idx-table "-" idx-row "-" column "-" td-val)
+                             :class (if (om/get-state owner :active) "active" nil)
+                             :onClick (fn [e] (oc/activate p owner))}
+                            td-val)))))
 
 (defcomponent tr
   [{:keys [app dbase css row columns idx-table idx-row] :as params} owner]
@@ -135,9 +137,12 @@
                            tname (get-in table [:table])
                            full-tname (str dbname "." tname)
                            data (get-in table [:data])
+                           rows-displayed (count data)
 
                            header (into [] (keys (:row0 data)))
-                           buttons [{:name "more-rows" :fnc inc :exec-fnc? (fn [_] true)}
+                           buttons [
+                                    ;; max 5 rows displayed per table on the client
+                                    {:name "more-rows" :fnc inc :exec-fnc? (fn [cnt-rows] (< cnt-rows 5))}
                                     {:name "less-rows" :fnc dec :exec-fnc? (fn [cnt-rows] (> cnt-rows 0))}]
                            ]
                        (dom/div {:id (str "div-" (name (:idx table)))}
@@ -153,15 +158,14 @@
                                                                                        {:owner owner
                                                                                         :dbase dbname
                                                                                         :table (:table @table)
-                                                                                        :rows-displayed (:rows-displayed @table)
+                                                                                        :rows-displayed rows-displayed
                                                                                         :idx (:idx @table)
                                                                                         :fnc (:fnc button)
                                                                                         :exec-fnc? (:exec-fnc? button)
                                                                                         }))}
                                                         (:name button)))
                                           "table-size "
-                                          (str "rows-displayed: " (:rows-displayed table))
-                                          )
+                                          (str "rows-displayed: " rows-displayed))
 
                                 (om/build table-c {:app app
                                                    :dbase dbname

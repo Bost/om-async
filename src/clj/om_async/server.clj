@@ -41,20 +41,13 @@
          ;; (l/infod src fn-name "id" (:id params))
          (l/infod src fn-name "edn-params" edn-params)
          (l/infod src fn-name "params" params)
-         (let [
-               data (trans/request (:request params))
-;;                data {:response (:request edn-params)
-;;                      :TODO "db.clj: search in all entities for :column with given :value"}
+         (let [data (trans/request (:request params))
+               ;; TODO server.clj add {:status :ok} to response; onclick.cljs extracts ite
+               ;; data (merge data {:status :ok})
+               r (response data)
                ]
-;;            (l/infod src fn-name "r" r)
-           (l/infod src fn-name "data" data)
-           (response
-            ;; TODO server.clj add {:status :ok} to response; onclick.cljs extract {:status :ok} from response
-            ;;(merge data {:status :ok})
-            data
-                     ))
-         ))
-
+           (l/infod src fn-name "r" r)
+           r)))
   (route/files "/" {:root "resources/public"}))
 
 (def app

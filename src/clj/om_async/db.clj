@@ -21,15 +21,14 @@
   ;; (entity-fields :table_schema :table_name :table_type :engine)
   )
 
-(l/defnd limit-rows-displayed [rows-displayed]
-  (l/infod src fn-name "rows-displayed" rows-displayed)
-  (let [max-rows 10
-        rows-displayed-limited (min max-rows rows-displayed)]
-    (if (> rows-displayed max-rows)
-      (l/warn src ("Number of selected rows limited to " rows-displayed-limited)))
-    (l/infod src fn-name "rows-displayed-limited" rows-displayed-limited)
-    rows-displayed-limited
-    ))
+(l/defnd calc-row-limit [requested-row-limit]
+  (l/infod src fn-name "requested-row-limit" requested-row-limit)
+  (let [highest-row-limit 3
+        row-limit (min highest-row-limit requested-row-limit)]
+    (if (> requested-row-limit highest-row-limit)
+      (l/warn src fn-name (str "Number of selected rows limited to " highest-row-limit)))
+    ;; (l/infod src fn-name "row-limit" row-limit)
+    row-limit))
 
 (l/defnd entities-with-column
   [{:keys [entities column] :as params}]
@@ -51,7 +50,7 @@
   ;; (l/infod src fn-name "params" params)
   (defdb db (mysql (db-connect dbase)))
   (let [r (select table
-                  (limit (limit-rows-displayed rows-displayed)))]
+                  (limit (calc-row-limit rows-displayed)))]
     r))
 
 (declare salaries titles departments dept_emp dept_manager employees salaries titles)
@@ -64,7 +63,7 @@
     (l/infod src fn-name "entities-wc" entities-wc)
     (let [r (select table
                     (where {column value})
-                    (limit (limit-rows-displayed rows-displayed)))
+                    (limit (calc-row-limit rows-displayed)))
           ;; TODO put the {:dbase ... :table ... } into result r
           ;; r (remove nil? r)
           ]
