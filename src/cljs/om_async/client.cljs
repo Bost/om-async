@@ -173,9 +173,8 @@
                                                                                           :exec-fnc? (:exec-fnc? button)
                                                                                           }))}
                                                           (:name button)))
-                                            "table-size "
-                                            (str "rows-displayed: " rows-displayed)
-                                            ;; (str "; displayed: " displayed)
+                                            (str "rows ?; ") ;; TODO use db/row-count to obtain select count(*) ...
+                                            (str "displayed: " rows-displayed)
                                             )
 
                                   (if displayed

@@ -84,6 +84,11 @@
 (def show-tables-from (memoize sql-show-tables-from))
 ;; (sql-show-tables-from u/e)
 
+(l/defnd row-count [entity]
+  (:cnt (first
+         (select entity
+                 (aggregate (count :*) :cnt)))))
+
 (defentity departments
   (pk :dept_no)
   (entity-fields :dept_no :dept_name))
