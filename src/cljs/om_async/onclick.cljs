@@ -6,7 +6,7 @@
             [om.core :as om :include-macros true]
 ;;             [om-tools.dom :as tdom :include-macros true]
             [cljs.core.async :as async :refer [put! chan <!]]
-;;             [om-async.utils :as u]
+            [om-async.utils :as u]
             [om-async.logger :as l]
             [om-async.cli-transform :as t]
 ;;             ;;[clojure.walk :as walk]
@@ -130,8 +130,7 @@
   ;; "TODO Should use the displayed-elems fn work a la Display +N / -N tables
   ;;  Hide table component from web page"
   [{:keys [owner idx] :as params}]
-  ;; (l/infod src fn-name "owner" owner)
-  (l/infod src fn-name "idx" idx)
+  (l/infod src fn-name "params" params)
   (let [korks [idx :display]
         displayed-state (om/get-state owner korks)
         ;; TODO proper initialisation of table displayed state
@@ -139,26 +138,29 @@
     (l/infod src fn-name "displayed" displayed)
     (om/set-state! owner korks (not displayed))))
 
-;; "Display +N / -N rows"
+;; "Display +N / -N rows"; TODO better name for idx (values like :table0)
 (l/defnd displayed-rows
   [app {:keys [owner dbase table rows-displayed idx fnc exec-fnc?] :as params}]
 ;;   (println "app" @app)
-;;   (println "params" params)
+  (l/infod src fn-name "params" params)
   (if (exec-fnc? rows-displayed)
     (edn-xhr
      {:method :put
       :url "fetch"
-      :data {:select-rows-from [{:dbase dbase
-                                 :table table
-                                 :rows-displayed (fnc rows-displayed)
-                                 :idx idx}]}
+      :data {:name :select-rows-from
+             :data {:dbase0 {:name dbase
+                             :data {
+                                    idx {:name table
+                                         :data {:rows-displayed (fnc rows-displayed)}}
+                                    }}}}
+
       :on-complete (fn [response]
                      (let [korks [:data idx]
                            new-data (t/extend-all response)
                            new-data-stripped (get-in new-data korks)
                            ]
-                       ;; (println "response" response)
-                       ;; (println "new-data" new-data)
+                       (l/infod src fn-name "response" response)
+                       (l/infod src fn-name "new-data" new-data)
                        (l/infod src fn-name "new-data-stripped" new-data-stripped)
                        ;om/transact! propagates changes back to the original atom
                        ;; (om/transact! app korks (fn [_] new-data-stripped))
