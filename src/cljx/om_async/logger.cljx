@@ -26,7 +26,7 @@
                   "get-display"
                   "table-sorter"
                   "new-to-old"
-                  "view-:on-complete"
+;;                   "view-:on-complete"
                   ]
    :onclick.cljs [
                   "toggle-table"
@@ -42,9 +42,11 @@
 ;;                         "extend-all"
                         ]
    :transform.clj [
-                   "get-params-for-fetch"
-                   "fetch"
+;;                    "get-params-for-fetch"
+                   "process-data-with-column-value"
+;;                    "fetch"
                    "request"
+
 ;;                    "encode-table"
 ;;                    "process-select-rows-from"
 ;;                    "m-show-tables-from"
@@ -63,8 +65,8 @@
            ]
 
    :db.clj [
-            "entities-with-colum"
-            "data-with-column-value"
+;;             "entities-with-colum"
+;;             "data-with-column-value"
 ;;             "limit-rows-displayed"
 ;;             "sql-show-tables-from"
 ;;             "sql-select-rows-from"

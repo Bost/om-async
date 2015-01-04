@@ -47,24 +47,30 @@
 (l/defnd encode-table
   [{:keys [table data idx] :as params}]
   ;; "idx is index for the keyword :table in the returned hash-map"
-
   ;; (l/infod src fn-name "table" table)
   ;; (l/infod src fn-name "data" data)
-  (let [encoded-table (map convert-hashmap data)]
-    ;; (l/infod src fn-name "encoded-table" encoded-table)
+  (let [r (map convert-hashmap data)]
+    ;; (l/infod src fn-name "r" r)
     ;; (l/infod src fn-name "idx" idx)
-    encoded-table))
+    r))
 
 ;; every process-* function must call a function from om-async.db
 (l/defnd process-sql [sql-fn {:keys [dbase table idx] :as params}]
   ;; "idx is index for the keyword :table in the returned hash-map"
-  ;; (l/infod src fn-name "sql-fn" sql-fn)
+  (l/infod src fn-name "params" params)
   ;; (l/infod src fn-name "dbase" dbase)
   ;; (l/infod src fn-name "table" table)
   ;; (l/infod src fn-name "idx " idx)
   (encode-table {:table table :data (sql-fn params) :idx idx})
   ;; table (sql-fn params) idx)
   )
+
+(l/defnd process-data-with-column-value [obj]
+  (l/infod src fn-name "obj" obj)
+  (let [r (process-sql db/data-with-column-value obj)
+        r (into [] r)]
+;;     (l/infod src fn-name "r" r)
+    r))
 
 (l/defnd process-select-rows-from [obj]
   (l/infod src fn-name "obj" obj)
@@ -75,10 +81,6 @@
 ;; TODO paredit grow right should jump over comment
 (defn process-show-tables-from [obj]
   (process-sql db/sql-show-tables-from obj))
-
-;; TODO DRY! see onclick/kw-table
-(defn kw-table [idx]
-  (keyword (str "table" idx)))
 
 (l/defnd process-show-tables-with-data-from
   [{:keys [dbase rows-displayed] :as params}]
@@ -97,7 +99,7 @@
           []
           ;; TODO implement process-show-tables-with-data-from
           ;; (map #(process-select-rows-from
-          ;;        {:dbase dbase :table %1 :rows-displayed 2 :idx (kw-table %2)})
+          ;;        {:dbase dbase :table %1 :rows-displayed 2 :idx (u/kw-table %2)})
           ;;      tables
           ;;      (into [] (range count-tables)))
           ]
@@ -106,10 +108,10 @@
 
 (l/defnd process-request [params idx]
   (let [table ((u/kw :table :name idx) params)
-        data (encode-table {:table table :data (db/s params idx) :idx idx})]
+        r (encode-table {:table table :data (db/s params idx) :idx idx})]
     ;; (l/infod src fn-name "table" table)
-    ;; (l/infod src fn-name "data" data)
-    data))
+    ;; (l/infod src fn-name "r" r)
+    r))
 
 (def fetch-fns {:select-rows-from           process-select-rows-from
                 :show-tables-from           process-show-tables-from
@@ -135,25 +137,30 @@
     ;; (l/infod src fn-name "rx" rx)
     rx))
 
+
+(l/defnd data-new-to-old [n]
+  [(into () n)])
+
 (l/defnd m-select-rows-from [params data]
   ;; (l/infod src fn-name "params" params)
   ;; (def params [{:dbase "employees", :table "departments", :idx 0}])
-  ;; (l/infod src fn-name "data" data)
-  ;; (def data [({:dept_no "d009", :dept_name "Customer Service"}
-  ;;             {:dept_no "d005", :dept_name "Development"})])
-  (let [rlist
+;;   (l/infod src fn-name "data" data)
+  (let [
+;;         data [[{:dept_no "d009", :dept_name "Customer Service"}
+;;                {:dept_no "d005", :dept_name "Development"}]]
+        rlist
         (doall (map (fn [p d]
                       (merge p
                              {:data (m-x p [d])}))
                     params data))
         rvec (into [] rlist)
         ks (into [] (map u/kw-table (range (count rvec))))
-        rdata (zipmap ks rvec)
+        r (zipmap ks rvec)
         ;; TODO extend-table must be done in the client.cljs
         ]
     ;; (l/infod src fn-name "rvec" rvec)
-    ;;(println "rdata" rdata)
-    rdata
+    ;; (l/infod src fn-name "r" r)
+    r
     ))
 
 (l/defnd m-show-tables-from [params data]
@@ -217,10 +224,10 @@
         manipulator-fn (kw-fetch-fn manipulator-fns)
         params (get-params-for-fetch edn-params)
         ]
-    (l/infod src fn-name "edn-params" edn-params)
-    (l/infod src fn-name "kw-fetch-fn" kw-fetch-fn)
-    (l/infod src fn-name "fetch-fn" fetch-fn)
-    (l/infod src fn-name "manipulator-fn" manipulator-fn)
+;;     (l/infod src fn-name "edn-params" edn-params)
+;;     (l/infod src fn-name "kw-fetch-fn" kw-fetch-fn)
+;;     (l/infod src fn-name "fetch-fn" fetch-fn)
+;;     (l/infod src fn-name "manipulator-fn" manipulator-fn)
     (l/infod src fn-name "params" params)
     (let [data (into [] (map fetch-fn params))]
       (l/infod src fn-name "data" data)
@@ -228,45 +235,37 @@
         (l/infod src fn-name "r" r)
         r))))
 
-(l/defnd get-params-for-select [entities]
-  (let [hm (for [[i e] (map-indexed vector entities-wc)]
-            {:dbase "employees", :table e, :rows-displayed 2, :idx (u/kw-table i)})
+(l/defnd get-params-for-select
+  [{:keys [dbase entities column value] :as params}]
+  (let [hm (for [[i e] (map-indexed vector entities)]
+            {:dbase dbase :table e :rows-displayed 2 :idx (u/kw-table i) :column column :value value})
         r (into [] hm)]
     (l/infod src fn-name "r" r)
     r))
 
 ;; reuqest puts partial results together
-(l/defnd request [edn-params]
+(l/defnd request
+  [{:keys [dbase column value] :as edn-params}]
   (l/infod src fn-name "edn-params" edn-params)
   (let [
-        data (db/data-with-column-value edn-params)
-        column (:column edn-params)
         entities-wc (db/entities-with-column {:entities db/all-entities :column column})
-        params (get-params-for-select entities-wc)
+        params (get-params-for-select (into edn-params {:entities entities-wc}))
 
-        r (m-select-rows-from params data)
-        ;; data
+        fetch-fn process-data-with-column-value
+        manipulator-fn m-select-rows-from
+
         ;; kw-fetch-fn (nth (keys edn-params) 0)
         ;; fetch-fn (kw-fetch-fn fetch-fns)
         ;; manipulator-fn (kw-fetch-fn manipulator-fns)
-        ;; params (kw-fetch-fn edn-params)
         ;; val-params (into [] (vals params))
         ]
-    ;;   ;; (l/info src fn-name (str "kw-fetch-fn: " kw-fetch-fn))
-    ;;   ;; (l/info src fn-name (str "fetch-fn: " fetch-fn))
-    ;;   ;; (l/info src fn-name (str "manipulator-fn: " manipulator-fn))
-;;     (l/infod src fn-name "column" column)
-;;     (l/infod src fn-name "entities-wc" entities-wc)
-;;     (l/infod src fn-name "params" params)
-    ;;   ;; (l/info src fn-name (str "val-params: " val-params))
-    ;;   (let [f0 (fetch-fn params 0)] ;; onClick sends just 1 value
-    ;;     ;; (l/info src fn-name (str "f0: " f0))
-    ;;     (let [data (manipulator-fn f0)]
-;;     (l/infod src fn-name "data" data)
-    ;;       data)))
-    ;; "TODO send edn-params to db.clj; db.clj should find entities with given :column"
-;;     (l/infod src fn-name "r" r)
-    r))
+    (l/infod src fn-name "params" params)
+    (let [data (into [] (map fetch-fn params))]
+      (l/infod src fn-name "data" data)
+      (let [r (manipulator-fn params data)]
+;;         (l/infod src fn-name "r" r)
+;;         (l/infod src fn-name "r0" r0)
+        r))))
 
 ;; clean the REPL - works only in clojure not in clojurescript
 ;; (map #(ns-unmap *ns* %) (keys (ns-interns *ns*)))

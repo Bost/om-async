@@ -31,18 +31,54 @@
     rows-displayed-limited
     ))
 
+(l/defnd entities-with-column
+  [{:keys [entities column] :as params}]
+  (l/infod src fn-name "entities" entities)
+  (let [ewc (for [e entities]
+              (if (u/contains-value? (:fields e) column)
+                (:name e)
+                ;; e
+                nil))
+        r (into [] (remove nil? ewc))]
+    (l/infod src fn-name "r " r)
+    r))
+
 (l/defnd sql-select-rows-from
 ;;   "Just put a key-val pair in the client to the
 ;;   (oc/edn-xhr { .. :data {:select-rows-from [ .. ]}}) and ... job done!
 ;;   It pops up here just like that!"
   [{:keys [dbase table rows-displayed] :as params}]
-  (l/infod src fn-name "params" params)
-  (l/infod src fn-name "dbase" dbase)
-  (l/infod src fn-name "table" table)
+;;   (l/infod src fn-name "params" params)
   (defdb db (mysql (db-connect dbase)))
-  (let [r (select table (limit (limit-rows-displayed rows-displayed)))]
-    ;; (l/infod src fn-name "r " r)
+  (let [ro (select table (limit (limit-rows-displayed rows-displayed)))
+        rn (into [] ro)
+        r ro
+        ]
+;;     (l/infod src fn-name "ro" ro)
+;;     (l/infod src fn-name "rn" rn)
+;;     (l/infod src fn-name "r" r)
     r))
+
+;; TODO data-with-column-value: dbase parameter should be taken into account
+(l/defnd data-with-column-value
+  [{:keys [dbase table rows-displayed column value] :as edn-params}]
+  (let [entities-wc (entities-with-column {:entities all-entities :column column})]
+    (l/infod src fn-name "entities-wc" entities-wc)
+    (let [r ;;(for [e entities-wc]
+              (into [] (select
+                      table
+                      ;; e
+                      (where {column value})
+                      (limit (limit-rows-displayed rows-displayed))))
+              ;;)
+          ;; TODO put the {:dbase ... :table ... } into result r
+          ;; r (into [] (remove nil? ewc))
+          r (into [] r)
+          ]
+      (l/infod src fn-name "r" r)
+      r)))
+
+;; (data-with-column-value {:dbase "employees" :column :emp_no :value 10001})
 
 (l/defnd sql-show-tables-from
   [{:keys [dbase rows-displayed] :as params}]
@@ -89,36 +125,6 @@
   (pk :from_date)
   (has-many employees)   ; (has-many employees {:fk :emp_no})
   (entity-fields :emp_no :from_date :title :to_date))
-
-(l/defnd entities-with-column
-  [{:keys [entities column] :as params}]
-  (l/infod src fn-name "entities" entities)
-  (let [ewc (for [e entities]
-              (if (u/contains-value? (:fields e) column)
-                (:name e)
-                ;; e
-                nil))
-        r (into [] (remove nil? ewc))]
-    (l/infod src fn-name "r " r)
-    r))
-
-;; TODO data-with-column-value: dbase parameter should be taken into account
-(l/defnd data-with-column-value
-  [{:keys [dbase column value] :as edn-params}]
-  (let [entities-wc (entities-with-column {:entities all-entities :column column})]
-    (l/infod src fn-name "entities-wc" entities-wc)
-    (let [r (for [e entities-wc]
-              (into [] (select e
-                      (where {column value})
-                      (limit 1)))
-              )
-          ;; TODO put the {:dbase ... :table ... } into result r
-          ;; r (into [] (remove nil? ewc))
-          ]
-      (l/infod src fn-name "r" r)
-      r)))
-
-(data-with-column-value {:dbase "employees" :column :emp_no :value 10001})
 
 (def sources [employees departments])
 (def intermediate [dept_emp dept_manager])
