@@ -30,12 +30,11 @@
                  [prismatic/om-tools "0.3.10"]
                  ;; [com.keminglabs/cljx "0.5.0" :exclusions [org.clojure/clojure]]
                  [clj-time "0.8.0"]
+                 [omdev "0.1.3-SNAPSHOT"] ; data inspection & history component
+                 ;; TODO see om-draggable
                  ]
-
   :plugins [[lein-cljsbuild "1.0.4"]
-            [com.keminglabs/cljx "0.5.0"
-             ;;:exclusions [org.clojure/clojure]
-             ]
+            [com.keminglabs/cljx "0.5.0"]
             ]
   :source-paths ["src/clj" "src/cljs"]
   :resource-paths ["resources"]

@@ -11,6 +11,7 @@
             [om-async.logger :as l]
             [om-async.onclick :as oc]
             [om-async.cli-transform :as t]
+            [omdev.core :as omdev] ; data inspection & history component
             )
   (:import [goog.net XhrIo]
            [goog.ui TableSorter])
@@ -242,4 +243,11 @@
 (om/root view app-state  ;; atom containing application state
          {:target (gdom/getElement "dbase0")}) ;; dbase0 is in index.html
 
+;; om/root replaced with omdev/dev-component
+(omdev/dev-component my-component
+    (atom {:text "Instrument!"
+           :list [{:text "Milk"} {:text "Cookies"} {:text "Applesss"}]})
+    {:target (.getElementById js/document "omdev")
+     :tx-listen (fn [tx-data root-cursor]
+                  (println "listener 1: " tx-data))})
 (println "-------------------------------------------------")
