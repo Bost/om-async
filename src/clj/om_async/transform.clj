@@ -192,7 +192,9 @@
 
                 get-rows-displayed [:data kw-dbase :data kw-table :data :rows-displayed]
                 rows-displayed     (get-in xhr-data get-rows-displayed)
-                r {:dbase dbase-name :table table-name :rows-displayed rows-displayed :idx kw-table}
+                ro {:dbase dbase-name :table table-name :rows-displayed rows-displayed :idx kw-table}
+                ;; TODO :row-count should be incorporated into :data
+                r (into ro {:row-count 1234})
                 ]
             ;; (l/infod src fn-name "kw-dbase" kw-dbase)
             ;; (l/infod src fn-name "idx-dbase" idx-dbase)
@@ -210,7 +212,7 @@
         manipulator-fn (kw-fetch-fn manipulator-fns)
         params (get-params-for-fetch edn-params)
         ]
-;;     (l/infod src fn-name "edn-params" edn-params)
+    (l/infod src fn-name "edn-params" edn-params)
 ;;     (l/infod src fn-name "kw-fetch-fn" kw-fetch-fn)
 ;;     (l/infod src fn-name "fetch-fn" fetch-fn)
 ;;     (l/infod src fn-name "manipulator-fn" manipulator-fn)

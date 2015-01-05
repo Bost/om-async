@@ -173,9 +173,8 @@
                                                                                           :exec-fnc? (:exec-fnc? button)
                                                                                           }))}
                                                           (:name button)))
-                                            (str "rows ?; ") ;; TODO use db/row-count to obtain select count(*) ...
-                                            (str "displayed: " rows-displayed)
-                                            )
+                                            ;; TODO use db/row-count to obtain select count(*) ...
+                                            (str "displayed / all: " rows-displayed "/" (:row-count table)))
 
                                   (if displayed
                                     (om/build table-c {:app app
@@ -209,10 +208,10 @@
                                  :data {
                                         :table0 {:name "employees"
                                                  :data {:rows-displayed 2}}
-                                        :table1 {:name "departments"
-                                                 :data {:rows-displayed 2}}
-                                        :table2 {:name "salaries"
-                                                 :data {:rows-displayed 2}}
+;;                                         :table1 {:name "departments"
+;;                                                  :data {:rows-displayed 2}}
+;;                                         :table2 {:name "salaries"
+;;                                                  :data {:rows-displayed 2}}
                                         }}}}
 
 ;;                 {:name :show-tables-from

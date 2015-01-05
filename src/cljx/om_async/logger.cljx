@@ -27,7 +27,7 @@
                   "get-display"
                   "table-sorter"
                   "new-to-old"
-;;                   "view-:on-complete"
+                  "view-:on-complete"
                   ]
    :onclick.cljs [
                   "toggle-table"
@@ -44,9 +44,9 @@
                         ]
    :transform.clj [
 ;;                    "get-params-for-fetch"
-                   "process-data-with-column-value"
-;;                    "fetch"
-                   "request"
+;;                    "process-data-with-column-value"
+                   "fetch"
+;;                    "request"
 
 ;;                    "encode-table"
 ;;                    "process-select-rows-from"

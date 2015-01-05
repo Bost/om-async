@@ -98,7 +98,7 @@
     ;; (om/transact! app ks (fn [] (not active))) ;; change application state; use with get-in
     ;; (om/set-state! owner ks (not active))  ;; change local component state
 
-;;     (toggle-activate @app owner (last ks-data) elem-val (not active-ks-params))
+    ;; (toggle-activate @app owner (last ks-data) elem-val (not active-ks-params))
     (om/set-state! owner :active (not active))
 
     (edn-xhr
