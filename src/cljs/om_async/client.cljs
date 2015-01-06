@@ -2,9 +2,10 @@
 ;;   (:use [jayq.core :only [$ css html document-ready]])
   (:require [goog.dom :as gdom]
             [om.core :as om :include-macros true]
+            [om.dom :as dom :include-macros true]
+            ;; [om.dom :as orig-dom :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
-            [om-tools.dom :as dom :include-macros true]
-            [om.dom :as orig-dom :include-macros true]
+            [om-tools.dom :as otdom :include-macros true]
             ;; this is probably not needed at the moment
             [cljs.core.async :as async :refer [put! chan <!]]
             [om-async.utils :as u]
@@ -49,7 +50,7 @@
                                         :elem-val td-val
                                         })]
                     (l/infod src fn-name "p" p)
-                    (dom/td {:id (str idx-table "-" idx-row "-" column "-" td-val)
+                    (otdom/td {:id (str idx-table "-" idx-row "-" column "-" td-val)
                              :class (if (om/get-state owner :active) "active" nil)
                              :onClick (fn [e] (oc/activate p owner))}
                             td-val)))))
@@ -60,7 +61,7 @@
                 (let [ column nil ]
                   ;;     (println "row: " row)
                   ;;     (println "columns: " columns)
-                  (dom/tr {:class css}
+                  (otdom/tr {:class css}
                           (for [col-kw (keys row)]
                             ;; (println "col-kw: " col-kw)
                             (om/build td {:app app
@@ -77,7 +78,7 @@
   ;;   (println "(keys rows): " (keys rows))
   ;;   (println "idx-table" idx-table)
   (render-state [_ state]
-                (dom/tbody
+                (otdom/tbody
                  (for [row-kw (keys rows)]
                    ;;     (println "row: " row)
                    ;;     (println "idx-row: " idx-row)
@@ -104,12 +105,12 @@
                 ;;                 (println "table-id: " table-id)
                 ;;                 (println "rows: " rows)
                 ;;                 (println "idx-table" idx-table)
-                (dom/table {:id table-id
+                (otdom/table {:id table-id
                             :style (get-display (keyword table-id) owner)}
-                           (dom/thead
-                            (dom/tr
+                           (otdom/thead
+                            (otdom/tr
                              (for [h header]
-                               (dom/th (str h)))))
+                               (otdom/th (str h)))))
                            (om/build render-rows {:app app
                                                   :dbase dbase
                                                   :rows rows
@@ -137,7 +138,7 @@
 (defcomponent table-controller [app owner]
   (render-state [_ state]
                 (let [fn-name "defcomponent-table-controller"]
-                  (dom/div
+                  (otdom/div
                    (let [dbname (get-in app [:dbase])
                          dbdata (get-in app [:data])
                          ]
@@ -155,14 +156,14 @@
                                       {:name "more-rows" :fnc inc :exec-fnc? (fn [cnt-rows] (< cnt-rows 5))}
                                       {:name "less-rows" :fnc dec :exec-fnc? (fn [cnt-rows] (> cnt-rows 0))}]
                              ]
-                         (dom/div {:id (str "div-" (name (:idx table)))}
+                         (otdom/div {:id (str "div-" (name (:idx table)))}
                                   (str tname "-" (name (:idx table)))
-                                  (dom/button {:onClick (fn [e]
+                                  (otdom/button {:onClick (fn [e]
                                                           (oc/toggle-table {:owner owner :idx (:idx @table)}))}
                                               "toggle-table")
-                                  (dom/span {:id (str "span-" (name (:idx table)))}
+                                  (otdom/span {:id (str "span-" (name (:idx table)))}
                                             (for [button buttons]
-                                              (dom/button {:ref "foo"
+                                              (otdom/button {:ref "foo"
                                                            :onClick (fn [e]
                                                                       (oc/displayed-rows app
                                                                                          {:owner owner
@@ -190,9 +191,9 @@
 (defcomponent render-multi [app owner]
   (render-state [_ state]
                 (if (zero? (count app))        ;; TODO get rid of 'if'
-                  (dom/div {:id "fetching"} "Fetching data...")
-                  (dom/div {:id "main"}
-                           (dom/button {:onClick (fn [e] (oc/deactivate-all app owner))} "deactivate-all")
+                  (otdom/div {:id "fetching"} "Fetching data...")
+                  (otdom/div {:id "main"}
+                           (otdom/button {:onClick (fn [e] (oc/deactivate-all app owner))} "deactivate-all")
                            (om/build table-controller app)))))
 
 (defcomponent view
@@ -240,14 +241,13 @@
                 ;; [_ {:keys [err-msg]}]
                 (om/build render-multi app)))
 
-(om/root view app-state  ;; atom containing application state
-         {:target (gdom/getElement "dbase0")}) ;; dbase0 is in index.html
+;; (om/root view app-state  ;; atom containing application state
+;;          {:target (gdom/getElement "dbase0")}) ;; dbase0 is in index.html
 
 ;; om/root replaced with omdev/dev-component
-(omdev/dev-component my-component
-    (atom {:text "Instrument!"
-           :list [{:text "Milk"} {:text "Cookies"} {:text "Applesss"}]})
-    {:target (.getElementById js/document "omdev")
+(omdev/dev-component view app-state
+    {:target (.getElementById js/document "dbase0")
      :tx-listen (fn [tx-data root-cursor]
-                  (println "listener 1: " tx-data))})
+                  ;;(println "listener 1: " tx-data)
+                  )})
 (println "-------------------------------------------------")

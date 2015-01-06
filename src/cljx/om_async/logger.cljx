@@ -27,10 +27,10 @@
                   "get-display"
                   "table-sorter"
                   "new-to-old"
-                  "view-:on-complete"
+;;                   "view-:on-complete"
                   ]
    :onclick.cljs [
-                  "toggle-table"
+;;                   "toggle-table"
 ;;                   "displayed-rows"
 ;;                   "edn-xhr"
 ;;                   "activate-:on-complete"
@@ -45,7 +45,7 @@
    :transform.clj [
 ;;                    "get-params-for-fetch"
 ;;                    "process-data-with-column-value"
-                   "fetch"
+;;                    "fetch"
 ;;                    "request"
 
 ;;                    "encode-table"
