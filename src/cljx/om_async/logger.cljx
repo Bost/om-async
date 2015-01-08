@@ -90,8 +90,6 @@
               "(def " def-name " " (pr-str def-val) ")"))))
     def-val))
 
-;; TODO macro: choose between clojure.pprint/pprint (clj) & println (cljs)
-;; TODO see (JSON/stringify obj nil 2)
 (defn info [src fn-name msg]
 ;;   (println "src" src)
 ;;   (println "fn-name" fn-name)
