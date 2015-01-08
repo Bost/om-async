@@ -175,7 +175,6 @@
                                                                                           :exec-fnc? (:exec-fnc? button)
                                                                                           }))}
                                                           (:name button)))
-                                            ;; TODO use db/row-count to obtain select count(*) ...
                                             (str "displayed / all: " rows-displayed "/" (:row-count table)))
 
                                   (if displayed

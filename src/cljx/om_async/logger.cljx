@@ -43,6 +43,7 @@
 ;;                         "extend-all"
                         ]
    :transform.clj [
+;;                    "m-x"
 ;;                    "get-params-for-fetch"
 ;;                    "process-data-with-column-value"
 ;;                    "fetch"

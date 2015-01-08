@@ -113,35 +113,40 @@
                 :request                    process-request
                 })
 
+;; returns
+;; (def rx
+;;   {:row1 {:emp_no 10002 :birth_date "1964-06-01" :first_name "Bezalel" :last_name "Simmel"  :gender "F" :hire_date "1985-11-20"}
+;;    :row0 {:emp_no 10001 :birth_date "1953-09-01" :first_name "Georgi"  :last_name "Facello" :gender "M" :hire_date "1986-06-25"}})
 (l/defnd m-x [params data]
   ;; (l/infod src fn-name "params" params)
   ;; (l/infod src fn-name "data" data)
   (let [vals-vec (u/convert-to-korks u/kw-row data)
-        rx (first vals-vec)]
+        r (first vals-vec)]
     ;; (l/infod src fn-name "vals-vec" vals-vec)
-    ;; (l/infod src fn-name "rx" rx)
-    rx))
+    ;; (l/infod src fn-name "r" r)
+    r))
 
 (l/defnd m-x-one [params data]
   ;; (l/infod src fn-name "params" params)
   ;; (l/infod src fn-name "data" data)
   (let [vals-vec (u/convert-to-korks u/kw-row data)
-        rx (first vals-vec)]
+        r (first vals-vec)]
     ;; (l/infod src fn-name "vals-vec" vals-vec)
-    ;; (l/infod src fn-name "rx" rx)
-    rx))
+    ;; (l/infod src fn-name "r" r)
+    r))
 
 (l/defnd m-select-rows-from [params data]
   ;; (l/infod src fn-name "params" params)
   ;; (l/infod src fn-name "data" data)
   (let [
-;;         params [{:dbase "employees", :table "departments", :idx 0}])
-;;         data [[{:dept_no "d009", :dept_name "Customer Service"}
-;;                {:dept_no "d005", :dept_name "Development"}]]
+        ;; params [{:dbase "employees", :table "departments", :idx 0}])
+        ;; data [[{:dept_no "d009", :dept_name "Customer Service"}
+        ;;        {:dept_no "d005", :dept_name "Development"}]]
         rlist
         (doall (map (fn [p d]
                       (merge p
-                             {:data (m-x p [d])}))
+                             {:data (m-x p [d])
+                              :row-count (db/row-count (:table p))}))
                     params data))
         rvec (into [] rlist)
         ks (into [] (map u/kw-table (range (count rvec))))
@@ -150,8 +155,7 @@
         ]
     ;; (l/infod src fn-name "rvec" rvec)
     ;; (l/infod src fn-name "r" r)
-    r
-    ))
+    r))
 
 (l/defnd m-show-tables-from [params data]
   ;; (l/infod src fn-name "params" params)
@@ -192,9 +196,7 @@
 
                 get-rows-displayed [:data kw-dbase :data kw-table :data :rows-displayed]
                 rows-displayed     (get-in xhr-data get-rows-displayed)
-                ro {:dbase dbase-name :table table-name :rows-displayed rows-displayed :idx kw-table}
-                ;; TODO :row-count should be incorporated into :data
-                r (into ro {:row-count 1234})
+                r {:dbase dbase-name :table table-name :rows-displayed rows-displayed :idx kw-table}
                 ]
             ;; (l/infod src fn-name "kw-dbase" kw-dbase)
             ;; (l/infod src fn-name "idx-dbase" idx-dbase)
