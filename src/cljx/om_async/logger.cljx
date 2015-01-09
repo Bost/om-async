@@ -30,11 +30,12 @@
 ;;                   "view-:on-complete"
                   ]
    :onclick.cljs [
-;;                   "toggle-table"
+                  "toggle-table"
 ;;                   "displayed-rows"
 ;;                   "edn-xhr"
 ;;                   "activate-:on-complete"
 ;;                   "activate"
+                  "deactivate-all"
                   ]
    :cli_transform.cljs [
 ;;                         "extend-table"

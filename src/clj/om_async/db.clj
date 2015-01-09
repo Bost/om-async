@@ -55,8 +55,12 @@
 
 (declare salaries titles departments dept_emp dept_manager employees salaries titles)
 (def all-entities #{salaries titles departments dept_emp dept_manager employees})
+(def all-dbases
+  #{{:name "employees" :entities all-entities}
+    {:name "some-other-dbase-name" :entities #{}}})
 
 ;; TODO data-with-column-value: dbase parameter should be taken into account
+;; the dbase "eployees" is assumed at the moment - see all-dbases
 (l/defnd data-with-column-value
   [{:keys [dbase table rows-displayed column value] :as edn-params}]
   (let [entities-wc (entities-with-column {:entities all-entities :column column})]

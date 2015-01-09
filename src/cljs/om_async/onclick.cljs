@@ -9,7 +9,7 @@
             [om-async.utils :as u]
             [om-async.logger :as l]
             [om-async.cli-transform :as t]
-;;             ;;[clojure.walk :as walk]
+            [clojure.walk :as w]
             )
   (:import [goog.net XhrIo]
            goog.net.EventType
@@ -117,20 +117,13 @@
                      )
       })))
 
-(defn deactivate-all
-  "Deactivate all active React GUI components"
-  [app owner]
-  (println "TODO implement deactivate-all; use clojure/walk?"))
-
-(defn displayed-elems [elem add-remove-N]
-  nil)
-
 ;; (into {:a 1 :b 2} {:a 2 :c 3})
 (l/defnd toggle-table
   ;; "TODO Should use the displayed-elems fn work a la Display +N / -N tables
   ;;  Hide table component from web page"
   [{:keys [owner idx] :as params}]
   (l/infod src fn-name "params" params)
+  (.log js/console "toggle-table: owner" owner)
   (let [korks [idx :display]
         displayed-state (om/get-state owner korks)
         ;; TODO proper initialisation of table displayed state
@@ -140,6 +133,22 @@
         displayed (if (nil? displayed-state) true displayed-state)]
     (l/infod src fn-name "displayed" displayed)
     (om/set-state! owner korks (not displayed)))))
+
+;; (w/walk #(* 2 %) #(apply + %) [1 2 3 4 5])
+(l/defnd deactivate-all
+  ;; Deactivate all active React GUI components
+  [app owner]
+  (l/infod src fn-name "app" app)
+  (l/infod src fn-name "owner" owner)
+  (.log js/console "deactivate-all: owner" owner)
+  (let [t0 (om/get-node owner)]
+    (l/infod src fn-name "t0" t0)
+    (toggle-table {:owner owner :idx :table0})
+    ;; (println "TODO implement deactivate-all; use clojure/walk?")
+    ))
+
+(defn displayed-elems [elem add-remove-N]
+  nil)
 
 ;; "Display +N / -N rows"; TODO better name for idx (values like :table0)
 (l/defnd displayed-rows
