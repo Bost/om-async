@@ -7,10 +7,10 @@
   :jvm-opts ^:replace ["-Xmx1g" "-server"]
 
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-2371"]
+                 [org.clojure/clojurescript "0.0-2511"]
+                 [org.om/om "0.8.0"]
                  [ring/ring "1.3.2"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
-                 [om "0.8.0-beta5"]
                  [compojure "1.3.1"]
                  [fogus/ring-edn "0.2.0"]
                  ;; [com.datomic/datomic-free "0.9.4699"]
