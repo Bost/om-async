@@ -136,64 +136,75 @@
 
 ;; TODO rename table to extended-table (i.e. table with its table-control buttons)
 (defcomponent table-controller [app owner]
-  (render-state [_ state]
-                (let [fn-name "defcomponent-table-controller"]
-                  (otdom/div
-                   (let [dbname (get-in app [:dbase])
-                         dbdata (get-in app [:data])
-                         ]
-                     (for [table-key (keys dbdata)]
-                       (let [table (table-key dbdata)
-                             tname (get-in table [:table])
-                             full-tname (str dbname "." tname)
-                             data (get-in table [:data])
-                             rows-displayed (count data)
-                             displayed (displayed? owner [(:idx table) :display])
+  (render-state
+   [_ state]
+   (let [fn-name "defcomponent-table-controller"]
+     (let [dbname (get-in app [:dbase])
+           dbdata (get-in app [:data])
+           db-displayed (displayed? owner [dbname :display])
+           ]
+       ;; TODO iterate over all dbases; make a div elem for every dbase
+       ;; this div should have {:class (if (om/get-state owner :active) "active" nil)}
+       (otdom/div
+        {:id (str "div-" dbname "0")} ;; TODO use indexes for :dbase0, :dbase1
+        (str dbname "0")
+        (otdom/button {:onClick (fn [e]
+                                  (oc/toggle-dbase {:owner owner :idx (keyword (str dbname "0"))}))}
+                      (str "toggle-dbase: " dbname "; db-displayed: " db-displayed))
+        (for [table-key (keys dbdata)]
+          (let [table (table-key dbdata)
+                tname (get-in table [:table])
+                full-tname (str dbname "." tname)
+                data (get-in table [:data])
+                rows-displayed (count data)
+                displayed (displayed? owner [(:idx table) :display])
 
-                             header (into [] (keys (:row0 data)))
-                             buttons [
-                                      ;; max 5 rows displayed per table on the client
-                                      {:name "more-rows" :fnc inc :exec-fnc? (fn [cnt-rows] (< cnt-rows 5))}
-                                      {:name "less-rows" :fnc dec :exec-fnc? (fn [cnt-rows] (> cnt-rows 0))}]
-                             ]
-                         (otdom/div {:id (str "div-" (name (:idx table)))}
-                                  (str tname "-" (name (:idx table)))
-                                  (otdom/button {:onClick (fn [e]
-                                                          (oc/toggle-table {:owner owner :idx (:idx @table)}))}
-                                              "toggle-table")
-                                  (otdom/span {:id (str "span-" (name (:idx table)))}
-                                            (for [button buttons]
-                                              (otdom/button {:ref "foo"
-                                                           :onClick (fn [e]
-                                                                      (oc/displayed-rows app
-                                                                                         {:owner owner
-                                                                                          :dbase dbname
-                                                                                          :table (:table @table)
-                                                                                          :rows-displayed rows-displayed
-                                                                                          :idx (:idx @table)
-                                                                                          :fnc (:fnc button)
-                                                                                          :exec-fnc? (:exec-fnc? button)
-                                                                                          }))}
-                                                          (:name button)))
-                                            (str "displayed / all: " rows-displayed "/" (:row-count table)))
+                header (into [] (keys (:row0 data)))
+                buttons [
+                         ;; max 5 rows displayed per table on the client
+                         {:name "more-rows" :fnc inc :exec-fnc? (fn [cnt-rows] (< cnt-rows 5))}
+                         {:name "less-rows" :fnc dec :exec-fnc? (fn [cnt-rows] (> cnt-rows 0))}]
+                ]
+            (otdom/div {:id (str "div-" (name (:idx table)))
+                        ;;:class (if (om/get-state owner :active) "active" nil)
+                        }
+                       (str tname "-" (name (:idx table)))
+                       (otdom/button {:onClick (fn [e]
+                                                 (oc/toggle-table {:owner owner :idx (:idx @table)}))}
+                                     (str "toggle-table: " tname))
+                       (otdom/span {:id (str "span-" (name (:idx table)))}
+                                   (for [button buttons]
+                                     (otdom/button {:ref "foo"
+                                                    :onClick (fn [e]
+                                                               (oc/displayed-rows app
+                                                                                  {:owner owner
+                                                                                   :dbase dbname
+                                                                                   :table (:table @table)
+                                                                                   :rows-displayed rows-displayed
+                                                                                   :idx (:idx @table)
+                                                                                   :fnc (:fnc button)
+                                                                                   :exec-fnc? (:exec-fnc? button)
+                                                                                   }))}
+                                                   (:name button)))
+                                   (str "displayed / all: " rows-displayed "/" (:row-count table)))
 
-                                  (if displayed
-                                    (om/build table-c {:app app
-                                                       :dbase dbname
-                                                       :header header
-                                                       :rows data
-                                                       :table-id (name (:idx table))
-                                                       :idx-table (:idx table)
-                                                       }))
-                                  ))))))))
+                       (if displayed
+                         (om/build table-c {:app app
+                                            :dbase dbname
+                                            :header header
+                                            :rows data
+                                            :table-id (name (:idx table))
+                                            :idx-table (:idx table)
+                                            }))
+                       ))))))))
 
 (defcomponent render-multi [app owner]
   (render-state [_ state]
-                (if (zero? (count app))        ;; TODO get rid of 'if'
-                  (otdom/div {:id "fetching"} "Fetching data...")
-                  (otdom/div {:id "main"}
-                           (otdom/button {:onClick (fn [e] (oc/deactivate-all app owner))} "deactivate-all")
-                           (om/build table-controller app)))))
+                (otdom/div
+                 {:id "react-compoments"}
+                 (if (zero? (count app))        ;; TODO get rid of 'if'
+                   "Fetching data..."
+                   (om/build table-controller app)))))
 
 (defcomponent view
   ;; "data - application state data (a cursor); owner - backing React component
@@ -245,7 +256,7 @@
 
 ;; om/root replaced with omdev/dev-component
 (omdev/dev-component view app-state
-    {:target (.getElementById js/document "dbase0")
+    {:target (.getElementById js/document "om-root")
      :tx-listen (fn [tx-data root-cursor]
                   ;;(println "listener 1: " tx-data)
                   )})

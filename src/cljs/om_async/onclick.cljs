@@ -117,6 +117,12 @@
                      )
       })))
 
+(l/defnd toggle-dbase
+  ;; "TODO Should use the displayed-elems fn work a la Display +N / -N tables
+  ;;  Hide table component from web page"
+  [{:keys [owner idx] :as params}]
+  (l/infod src fn-name "params" params))
+
 ;; (into {:a 1 :b 2} {:a 2 :c 3})
 (l/defnd toggle-table
   ;; "TODO Should use the displayed-elems fn work a la Display +N / -N tables
@@ -135,17 +141,21 @@
     (om/set-state! owner korks (not displayed)))))
 
 ;; (w/walk #(* 2 %) #(apply + %) [1 2 3 4 5])
-(l/defnd deactivate-all
-  ;; Deactivate all active React GUI components
+(l/defnd toggle-react-compoments
+  ;; toggle all React GUI components
   [app owner]
   (l/infod src fn-name "app" app)
   (l/infod src fn-name "owner" owner)
   (.log js/console "deactivate-all: owner" owner)
-  (let [t0 (om/get-node owner)]
-    (l/infod src fn-name "t0" t0)
-    (toggle-table {:owner owner :idx :table0})
-    ;; (println "TODO implement deactivate-all; use clojure/walk?")
-    ))
+  (let [korks [:display]
+        displayed-state (om/get-state owner korks)
+        ;; TODO proper initialisation of table displayed state
+        ]
+    (l/infod src fn-name "displayed-state" displayed-state)
+    (let [
+        displayed (if (nil? displayed-state) true displayed-state)]
+    (l/infod src fn-name "displayed" displayed)
+    (om/set-state! owner korks (not displayed)))))
 
 (defn displayed-elems [elem add-remove-N]
   nil)

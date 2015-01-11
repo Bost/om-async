@@ -31,6 +31,8 @@
                   ]
    :onclick.cljs [
                   "toggle-table"
+                  "toggle-dbase"
+                  "toggle-react-compoments"
 ;;                   "displayed-rows"
 ;;                   "edn-xhr"
 ;;                   "activate-:on-complete"
