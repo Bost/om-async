@@ -146,10 +146,10 @@
        ;; TODO iterate over all dbases; make a div elem for every dbase
        ;; this div should have {:class (if (om/get-state owner :active) "active" nil)}
        (otdom/div
-        {:id (str "div-" dbname "0")} ;; TODO use indexes for :dbase0, :dbase1
-        (str dbname "0")
+        {:id (str "div-" (name :dbase0))} ;; TODO use indexes for :dbase0, :dbase1
+        (str dbname "-" (name :dbase0))
         (otdom/button {:onClick (fn [e]
-                                  (oc/toggle-dbase {:owner owner :idx (keyword (str dbname "0"))}))}
+                                  (oc/toggle-dbase {:owner owner :idx :dbase0}))}
                       (str "toggle-dbase: " dbname "; db-displayed: " db-displayed))
         (for [table-key (keys dbdata)]
           (let [table (table-key dbdata)

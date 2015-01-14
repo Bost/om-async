@@ -121,7 +121,16 @@
   ;; "TODO Should use the displayed-elems fn work a la Display +N / -N tables
   ;;  Hide table component from web page"
   [{:keys [owner idx] :as params}]
-  (l/infod src fn-name "params" params))
+  (l/infod src fn-name "params" params)
+  (let [korks [idx :display]
+        displayed-state (om/get-state owner korks)
+        ;; TODO proper initialisation of table displayed state
+        ]
+    (l/infod src fn-name "displayed-state" displayed-state)
+    (let [
+        displayed (if (nil? displayed-state) true displayed-state)]
+    (l/infod src fn-name "displayed" displayed)
+    (om/set-state! owner korks (not displayed)))))
 
 ;; (into {:a 1 :b 2} {:a 2 :c 3})
 (l/defnd toggle-table
@@ -129,7 +138,6 @@
   ;;  Hide table component from web page"
   [{:keys [owner idx] :as params}]
   (l/infod src fn-name "params" params)
-  (.log js/console "toggle-table: owner" owner)
   (let [korks [idx :display]
         displayed-state (om/get-state owner korks)
         ;; TODO proper initialisation of table displayed state
