@@ -142,7 +142,7 @@
      (let [dbname (get-in app [:dbase])
            dbdata (get-in app [:data])
            idx-dbase (get-in app [:idx])
-           db-displayed (displayed? owner [dbname :display])
+           block-displayed (displayed? owner [dbname :display])
            ]
        ;; TODO iterate over all dbases; make a div elem for every dbase
        ;; this div should have {:class (if (om/get-state owner :active) "active" nil)}
@@ -151,7 +151,7 @@
         (str dbname "-" (name idx-dbase))
         (otdom/button {:onClick (fn [e]
                                   (oc/toggle-dbase {:owner owner :idx idx-dbase}))}
-                      (str "toggle-dbase: " dbname "; db-displayed: " db-displayed))
+                      (str "toggle-block block-displayed: " block-displayed))
         (for [table-key (keys dbdata)]
           (let [table (table-key dbdata)
                 tname (get-in table [:table])

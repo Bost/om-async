@@ -50,9 +50,10 @@
         indexed-tables (for [[i d] (map vector indexes all-tables-data)]
                          {i d})
 
-        ;; TODO :dbase "employees" :idx :dbase0 must be done programatically
-        dbase-data {:dbase "employees"
-                    :idx :dbase0
+        ;; TODO tables displayed on the web page are draggable;
+        ;;      the user should be able to group them in blocks - these blocks should be toggable
+        dbase-data {:dbase (:dbase (first (apply concat all-xtable))) ;; => "employees"
+                    :idx :dbase0 ;; TODO :idx :dbase0 must be done programatically
                     :data (into {}
                                 (apply concat indexed-tables))}
         ]
