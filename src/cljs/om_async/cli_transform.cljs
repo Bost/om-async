@@ -50,7 +50,9 @@
         indexed-tables (for [[i d] (map vector indexes all-tables-data)]
                          {i d})
 
+        ;; TODO :dbase "employees" :idx :dbase0 must be done programatically
         dbase-data {:dbase "employees"
+                    :idx :dbase0
                     :data (into {}
                                 (apply concat indexed-tables))}
         ]
