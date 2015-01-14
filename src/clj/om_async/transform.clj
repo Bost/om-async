@@ -117,7 +117,7 @@
 ;; (def rx
 ;;   {:row1 {:emp_no 10002 :birth_date "1964-06-01" :first_name "Bezalel" :last_name "Simmel"  :gender "F" :hire_date "1985-11-20"}
 ;;    :row0 {:emp_no 10001 :birth_date "1953-09-01" :first_name "Georgi"  :last_name "Facello" :gender "M" :hire_date "1986-06-25"}})
-(l/defnd m-x [params data]
+(l/defnd manipulate-rows [params data]
   ;; (l/infod src fn-name "params" params)
   ;; (l/infod src fn-name "data" data)
   (let [vals-vec (u/convert-to-korks u/kw-row data)
@@ -145,7 +145,7 @@
         rlist
         (doall (map (fn [p d]
                       (merge p
-                             {:data (m-x p [d])
+                             {:data (manipulate-rows p [d])
                               :row-count (db/row-count (:table p))}))
                     params data))
         rvec (into [] rlist)

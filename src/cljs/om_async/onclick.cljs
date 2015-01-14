@@ -154,7 +154,6 @@
   [app owner]
   (l/infod src fn-name "app" app)
   (l/infod src fn-name "owner" owner)
-  (.log js/console "deactivate-all: owner" owner)
   (let [korks [:display]
         displayed-state (om/get-state owner korks)
         ;; TODO proper initialisation of table displayed state

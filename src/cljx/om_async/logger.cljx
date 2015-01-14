@@ -16,7 +16,6 @@
 ;;                   "init"
 ;;                   "color"
 ;;                   "tr"
-;;                   "view-onComplete"
 ;;                   "onClick-onComplete"
 ;;                   "onClick"
 ;;                   "defcomponent-td"
@@ -37,7 +36,6 @@
 ;;                   "edn-xhr"
 ;;                   "activate-:on-complete"
 ;;                   "activate"
-                  "deactivate-all"
                   ]
    :cli_transform.cljs [
 ;;                         "extend-table"
@@ -107,8 +105,6 @@
 (defn warn [src fn-name msg]
   (println
    (str "WARN " src "; " fn-name "; " msg)))
-
-(keyword "client.cljs")
 
 ;; (defn error [src fn-name msg]
 ;;   (let [separator "========="]

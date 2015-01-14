@@ -39,10 +39,10 @@
     (l/infod src fn-name "r" r)
     r))
 
-(l/defnd extend-all [tfull]
-  (l/infod src fn-name "tfull" tfull)
-  (let [all-xtable (for [k (keys tfull)]
-                     (xtable tfull k))
+(l/defnd extend-all [response]
+  (l/infod src fn-name "response" response)
+  (let [all-xtable (for [k (keys response)]
+                     (xtable response k))
         all-tables-data (for [t (apply concat all-xtable)]
                           (dissoc t :dbase))
         indexes (for [d all-tables-data]
@@ -55,6 +55,7 @@
                                 (apply concat indexed-tables))}
         ]
     (l/infod src fn-name "all-xtable" all-xtable)
+    (l/infod src fn-name "all-tables-data" all-tables-data)
     (l/infod src fn-name "dbase-data" dbase-data)
     dbase-data))
 
