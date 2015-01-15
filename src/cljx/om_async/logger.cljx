@@ -44,6 +44,7 @@
 ;;                         "extend-all"
                         ]
    :transform.clj [
+                   "date-to-string"
 ;;                    "m-x"
 ;;                    "get-params-for-fetch"
 ;;                    "process-data-with-column-value"

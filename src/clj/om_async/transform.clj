@@ -12,14 +12,19 @@
 
 (def src "transform.clj")
 
+;; TODO convert only dates to strings
+(l/defnd date-to-string [v]
+  (l/info src fn-name (str "(type v): " (type v)))
+  (println (str "(type v): " (type v)))
+  ;;(if (instance? java.util.Date v)
+    (into [] (map str
+                  (into [] (vals v))))
+    ;; v)
+  )
+
 (l/defnd table-vals [data]
   ;; (l/infod src fn-name "data" data)
-  (let [result
-        (map (fn [v]
-               ;; TODO convert only dates to strings
-               (into [] (map str
-                             (into [] (vals v)))))
-             data)]
+  (let [result (map date-to-string data)]
     ;; (l/infod src fn-name "result" result)
     result))
 
@@ -33,6 +38,7 @@
 
 (def built-in-formatter (tf/formatters :mysql))
 
+;; Conversion between java.util.Date and clj-time
 (l/defnd convert-val [v]
   ;; (l/infod src fn-name "v" v)
   (if (instance? java.util.Date v)
