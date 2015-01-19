@@ -45,7 +45,8 @@
                         ]
    :transform.clj [
                    "date-to-string"
-;;                    "m-x"
+                   "table-vals"
+;;                    "manipulate-rows"
 ;;                    "get-params-for-fetch"
 ;;                    "process-data-with-column-value"
 ;;                    "fetch"
