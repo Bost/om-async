@@ -23,15 +23,15 @@
   )
 
 (l/defnd table-vals [data]
-  ;; (l/infod src fn-name "data" data)
+  (l/infod src fn-name "data" data)
   (let [result (map date-to-string data)]
     ;; (l/infod src fn-name "result" result)
     result))
 
-(defn nth-from [all-vals idx]
+(l/defnd nth-from [all-vals idx]
   (map #(nth % idx) all-vals))
 
-(defn encode-entity [idx prefix name vals]
+(l/defnd encode-entity [idx prefix name vals]
   {(u/kw-prefix prefix idx)
    ;; TODO don't transfer a vector containing a single name
    {:name [name] :vals (into [] vals)}})
@@ -45,7 +45,7 @@
     (tf/unparse built-in-formatter (tc/from-date v))
     v))
 
-(defn convert-hashmap [m]
+(l/defnd convert-hashmap [m]
   "Apply convert-val on each value of hash-map m"
   (reduce-kv (fn [m k v]
                (assoc m k (convert-val v))) {} m))
@@ -79,7 +79,7 @@
     r))
 
 ;; TODO paredit grow right should jump over comment
-(defn process-show-tables-from [obj]
+(l/defnd process-show-tables-from [obj]
   (process-sql db/sql-show-tables-from obj))
 
 (l/defnd process-show-tables-with-data-from
@@ -173,7 +173,7 @@
   ;; (l/infod src fn-name "data" data)
   (m-select-rows-from params data))
 
-(defn m-request [p]
+(l/defnd m-request [p]
   (into [] p))
 
 (def manipulator-fns {:select-rows-from            m-select-rows-from
