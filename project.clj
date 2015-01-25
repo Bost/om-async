@@ -1,4 +1,5 @@
 (defproject om-async "0.1.0-SNAPSHOT"
+  ;; TODO use core.typed - optional type checking
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -8,7 +9,7 @@
 
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/clojurescript "0.0-2511"]
-                 [org.om/om "0.8.0"]
+                 [org.om/om "0.8.1"]
                  [ring/ring "1.3.2"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [compojure "1.3.1"]
