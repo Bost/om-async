@@ -78,7 +78,7 @@
     ;; (l/infod src fn-name "r" r)
     r))
 
-;; TODO paredit grow right should jump over comment
+;; TODO LightTable: paredit grow right should jump over comment
 (l/defnd process-show-tables-from [obj]
   (process-sql db/sql-show-tables-from obj))
 
@@ -212,25 +212,6 @@
             r)
           )))
 
-(l/defnd fetch [edn-params]
-  ;; (l/infod src fn-name "new-edn-params" new-edn-params)
-  (let [;; TODO get the content of N-th key? this could be done better
-        kw-fetch-fn (:name edn-params)
-        fetch-fn (kw-fetch-fn fetch-fns)
-        manipulator-fn (kw-fetch-fn manipulator-fns)
-        params (get-params-for-fetch edn-params)
-        ]
-    (l/infod src fn-name "edn-params" edn-params)
-;;     (l/infod src fn-name "kw-fetch-fn" kw-fetch-fn)
-;;     (l/infod src fn-name "fetch-fn" fetch-fn)
-;;     (l/infod src fn-name "manipulator-fn" manipulator-fn)
-    (l/infod src fn-name "params" params)
-    (let [data (into [] (map fetch-fn params))]
-      (l/infod src fn-name "data" data)
-      (let [r (manipulator-fn params data)]
-        (l/infod src fn-name "r" r)
-        r))))
-
 (l/defnd get-params-for-select
   [{:keys [dbase entities column value] :as params}]
   (let [hm (for [[i e] (map-indexed vector entities)]
@@ -239,22 +220,42 @@
     (l/infod src fn-name "r" r)
     r))
 
-;; TODO merge functions request and fetch
+(l/defnd get-data
+  [fetch-fn manipulator-fn params]
+  ;; (l/infod src fn-name "fetch-fn" fetch-fn)
+  ;; (l/infod src fn-name "manipulator-fn" manipulator-fn)
+  (l/infod src fn-name "params" params)
+  (let [data (into [] (map fetch-fn params))]
+    (l/infod src fn-name "data" data)
+    (let [r (manipulator-fn params data)]
+      (l/infod src fn-name "r" r)
+      r)))
+
 (l/defnd request
   [{:keys [dbase column value] :as edn-params}]
   (l/infod src fn-name "edn-params" edn-params)
   (let [
-        entities-wc (db/entities-with-column {:entities db/all-entities :column column})
-        params (get-params-for-select (into edn-params {:entities entities-wc}))
+        entities-wc    (db/entities-with-column {:entities db/all-entities :column column})
 
         fetch-fn       process-data-with-column-value
         manipulator-fn m-select-rows-from
+        params         (get-params-for-select (into edn-params {:entities entities-wc}))
         ]
-    (l/infod src fn-name "params" params)
-    (let [data (into [] (map fetch-fn params))]
-      (l/infod src fn-name "data" data)
-      (let [r (manipulator-fn params data)]
-        r))))
+    (let [r (get-data fetch-fn manipulator-fn params)]
+      r)))
+
+(l/defnd fetch
+  [edn-params]
+  ;; (l/infod src fn-name "new-edn-params" new-edn-params)
+  (let [;; TODO get the content of N-th key? this could be done better
+        kw-fetch-fn (:name edn-params)
+
+        fetch-fn       (kw-fetch-fn fetch-fns)
+        manipulator-fn (kw-fetch-fn manipulator-fns)
+        params         (get-params-for-fetch edn-params)
+        ]
+    (let [r (get-data fetch-fn manipulator-fn params)]
+      r)))
 
 ;; clean the REPL - works only in clojure not in clojurescript
 ;; (map #(ns-unmap *ns* %) (keys (ns-interns *ns*)))
