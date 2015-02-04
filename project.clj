@@ -8,8 +8,11 @@
   :jvm-opts ^:replace ["-Xmx1g" "-server"]
 
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-2511"]
-                 [org.om/om "0.8.1"]
+                 [org.clojure/clojurescript "0.0-2760"]
+                 [org.omcljs/om "0.8.8"
+                  ;; activate following in order to use use React with Add-Ons
+                  ;; :exclusions [cljsjs/react]
+                  ]
                  [ring/ring "1.3.2"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [compojure "1.3.1"]
