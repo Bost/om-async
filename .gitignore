@@ -10,6 +10,7 @@ pom.xml
 .nrepl-port
 resources/public/js/out
 resources/public/js/main.js
+figwheel_server.log
 
 # utils.clj and utils.cljs are generated from utils.cljx
 utils.clj

@@ -13,6 +13,7 @@
             [om-async.onclick :as oc]
             [om-async.cli-transform :as t]
             [omdev.core :as omdev] ; data inspection & history component
+            [figwheel.client :as fw]
             )
   (:import [goog.net XhrIo]
            [goog.ui TableSorter])
@@ -151,7 +152,7 @@
         (str dbname "-" (name idx-dbase))
         (otdom/button {:onClick (fn [e]
                                   (oc/toggle-dbase {:owner owner :idx idx-dbase}))}
-                      (str "toggle-block block-displayed: " block-displayed))
+                      (str "toggle-block block-displayed:-" block-displayed))
         (for [table-key (keys dbdata)]
           (let [table (table-key dbdata)
                 tname (get-in table [:table])
@@ -261,4 +262,26 @@
      :tx-listen (fn [tx-data root-cursor]
                   ;;(println "listener 1: " tx-data)
                   )})
-(println "-------------------------------------------------")
+(println "------------------------------------------------")
+
+(fw/start {
+  ;; configure a websocket url if yor are using your own server
+  ;; :websocket-url "ws://localhost:3449/figwheel-ws"
+
+  ;; optional callback
+  :on-jsload (fn [] (print "reloaded "))
+
+  ;; The heads up display is enabled by default
+  ;; to disable it:
+  ;; :heads-up-display false
+
+  ;; when the compiler emits warnings figwheel
+  ;; blocks the loading of files.
+  ;; To disable this behavior:
+  ;; :load-warninged-code true
+
+  ;; if figwheel is watching more than one build
+  ;; it can be helpful to specify a build id for
+  ;; the client to focus on
+  ;; :build-id "example"
+})

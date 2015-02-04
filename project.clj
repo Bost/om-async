@@ -36,8 +36,12 @@
                  [clj-time "0.8.0"]
                  [omdev "0.1.3-SNAPSHOT"] ; data inspection & history component
                  ;; TODO see om-draggable
+
+                 [figwheel "0.2.2-SNAPSHOT"] ;; build your cljs code and hot load it into the browser
                  ]
   :plugins [[lein-cljsbuild "1.0.4"]
+            ;; [lein-ring "0.9.1"]
+            [lein-figwheel "0.2.2-SNAPSHOT"]
             [com.keminglabs/cljx "0.5.0"]
             ]
   :source-paths ["src/clj" "src/cljs"]
@@ -61,4 +65,38 @@
                 ;; can not use :optimizations :whitespace
                 ;; otherwise the build process complains
                 :optimizations :none
-                :source-map true}}]})
+                :source-map true}}]}
+
+  :figwheel {
+             :http-server-root "public" ;; this will be in resources/
+             ;; :server-port is ignored - see server.clj (defonce server ...)
+             :server-port 8080                   ;; default is 3449
+
+             ;; CSS reloading (optional)
+             ;; :css-dirs has no default value
+             ;; if :css-dirs is set figwheel will detect css file changes and
+             ;; send them to the browser
+             :css-dirs ["resources/public/css"]
+
+             ;; Server Ring Handler (optional)
+             ;; if you want to embed a ring handler into the figwheel http-kit
+             ;; server
+             ;; :ring-handler om-async.server/handler
+
+             ;; To be able to open files in your editor from the heads up display
+             ;; you will need to put a script on your path.
+             ;; that script will have to take a file path and a line number
+             ;; ie. in  ~/bin/myfile-opener
+             ;; #! /bin/sh
+             ;; emacsclient -n +$2 $1
+             ;;
+             :open-file-command "myfile-opener"  ;; TODO fiwgwheel: myfile-opener
+
+             ;; if you want to disable the REPL
+             ;; :repl false
+
+             ;; to configure a different figwheel logfile path
+             ;; :server-logfile "tmp/logs/figwheel-logfile.log"
+
+             }
+  )
