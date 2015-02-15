@@ -55,7 +55,11 @@
       wrap-edn-params))
 
 (defonce server
-  (run-jetty #'app {:port 8080 :join? false}))
+  (fn [request]
+    (run-jetty #'app {:port 8080 :join? false})))
+
+;; (defn server [request]
+;;   (run-jetty #'app {:port 8080 :join? false}))
 
 ;; clean the REPL - works only in clojure not in clojurescript
 ;; (map #(ns-unmap *ns* %) (keys (ns-interns *ns*)))
