@@ -1,17 +1,27 @@
+### 1. Compile, Launch etc.:
+
+#### 1.1. With LightTable:
+
 ``` bash
 lein cljx auto
 lein cljsbuild auto dev
 ```
 
-In LightTable:
-- Evaluate
+In LightTable: start http server by evaluating:
+  server.clj
+
   logger.clj
   db.clj
   transform.clj
   client.cljs
 
-- Evaluate
-  server.clj
-to start the sever!!!
+#### 1.2. Without LightTable:
 
-- Open Browser Tab, goto http://localhost:8080/
+``` bash
+lein cljx auto
+lein cljsbuild auto dev
+lein ring server
+```
+
+
+### 2. In browser / lighttable browser tab: http://localhost:8080/

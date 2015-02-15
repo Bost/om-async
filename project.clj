@@ -9,10 +9,14 @@
 
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/clojurescript "0.0-2760"]
-                 [org.omcljs/om "0.8.8"
-                  ;; activate following in order to use use React with Add-Ons
-                  ;; :exclusions [cljsjs/react]
-                  ]
+
+                 ;; use React without Add-Ons
+                 [org.omcljs/om "0.8.8"]
+
+                 ;; use React with Add-Ons
+                 ;; [org.omcljs/om "0.8.8" :exclusions [cljsjs/react]]
+                 ;; [cljsjs/react-with-addons "0.12.2-4"]
+
                  [ring/ring "1.3.2"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [compojure "1.3.1"]
@@ -37,12 +41,14 @@
                  [omdev "0.1.3-SNAPSHOT"] ; data inspection & history component
                  ;; TODO see om-draggable
 
-                 [figwheel "0.2.2-SNAPSHOT"] ;; build your cljs code and hot load it into the browser
+                 ;; [com.cemerick/piggieback "0.1.5"]
+                 ;; [figwheel "0.2.3-SNAPSHOT"] ;; build your cljs code and hot load it into the browser
                  ]
   :plugins [[lein-cljsbuild "1.0.4"]
-            ;; [lein-ring "0.9.1"]
-            [lein-figwheel "0.2.2-SNAPSHOT"]
+            [lein-ring "0.9.1"]
+            ;; [lein-figwheel "0.2.3-SNAPSHOT"]
             [com.keminglabs/cljx "0.5.0"]
+            [cider/cider-nrepl "0.9.0-SNAPSHOT"]
             ]
   :source-paths ["src/clj" "src/cljs"]
   :resource-paths ["resources"]
@@ -55,6 +61,8 @@
                    :output-path "src/cljs"
                    :rules :cljs}]}
 
+  ;; :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+
   :cljsbuild {
     :builds [{:id "dev"
               :source-paths ["src/clj" "src/cljs"]
@@ -62,41 +70,44 @@
                 ;; :output-to default: target/cljsbuild-main.js
                 :output-to "resources/public/js/main.js"
                 :output-dir "resources/public/js/out"
+                :externs ["resources/public/js/jquery-2.1.1.js"]
                 ;; can not use :optimizations :whitespace
                 ;; otherwise the build process complains
                 :optimizations :none
                 :source-map true}}]}
 
-  :figwheel {
-             :http-server-root "public" ;; this will be in resources/
-             ;; :server-port is ignored - see server.clj (defonce server ...)
-             :server-port 8080                   ;; default is 3449
+  :ring {:handler om-async.server/server}
 
-             ;; CSS reloading (optional)
-             ;; :css-dirs has no default value
-             ;; if :css-dirs is set figwheel will detect css file changes and
-             ;; send them to the browser
-             :css-dirs ["resources/public/css"]
+  ;; :figwheel {
+  ;;            :http-server-root "public" ;; this will be in resources/
+  ;;            ;; :server-port is ignored - see server.clj (defonce server ...)
+  ;;            :server-port 8080                   ;; default is 3449
 
-             ;; Server Ring Handler (optional)
-             ;; if you want to embed a ring handler into the figwheel http-kit
-             ;; server
-             ;; :ring-handler om-async.server/handler
+  ;;            ;; CSS reloading (optional)
+  ;;            ;; :css-dirs has no default value
+  ;;            ;; if :css-dirs is set figwheel will detect css file changes and
+  ;;            ;; send them to the browser
+  ;;            :css-dirs ["resources/public/css"]
 
-             ;; To be able to open files in your editor from the heads up display
-             ;; you will need to put a script on your path.
-             ;; that script will have to take a file path and a line number
-             ;; ie. in  ~/bin/myfile-opener
-             ;; #! /bin/sh
-             ;; emacsclient -n +$2 $1
-             ;;
-             :open-file-command "myfile-opener"  ;; TODO fiwgwheel: myfile-opener
+  ;;            ;; Server Ring Handler (optional)
+  ;;            ;; if you want to embed a ring handler into the figwheel http-kit
+  ;;            ;; server
+  ;;            ;; :ring-handler om-async.server/handler
 
-             ;; if you want to disable the REPL
-             ;; :repl false
+  ;;            ;; To be able to open files in your editor from the heads up display
+  ;;            ;; you will need to put a script on your path.
+  ;;            ;; that script will have to take a file path and a line number
+  ;;            ;; ie. in  ~/bin/myfile-opener
+  ;;            ;; #! /bin/sh
+  ;;            ;; emacsclient -n +$2 $1
+  ;;            ;;
+  ;;            :open-file-command "myfile-opener"  ;; TODO fiwgwheel: myfile-opener
 
-             ;; to configure a different figwheel logfile path
-             ;; :server-logfile "tmp/logs/figwheel-logfile.log"
+  ;;            ;; if you want to disable the REPL
+  ;;            ;; :repl false
 
-             }
+  ;;            ;; to configure a different figwheel logfile path
+  ;;            ;; :server-logfile "tmp/logs/figwheel-logfile.log"
+
+  ;;            }
   )
