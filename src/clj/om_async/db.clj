@@ -152,9 +152,9 @@
             (where {(keyword col) row-val})
             (limit 2))))
 
-(select dept_emp
-        (where {:dept_no "d006"})
-        (limit 2))
+;; (select dept_emp
+;;         (where {:dept_no "d006"})
+;;         (limit 2))
 
 (s {:dbaseN0 "employees", :tableN0 "departments",
     :colN0 "dept_name", :rowV0 "Development"} 0)
