@@ -90,16 +90,18 @@
               )))))))
 
 (l/defnd activate
-  [{:keys [app dbase ks-data column elem-val] :as params} owner]
+  [{:keys [app dbase ks-data idx-table idx-row column elem-val] :as params} owner]
   ;; TODO (js* "debugger;") seems to cause LightTable freeze
-  (let [active (om/get-state owner :active)]
+  ;; (println "onclick")
+  ;; (l/infod src fn-name "params: " params)
+  (let [active
+        ;; (om/get-state owner :active)
+        (get-in app (conj ks-data :active))
+        ]
     ;; we're not allowed to use cursors outside of the render phase as
     ;; this is almost certainly a concurrency bug!
-    ;; (om/transact! app ks (fn [] (not active))) ;; change application state; use with get-in
+    ;; (om/transact! app ks (fn [] (not active))) ;; change application state; use with (get-in app ks)
     ;; (om/set-state! owner ks (not active))  ;; change local component state
-
-    ;; (toggle-activate @app owner (last ks-data) elem-val (not active-ks-params))
-    (om/set-state! owner :active (not active))
 
     (edn-xhr
      {:method :put
@@ -110,12 +112,25 @@
                      ;; change application state; use with get-in
                      (om/transact! app [] (fn [_]
                                             ;; (println "transacting...")
+                                            ;; (.log js/console (pr-str "response" response))
                                             (let [fn-name "activate-:on-complete"]
                                               (l/infod src fn-name "response" response)
                                               ;; TODO server.clj add {:status :ok} to response; onclick.cljs extract {:status :ok} from response
-                                              (t/extend-all response))))
-                     )
-      })))
+                                              (let [re (t/extend-all response)
+                                                    x (into [:data idx-table] ks-data)
+                                                    y (into x [:active])
+                                                    r (assoc-in re x {:active (not active)})
+                                                    ]
+                                                ;; TODO find all occurences of a given val and call the assoc-in
+                                                (.log js/console (pr-str "ks-data: " ks-data))
+                                                (.log js/console (pr-str "idx-table: " idx-table))
+                                                (.log js/console (pr-str "(get-in re " x "): " (get-in re x)))
+                                                (.log js/console (pr-str "(get-in r " x "): " (get-in r x)))
+                                                (.log js/console (pr-str "(get-in r " y "): " (get-in r y)))
+                                                r
+                                                ))))
+                     )})
+    ))
 
 (l/defnd toggle-dbase
   ;; "TODO Should use the displayed-elems fn work a la Display +N / -N tables

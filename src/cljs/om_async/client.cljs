@@ -27,6 +27,7 @@
 (enable-console-print!)
 
 ;; The 'client dbase'. swap! or reset! on app-state trigger root re-rendering
+;; local vs. application state - see: http://stackoverflow.com/a/22914077
 (def app-state (atom {}))
 
 ;; TODO consider using take-while/drop-while to increase performance
@@ -36,6 +37,12 @@
 
 (defn table-filter?  [elem-idx] true) ;; (= elem-idx 0) ;; true = no elem is filtered out
 ;; (defn table-filter?  [elem-idx] (= elem-idx 0)) ;; true = no elem is filtered out
+
+(defn my-get-in [app ks]
+  ;; (.log js/console (pr-str "ks: " ks))
+  (let [r (get-in app ks)]
+    ;; (.log js/console (pr-str "r: " r))
+    r))
 
 (defcomponent td
   [{:keys [app dbase cell idx-table idx-row column] :as params} owner]
@@ -53,9 +60,13 @@
                                         })]
                     (l/infod src fn-name "p" p)
                     (otdom/td {:id (str idx-table "-" idx-row "-" column "-" td-val)
-                             :class (if (om/get-state owner :active) "active" nil)
-                             :onClick (fn [e] (oc/activate p owner))}
-                            td-val)))))
+                               :class (if (my-get-in app
+                                                     (into
+                                                      (into [:data idx-table] [:data idx-row column])
+                                                      [:active]))
+                                        "active" nil)
+                               :onClick (fn [e] (oc/activate p owner))}
+                              td-val)))))
 
 (defcomponent tr
   [{:keys [app dbase css row columns idx-table idx-row] :as params} owner]
@@ -153,7 +164,7 @@
         (str dbname "-" (name idx-dbase))
         (otdom/button {:onClick (fn [e]
                                   (oc/toggle-dbase {:owner owner :idx idx-dbase}))}
-                      (str "UHU toggle-block block-displayed:-" block-displayed))
+                      (str "toggle-block block-displayed:-" block-displayed))
         (for [table-key (keys dbdata)]
           (let [table (table-key dbdata)
                 tname (get-in table [:table])
