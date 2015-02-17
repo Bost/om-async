@@ -14,7 +14,7 @@
             [om-async.cli-transform :as t]
             [omdev.core :as omdev] ; data inspection & history component
             ;; [figwheel.client :as fw]
-            ;; [clojure.browser.repl :as repl]
+            [clojure.browser.repl :as repl]
             )
   (:import [goog.net XhrIo]
            [goog.ui TableSorter])
@@ -153,7 +153,7 @@
         (str dbname "-" (name idx-dbase))
         (otdom/button {:onClick (fn [e]
                                   (oc/toggle-dbase {:owner owner :idx idx-dbase}))}
-                      (str "toggle-block block-displayed:-" block-displayed))
+                      (str "UHU toggle-block block-displayed:-" block-displayed))
         (for [table-key (keys dbdata)]
           (let [table (table-key dbdata)
                 tname (get-in table [:table])
@@ -264,7 +264,7 @@
                   ;;(println "listener 1: " tx-data)
                   )})
 
-;; (repl/connect "http://localhost:9000/repl")
+(repl/connect "http://localhost:9000/repl")
 
 (println "------------------------------------------------")
 

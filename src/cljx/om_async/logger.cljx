@@ -2,6 +2,7 @@
   ;; TODO find a logger for server (clj) and client (cljs)
   (:require [om-async.utils :as u]
             ;; [taoensso.timbre :as logger]
+            [onelog.core :as log]
             )
 ;;   (:use [clojure.walk :as walk])
    )
@@ -89,9 +90,11 @@
   (let [fns ((keyword src) files)]
     (if fns
       (if (u/in? fns fn-name)
-        (println
-         (str src "; " fn-name "; "
-              "(def " def-name " " (pr-str def-val) ")"))))
+        (do
+          (log/info+ "huh")
+          (println
+           (str src "; " fn-name "; "
+                "(def " def-name " " (pr-str def-val) ")")))))
     def-val))
 
 (defn info [src fn-name msg]

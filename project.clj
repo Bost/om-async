@@ -8,13 +8,14 @@
   :jvm-opts ^:replace ["-Xmx1g" "-server"]
 
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-2760"]
+                 [org.clojure/clojurescript "0.0-2850"]
 
                  ;; use React without Add-Ons
                  [org.omcljs/om "0.8.8"]
 
                  ;; use React with Add-Ons
                  ;; [org.omcljs/om "0.8.8" :exclusions [cljsjs/react]]
+                 ;; use React with Add-Ons
                  ;; [cljsjs/react-with-addons "0.12.2-4"]
 
                  [ring/ring "1.3.2"]
@@ -35,13 +36,15 @@
 
                  ;; [org.clojure/tools.logging "0.3.0"]
                  ;; [org.slf4j/slf4j-log4j12 "1.7.7"]
+                 [onelog "0.4.5"]  ;; used also by ring
+
                  [prismatic/om-tools "0.3.10"]
                  ;; [com.keminglabs/cljx "0.5.0" :exclusions [org.clojure/clojure]]
                  [clj-time "0.8.0"]
                  [omdev "0.1.3-SNAPSHOT"] ; data inspection & history component
                  ;; TODO see om-draggable
 
-                 ;; [com.cemerick/piggieback "0.1.5"]
+                 [com.cemerick/piggieback "0.1.5"]
                  ;; [figwheel "0.2.3-SNAPSHOT"] ;; build your cljs code and hot load it into the browser
                  ]
   :plugins [[lein-cljsbuild "1.0.4"]
@@ -61,7 +64,7 @@
                    :output-path "src/cljs"
                    :rules :cljs}]}
 
-  ;; :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+  :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
   :cljsbuild {
     :builds [{:id "dev"
@@ -76,7 +79,9 @@
                 :optimizations :none
                 :source-map true}}]}
 
-  :ring {:handler om-async.server/server}
+  :ring {:handler om-async.server/app
+         ;; :port 3000
+         :nrepl {:start? true :port 4500}}
 
   ;; :figwheel {
   ;;            :http-server-root "public" ;; this will be in resources/

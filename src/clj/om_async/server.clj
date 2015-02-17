@@ -8,6 +8,7 @@
             ;; [datomic.api :as d]
             [om-async.transform :as trans]
             [om-async.logger :as l]
+            [onelog.core :as log]
             [clojure.pprint :as pp] ; for debug purposes
             ))
 
@@ -21,7 +22,7 @@
    :headers {"Content-Type" "application/edn"}
    :body (pr-str data)})
 
-(defroutes routes
+(defroutes app-routes
   (GET "/"
        []
        (file-response "public/html/index.html" {:root "resources"}))
@@ -51,15 +52,18 @@
   (route/files "/" {:root "resources/public"}))
 
 (def app
-  (-> routes
-      wrap-edn-params))
+  (wrap-edn-params app-routes))
 
-(defonce server
-  (fn [request]
-    (run-jetty #'app {:port 8080 :join? false})))
-
-;; (defn server [request]
-;;   (run-jetty #'app {:port 8080 :join? false}))
+;; comment this out if started by lein ring server
+;; (defonce server
+;;   (fn [request]
+;;     ;; (log/start!)
+;;     (run-jetty
+;;      #'app {:port 8080
+;;             ;; blocks the thread until server ends (defaults to true)
+;;             :join? false})
+;;     ;; (log/info+ "Server started")
+;;     ))
 
 ;; clean the REPL - works only in clojure not in clojurescript
 ;; (map #(ns-unmap *ns* %) (keys (ns-interns *ns*)))
