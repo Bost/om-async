@@ -4,11 +4,13 @@
             [om-async.logger :as l]
             [om-async.utils :as u]
             [clojure.pprint :as pp] ; for debug purposes
+            [onelog.core :as log]
             )
   (:use [korma.db]
         [korma.core]
         ))
 
+;; (log/start!)
 (def src "db.clj")
 
 (defn db-connect [dbase]
@@ -48,6 +50,7 @@
   ;; It pops up here just like that!"
   [{:keys [dbase table rows-displayed] :as params}]
   ;; (l/infod src fn-name "params" params)
+  ;; (log/info+ params)
   (defdb db (mysql (db-connect dbase)))
   (let [r (select table
                   (limit (calc-row-limit rows-displayed)))]

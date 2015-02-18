@@ -60,7 +60,8 @@
                                         })]
                     (l/infod src fn-name "p" p)
                     (otdom/td {:id (str idx-table "-" idx-row "-" column "-" td-val)
-                               :class (if (my-get-in app
+                               :class (if ;;false
+                                          (my-get-in app
                                                      (into
                                                       (into [:data idx-table] [:data idx-row column])
                                                       [:active]))

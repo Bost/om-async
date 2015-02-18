@@ -89,6 +89,28 @@
               (om/set-state! owner table-ktirj-active active)
               )))))))
 
+(defn activate-on-complete
+  "TODO find the clicked-on-value in response and assoc-in {:active true}"
+  [response ks-data idx-table active]
+  (let [fn-name "activate-:on-complete"]
+    (l/infod src fn-name "response" response)
+    ;; TODO server.clj add {:status :ok} to response; onclick.cljs extract {:status :ok} from response
+    (let [ro (t/extend-all response)
+          ;; x (into [:data idx-table] ks-data)
+          ;; a (into x [:active])
+          ;; v (into x [:val])
+          ;; rn (assoc-in ro x {:active (not active)})
+          tables (into [] (keys (get-in ro [:data])))
+          ]
+      (.log js/console (pr-str "tables: " tables))
+      (doseq [t tables]
+        (let [rows (into [] (keys (get-in ro [:data t :data])))]
+          ;; (.log js/console (pr-str "table: " t "; rows: " rows))
+          (doseq [r rows]
+            (.log js/console (pr-str t ": " r)))
+          ))
+      ro)))
+
 (l/defnd activate
   [{:keys [app dbase ks-data idx-table idx-row column elem-val] :as params} owner]
   ;; TODO (js* "debugger;") seems to cause LightTable freeze
@@ -108,29 +130,11 @@
       :url (str "select/" column)
       ;; value under :data can't be a just a "value". (TODO see if only hash-map is accepted)
       :data {:request {:dbase dbase :column column :value elem-val}}
-      :on-complete (fn [response]
-                     ;; change application state; use with get-in
-                     (om/transact! app [] (fn [_]
-                                            ;; (println "transacting...")
-                                            ;; (.log js/console (pr-str "response" response))
-                                            (let [fn-name "activate-:on-complete"]
-                                              (l/infod src fn-name "response" response)
-                                              ;; TODO server.clj add {:status :ok} to response; onclick.cljs extract {:status :ok} from response
-                                              (let [re (t/extend-all response)
-                                                    x (into [:data idx-table] ks-data)
-                                                    y (into x [:active])
-                                                    r (assoc-in re x {:active (not active)})
-                                                    ]
-                                                ;; TODO find all occurences of a given val and call the assoc-in
-                                                (.log js/console (pr-str "ks-data: " ks-data))
-                                                (.log js/console (pr-str "idx-table: " idx-table))
-                                                (.log js/console (pr-str "(get-in re " x "): " (get-in re x)))
-                                                (.log js/console (pr-str "(get-in r " x "): " (get-in r x)))
-                                                (.log js/console (pr-str "(get-in r " y "): " (get-in r y)))
-                                                r
-                                                ))))
-                     )})
-    ))
+      :on-complete
+      (fn [response]
+        (om/transact! app []
+                      (fn [_]
+                        (activate-on-complete response ks-data idx-table active))))})))
 
 (l/defnd toggle-dbase
   ;; "TODO Should use the displayed-elems fn work a la Display +N / -N tables
