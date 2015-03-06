@@ -1,7 +1,11 @@
 (ns om-async.server
   (:require [ring.util.response :refer [file-response]]
+            ;; the ring adapter is a configurable layer between the web app and the web server
+            ;; possible options: 1. jetty 2. servlets 3. server running outside of the JVM
             [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.edn :refer [wrap-edn-params]]
+
+            ;; compojure is used for dispatching
             [compojure.core :refer [defroutes GET PUT]]
             [compojure.route :as route]
             [compojure.handler :as handler]
@@ -54,7 +58,7 @@
 (def app
   (wrap-edn-params app-routes))
 
-;; comment this out if started by lein ring server
+;; comment this out if the server is started by lein ring server
 ;; (defonce server
 ;;   (fn [request]
 ;;     ;; (log/start!)
