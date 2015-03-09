@@ -52,6 +52,7 @@
             ;; [lein-figwheel "0.2.3-SNAPSHOT"]
             [com.keminglabs/cljx "0.5.0"]
             [cider/cider-nrepl "0.9.0-SNAPSHOT"]
+            [refactor-nrepl "0.3.0-SNAPSHOT"]
             ]
   :source-paths ["src/clj" "src/cljs"]
   :resource-paths ["resources"]
