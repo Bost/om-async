@@ -157,7 +157,8 @@
            dbname (get-in dbase [:dbase])
            dbdata (get-in dbase [:data])
            dbidx  (get-in dbase [:idx])
-           dbdisplayed (displayed? owner [(:idx dbase) :display])
+           dbidx-number (:idx dbase)
+           dbdisplayed (displayed? owner [dbidx-number :display])
            dbbuttons [
                      ;; max 5 elems displayed per dbase on the client
                      {:name "more-tables" :fnc inc :exec-fnc? (fn [cnt-elems] (< cnt-elems 5))}
@@ -182,7 +183,8 @@
                               tname (get-in table [:table])
                               tdata (get-in table [:data])
                               tidx  (get-in table [:idx])
-                              tdisplayed (displayed? owner [(:idx table) :display])
+                              tidx-number (:idx table)
+                              tdisplayed (displayed? owner [tidx-number :display])
                               rows-displayed (count tdata)
 
                               header (into [] (keys (:row0 tdata)))
@@ -191,14 +193,14 @@
                                        {:name "more-rows" :fnc inc :exec-fnc? (fn [cnt-elems] (< cnt-elems 5))}
                                        {:name "less-rows" :fnc dec :exec-fnc? (fn [cnt-elems] (> cnt-elems 0))}]
                               ]
-                          (otdom/div {:id (str "div-" (name (:idx table)))
+                          (otdom/div {:id (str "div-" (name tidx-number))
                                       ;;:class (if (om/get-state owner :active) "active" nil)
                                       }
-                                     (str tname "-" (name (:idx table)))
+                                     (str tname "-" (name tidx-number))
                                      (otdom/button {:onClick (fn [e]
                                                                (oc/toggle-table {:owner owner :idx (:idx @table)}))}
                                                    (str "toggle-table: " tname "; displayed: " tdisplayed))
-                                     (otdom/span {:id (str "span-table-" (name (:idx table)))}
+                                     (otdom/span {:id (str "span-table-" (name tidx-number))}
                                                  (for [tbutton tbuttons]
                                                    (otdom/button {:ref "foo"
                                                                   :onClick (fn [e]
@@ -219,8 +221,8 @@
                                                           :dbase dbname
                                                           :header header
                                                           :rows tdata
-                                                          :table-id (name (:idx table))
-                                                          :idx-table (:idx table)
+                                                          :table-id (name tidx-number)
+                                                          :idx-table tidx-number
                                                           }))
                                      ))))))))))
 
