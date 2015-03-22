@@ -166,65 +166,62 @@
            ]
        ;; TODO iterate over all dbases; make a div elem for every dbase
        ;; this div should have {:class (if (om/get-state owner :active) "active" nil)}
-       (otdom/div
-        {:id (str "div-" (name dbidx))} ;; TODO use indexes for :dbase0, :dbase1
-        (str dbname "-" (name dbidx))
-        (otdom/button {:onClick (fn [e]
-                                  (oc/toggle-dbase {:owner owner :idx dbidx}))}
-                      (str "toggle-dbase: " dbname "; displayed: " dbdisplayed))
-        (for [dbbutton dbbuttons]
-          (otdom/button {:ref "foo"
-                         :onClick (fn [e] (oc/displayed-tables))}
-                        (:name dbbutton)))
-        (otdom/span {:id (str "span-dbase-" dbname)}
-                    (if dbdisplayed
-                      (for [table-key (keys dbdata)]
-                        (let [table (table-key dbdata)
-                              tname (get-in table [:table])
-                              tdata (get-in table [:data])
-                              tidx  (get-in table [:idx])
-                              tidx-number (:idx table)
-                              tdisplayed (displayed? owner [tidx-number :display])
-                              rows-displayed (count tdata)
+       (otdom/div {:id (str "div-" (name dbidx))} ;; TODO use indexes for :dbase0, :dbase1
+                  (str dbname "-" (name dbidx))
+                  (otdom/button {:onClick (fn [e]
+                                            (oc/toggle-dbase {:owner owner :idx dbidx}))}
+                                (str "toggle-dbase: " dbname "; displayed: " dbdisplayed))
+                  (for [dbbutton dbbuttons]
+                    (otdom/button {:ref "foo"
+                                   :onClick (fn [e] (oc/displayed-tables))}
+                                  (:name dbbutton)))
+                  (otdom/span {:id (str "span-dbase-" dbname)}
+                              (if dbdisplayed
+                                (for [table-key (keys dbdata)]
+                                  (let [table (table-key dbdata)
+                                        tname (get-in table [:table])
+                                        tdata (get-in table [:data])
+                                        tidx  (get-in table [:idx])
+                                        tidx-number (:idx table)
+                                        tdisplayed (displayed? owner [tidx-number :display])
+                                        rows-displayed (count tdata)
 
-                              header (into [] (keys (:row0 tdata)))
-                              tbuttons [
-                                       ;; max 5 rows displayed per table on the client
-                                       {:name "more-rows" :fnc inc :exec-fnc? (fn [cnt-elems] (< cnt-elems 5))}
-                                       {:name "less-rows" :fnc dec :exec-fnc? (fn [cnt-elems] (> cnt-elems 0))}]
-                              ]
-                          (otdom/div {:id (str "div-" (name tidx-number))
-                                      ;;:class (if (om/get-state owner :active) "active" nil)
-                                      }
-                                     (str tname "-" (name tidx-number))
-                                     (otdom/button {:onClick (fn [e]
-                                                               (oc/toggle-table {:owner owner :idx (:idx @table)}))}
-                                                   (str "toggle-table: " tname "; displayed: " tdisplayed))
-                                     (otdom/span {:id (str "span-table-" (name tidx-number))}
-                                                 (for [tbutton tbuttons]
-                                                   (otdom/button {:ref "foo"
-                                                                  :onClick (fn [e]
-                                                                             (oc/displayed-rows app
-                                                                                                {:owner owner
-                                                                                                 :dbase dbname
-                                                                                                 :table (:table @table)
-                                                                                                 :rows-displayed rows-displayed
-                                                                                                 :idx (:idx @table)
-                                                                                                 :fnc (:fnc tbutton)
-                                                                                                 :exec-fnc? (:exec-fnc? tbutton)
-                                                                                                 }))}
-                                                                 (:name tbutton)))
-                                                 (str "displayed / all: " rows-displayed "/" (:row-count table)))
+                                        header (into [] (keys (:row0 tdata)))
+                                        tbuttons [
+                                                  ;; max 5 rows displayed per table on the client
+                                                  {:name "more-rows" :fnc inc :exec-fnc? (fn [cnt-elems] (< cnt-elems 5))}
+                                                  {:name "less-rows" :fnc dec :exec-fnc? (fn [cnt-elems] (> cnt-elems 0))}]
+                                        ]
+                                    (otdom/div {:id (str "div-" (name tidx-number))}
+                                               (str tname "-" (name tidx-number))
+                                               (otdom/button {:onClick (fn [e]
+                                                                         (oc/toggle-table {:owner owner :idx (:idx @table)}))}
+                                                             (str "toggle-table: " tname "; displayed: " tdisplayed))
+                                               (otdom/span {:id (str "span-table-" (name tidx-number))}
+                                                           (for [tbutton tbuttons]
+                                                             (otdom/button {:ref "foo"
+                                                                            :onClick (fn [e]
+                                                                                       (oc/displayed-rows app
+                                                                                                          {:owner owner
+                                                                                                           :dbase dbname
+                                                                                                           :table (:table @table)
+                                                                                                           :rows-displayed rows-displayed
+                                                                                                           :idx (:idx @table)
+                                                                                                           :fnc (:fnc tbutton)
+                                                                                                           :exec-fnc? (:exec-fnc? tbutton)
+                                                                                                           }))}
+                                                                           (:name tbutton)))
+                                                           (str "displayed / all: " rows-displayed "/" (:row-count table)))
 
-                                     (if tdisplayed
-                                       (om/build table-c {:app app
-                                                          :dbase dbname
-                                                          :header header
-                                                          :rows tdata
-                                                          :table-id (name tidx-number)
-                                                          :idx-table tidx-number
-                                                          }))
-                                     ))))))))))
+                                               (if tdisplayed
+                                                 (om/build table-c {:app app
+                                                                    :dbase dbname
+                                                                    :header header
+                                                                    :rows tdata
+                                                                    :table-id (name tidx-number)
+                                                                    :idx-table tidx-number
+                                                                    }))
+                                               ))))))))))
 
 (defcomponent render-multi [app owner]
   (render-state [_ state]
