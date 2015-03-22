@@ -34,6 +34,7 @@
                   "toggle-table"
                   "toggle-dbase"
                   "toggle-react-compoments"
+                  "displayed-tables"
 ;;                   "displayed-rows"
 ;;                   "edn-xhr"
 ;;                   "activate-:on-complete"

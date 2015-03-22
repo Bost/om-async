@@ -185,6 +185,9 @@
 (defn displayed-elems [elem add-remove-N]
   nil)
 
+(l/defnd displayed-tables []
+  (l/infod src fn-name "uhu" "uhu"))
+
 ;; "Display +N / -N rows"; TODO better name for idx (values like :table0)
 (l/defnd displayed-rows
   [app {:keys [owner dbase table rows-displayed idx fnc exec-fnc?] :as params}]
