@@ -2,7 +2,7 @@
   ;; TODO find a logger for server (clj) and client (cljs)
   (:require [om-async.utils :as u]
             ;; [taoensso.timbre :as logger]
-            [onelog.core :as log]
+            ;; [onelog.core :as log]
             )
 ;;   (:use [clojure.walk :as walk])
    )
@@ -25,6 +25,7 @@
                   "ks-other"
                   "render"
                   "get-display"
+                  "displayed?"
                   "table-sorter"
                   "new-to-old"
 ;;                   "view-:on-complete"
@@ -91,7 +92,7 @@
     (if fns
       (if (u/in? fns fn-name)
         (do
-          (log/info+ "huh")
+          ;; (log/info+ "huhu") - see the project.clj; the onelog problem
           (println
            (str src "; " fn-name "; "
                 "(def " def-name " " (pr-str def-val) ")")))))

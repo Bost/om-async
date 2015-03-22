@@ -102,13 +102,12 @@
           ;; rn (assoc-in ro x {:active (not active)})
           tables (into [] (keys (get-in ro [:data])))
           ]
-      (.log js/console (pr-str "tables: " tables))
-      (doseq [t tables]
-        (let [rows (into [] (keys (get-in ro [:data t :data])))]
-          ;; (.log js/console (pr-str "table: " t "; rows: " rows))
-          (doseq [r rows]
-            (.log js/console (pr-str t ": " r)))
-          ))
+      ;; (doseq [t tables]
+      ;;   (let [rows (into [] (keys (get-in ro [:data t :data])))]
+      ;;     ;; (.log js/console (pr-str "table: " t "; rows: " rows))
+      ;;     (doseq [r rows]
+      ;;       (.log js/console (pr-str t ": " r)))
+      ;;     ))
       ro)))
 
 (l/defnd activate
@@ -140,15 +139,15 @@
   ;; "TODO Should use the displayed-elems fn work a la Display +N / -N tables
   ;;  Hide table component from web page"
   [{:keys [owner idx] :as params}]
-  (l/infod src fn-name "params" params)
+  ;; (l/infod src fn-name "params" params)
   (let [korks [idx :display]
         displayed-state (om/get-state owner korks)
         ;; TODO proper initialisation of table displayed state
         ]
-    (l/infod src fn-name "displayed-state" displayed-state)
+    ;; (l/infod src fn-name "displayed-state" displayed-state)
     (let [
         displayed (if (nil? displayed-state) true displayed-state)]
-    (l/infod src fn-name "displayed" displayed)
+    ;; (l/infod src fn-name "displayed" displayed)
     (om/set-state! owner korks (not displayed)))))
 
 ;; (into {:a 1 :b 2} {:a 2 :c 3})
@@ -161,10 +160,10 @@
         displayed-state (om/get-state owner korks)
         ;; TODO proper initialisation of table displayed state
         ]
-    (l/infod src fn-name "displayed-state" displayed-state)
+    ;; (l/infod src fn-name "displayed-state" displayed-state)
     (let [
         displayed (if (nil? displayed-state) true displayed-state)]
-    (l/infod src fn-name "displayed" displayed)
+    ;; (l/infod src fn-name "displayed" displayed)
     (om/set-state! owner korks (not displayed)))))
 
 ;; (w/walk #(* 2 %) #(apply + %) [1 2 3 4 5])
