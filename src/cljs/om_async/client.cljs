@@ -166,7 +166,7 @@
        (otdom/button
         {:onClick (fn [e]
                     (oc/toggle-table {:owner owner :idx (:idx @table)}))}
-        (str "toggle-table: " tname "; displayed: " displayed))
+        (str "toggle-table: " tname))
        (otdom/span {:id (str "span-table-" (name tidx-number))}
                    (for [tbutton tbuttons]
                      (otdom/button
@@ -217,7 +217,7 @@
                   ;; (str dbname "-" (name dbidx))
                   (otdom/button {:onClick (fn [e]
                                             (oc/toggle-dbase {:owner owner :idx dbidx}))}
-                                (str "toggle-dbase: " dbname "; displayed: " displayed))
+                                (str "toggle-dbase: " dbname))
                   (for [dbbutton dbbuttons]
                     (otdom/button {:ref "foo"
                                    :onClick (fn [e] (oc/displayed-tables))}
@@ -241,24 +241,33 @@
   (will-mount [_]
               (oc/edn-xhr
                {:method :put
-                :url "fetch"
+                :url "fetch-dbases"
                 :data
-                {:name :select-rows-from
-                 :data {:dbase0 {:name "employees"
-                                 :data {
-                                        :table0 {:name "employees"
-                                                 :data {:rows-displayed 2}}
-;;                                         :table1 {:name "departments"
-;;                                                  :data {:rows-displayed 2}}
-;;                                         :table2 {:name "salaries"
-;;                                                  :data {:rows-displayed 2}}
-                                        }}}}
+                {:name :show-tables-from
+                 :data {
+                        :dbase0 {:name "employees"
+                                 :data {:rows-displayed 3}}
+                        :dbase1 {:name "some-dbase-name"
+                                 :data {:rows-displayed 5}}}}
 
-;;                 {:name :show-tables-from
-;;                  :data {:dbase0 {:name "employees"
-;;                                  :data {
-;;                                         :table0 {:name "all-tables"
-;;                                                  :data {:rows-displayed 3}}}}}}
+                ;; :url "fetch"
+                ;; :data
+                ;; {:name :select-rows-from
+                ;;  :data {:dbase0 {:name "employees"
+                ;;                  :data {
+                ;;                         :table0 {:name "employees"
+                ;;                                  :data {:rows-displayed 2}}
+                ;;                         }}}}
+                ;; {:name :select-rows-from
+                ;;  :data {:dbase0 {:name "employees"
+                ;;                  :data {
+                ;;                         :table0 {:name "employees"
+                ;;                                  :data {:rows-displayed 2}}
+                ;;                         :table1 {:name "departments"
+                ;;                                  :data {:rows-displayed 2}}
+                ;;                         :table2 {:name "salaries"
+                ;;                                  :data {:rows-displayed 2}}
+                ;;                         }}}}
 
 ;;                 {:name :show-tables-with-data-from
 ;;                  :data {:dbase0 {:name "employees"
@@ -290,27 +299,3 @@
                   )})
 
 (repl/connect "http://localhost:9000/repl")
-
-(println "------------------------------------------------")
-
-;; (fw/start {
-;;   ;; configure a websocket url if yor are using your own server
-;;   ;; :websocket-url "ws://localhost:3449/figwheel-ws"
-
-;;   ;; optional callback
-;;   :on-jsload (fn [] (print "reloaded "))
-
-;;   ;; The heads up display is enabled by default
-;;   ;; to disable it:
-;;   ;; :heads-up-display false
-
-;;   ;; when the compiler emits warnings figwheel
-;;   ;; blocks the loading of files.
-;;   ;; To disable this behavior:
-;;   ;; :load-warninged-code true
-
-;;   ;; if figwheel is watching more than one build
-;;   ;; it can be helpful to specify a build id for
-;;   ;; the client to focus on
-;;   ;; :build-id "example"
-;; })

@@ -52,6 +52,7 @@
 ;;                    "manipulate-rows"
 ;;                    "get-params-for-fetch"
 ;;                    "process-data-with-column-value"
+                   "fetch-dbases"
 ;;                    "fetch"
 ;;                    "request"
 
@@ -66,6 +67,7 @@
                    ]
    :server.clj [
 ;;                 "routes-PUT-select-id"
+;;                 "routes-PUT-fetch-dbases"
 ;;                 "routes-PUT-fetch"
                 ]
    :utils [

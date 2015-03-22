@@ -220,6 +220,17 @@
     (l/infod src fn-name "r" r)
     r))
 
+(l/defnd get-dbases
+  [fetch-fn manipulator-fn params]
+  (println src fn-name "fetch-fn" fetch-fn)
+  (println src fn-name "manipulator-fn" manipulator-fn)
+  (println src fn-name "params" params)
+  (let [data (into [] (map fetch-fn params))]
+    (println src fn-name "data" data)
+    (let [r (manipulator-fn params data)]
+      (println src fn-name "r" r)
+      r)))
+
 (l/defnd get-data
   [fetch-fn manipulator-fn params]
   ;; (l/infod src fn-name "fetch-fn" fetch-fn)
@@ -244,9 +255,24 @@
     (let [r (get-data fetch-fn manipulator-fn params)]
       r)))
 
+(l/defnd fetch-dbases
+  [edn-params]
+  (let [
+        kw-fetch-fn (:name edn-params)
+        fetch-fn       (kw-fetch-fn fetch-fns)
+        manipulator-fn (kw-fetch-fn manipulator-fns)
+        ;; params (get-params-for-fetch edn-params)
+        params [{:dbase "employees", :rows-displayed 4, :idx 0}]
+        ]
+    (println src fn-name "fetch-fn" fetch-fn)
+    (println src fn-name "manipulator-fn" manipulator-fn)
+    (println src fn-name "params" params)
+    (let [r (get-dbases fetch-fn manipulator-fn params)
+          ]
+      r)))
+
 (l/defnd fetch
   [edn-params]
-  ;; (l/infod src fn-name "new-edn-params" new-edn-params)
   (let [;; TODO get the content of N-th key? this could be done better
         kw-fetch-fn (:name edn-params)
 

@@ -31,6 +31,15 @@
        []
        (file-response "public/html/index.html" {:root "resources"}))
 
+  (PUT "/fetch-dbases"
+       {params :params edn-params :edn-params}
+       (let [fn-name "routes-PUT-fetch-dbases"]
+         (l/infod src fn-name "edn-params" edn-params)
+         (l/infod src fn-name "params" params)
+         (let [data (trans/fetch-dbases edn-params)]
+           (l/infod src fn-name "data" data)
+           (response data))))
+
   (PUT "/fetch"
        {params :params edn-params :edn-params}
        (let [fn-name "routes-PUT-fetch"]
