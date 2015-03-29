@@ -18,6 +18,7 @@
                  ;; use React with Add-Ons
                  ;; [cljsjs/react-with-addons "0.12.2-4"]
 
+                 [org.clojure/tools.nrepl "0.2.7"]
                  [ring/ring "1.3.2"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [compojure "1.3.1"]
