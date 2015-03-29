@@ -40,7 +40,7 @@
                 (:name e)
                 ;; e
                 nil))
-        r (into [] (remove nil? ewc))]
+        r (vec (remove nil? ewc))]
     (l/infod src fn-name "r " r)
     r))
 

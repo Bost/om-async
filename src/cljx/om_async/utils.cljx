@@ -53,14 +53,14 @@
 
 (defn to-korks [f values]
   (let [r (map-indexed (fn [idx value] {(f idx) value}) values)
-        rv (into [] r)]
+        rv (vec r)]
     (apply merge rv)))
 
 (defn convert-to-korks-orig [f1 f2 vals-vec]
   (let [fn-name "convert-to-korks-orig"]
     ;; (l/infod src fn-name "vals-vec" vals-vec)
     (let [xs (map (fn [x] (to-korks f1 x)) vals-vec)
-          xs-seq (into [] xs)
+          xs-seq (vec xs)
           ys (to-korks f2 xs-seq)]
       ;; (l/infod src fn-name "xs" xs)
       ;; (l/infod src fn-name "xs-seq" xs-seq)
@@ -71,7 +71,7 @@
   (let [fn-name "convert-to-korks"]
     ;; (l/infod src fn-name "vals-vec" vals-vec)
     (let [xs (map (fn [x] (to-korks f1 x)) vals-vec)
-          xs-seq (into [] xs)
+          xs-seq (vec xs)
           ;; ys (to-korks f2 xs-seq)
           ]
       ;; (l/infod src fn-name "xs" xs)
@@ -94,7 +94,7 @@
   (let [fn-name "convert-to-korks"]
     ;; (l/infod src fn-name "vals-vec" vals-vec)
     (let [xs (map (fn [x] (to-korks f1 x)) vals-vec)
-          xs-seq (into [] xs)
+          xs-seq (vec xs)
           ys (to-korks f2 xs-seq)
           zs {f3 ys}]
       ;; (l/infod src fn-name "xs" xs)

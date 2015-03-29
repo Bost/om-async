@@ -154,7 +154,7 @@
           displayed (displayed? owner [tidx-number :display])
           rows-displayed (count tdata)
 
-          header (into [] (keys (:row0 tdata)))
+          header (vec (keys (:row0 tdata)))
           tbuttons [
                     ;; max 5 rows displayed per table on the client
                     {:name "more-rows" :fnc inc :exec-fnc? (fn [cnt-elems] (< cnt-elems 5))}

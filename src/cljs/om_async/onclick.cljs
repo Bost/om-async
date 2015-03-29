@@ -57,15 +57,13 @@
 (defn nth-korks
   "Returns [[:data elem0 :emp_no] [:data elem1 :emp_no] [:data elem2 :emp_no]]"
   [vec-of-elems column]
-  (into []
-        (map #(into [:data] [% column]) vec-of-elems)))
+  (vec (map #(into [:data] [% column]) vec-of-elems)))
 
 (defn all-idx-table-kws
   "Returns [[:row0 :row1] [:row0 :row1] [:row0 :row1]]"
   [app]
-  (into []
-        (for [i (map :data app)]
-          (into [] (keys i)))))
+  (vec (for [i (map :data app)]
+         (vec (keys i)))))
 
 (defn korks-all-tables
   "Returns [
@@ -74,7 +72,7 @@
     [[:data :row0 :emp_no] [:data :row1 :emp_no]]  ;; for :table2
   ]"
   [app column]
-  (into [] (map #(nth-korks % column) (all-idx-table-kws app))))
+  (vec (map #(nth-korks % column) (all-idx-table-kws app))))
 
 (defn toggle-activate
   [app owner column elem-val active]
@@ -100,10 +98,10 @@
           ;; a (into x [:active])
           ;; v (into x [:val])
           ;; rn (assoc-in ro x {:active (not active)})
-          tables (into [] (keys (get-in ro [:data])))
+          tables (vec (keys (get-in ro [:data])))
           ]
       ;; (doseq [t tables]
-      ;;   (let [rows (into [] (keys (get-in ro [:data t :data])))]
+      ;;   (let [rows (vec (keys (get-in ro [:data t :data])))]
       ;;     ;; (.log js/console (pr-str "table: " t "; rows: " rows))
       ;;     (doseq [r rows]
       ;;       (.log js/console (pr-str t ": " r)))

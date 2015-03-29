@@ -17,9 +17,9 @@
   (l/info src fn-name (str "(type v): " (type v)))
   (println (str "(type v): " (type v)))
   ;;(if (instance? java.util.Date v)
-    (into [] (map str
-                  (into [] (vals v))))
-    ;; v)
+  (vec (map str
+            (vec (vals v))))
+  ;; v)
   )
 
 (l/defnd table-vals [data]
@@ -34,7 +34,7 @@
 (l/defnd encode-entity [idx prefix name vals]
   {(u/kw-prefix prefix idx)
    ;; TODO don't transfer a vector containing a single name
-   {:name [name] :vals (into [] vals)}})
+   {:name [name] :vals (vec vals)}})
 
 (def built-in-formatter (tf/formatters :mysql))
 
@@ -88,7 +88,7 @@
   (let [
         all-tables (table-vals (db/show-tables-from params))
         list-tables (map first all-tables)
-        tables (into [] list-tables)
+        tables (vec list-tables)
         count-tables (count tables)
         ]
 ;;     (l/infod src fn-name "all-tables" all-tables)
@@ -101,7 +101,7 @@
           ;; (map #(process-select-rows-from
           ;;        {:dbase dbase :table %1 :rows-displayed 2 :idx (u/kw-table %2)})
           ;;      tables
-          ;;      (into [] (range count-tables)))
+          ;;      (vec (range count-tables)))
           ]
       (l/infod src fn-name "r" r)
       r)))
@@ -154,8 +154,8 @@
                              {:data (manipulate-rows p [d])
                               :row-count (db/row-count (:table p))}))
                     params data))
-        rvec (into [] rlist)
-        ks (into [] (map u/kw-table (range (count rvec))))
+        rvec (vec rlist)
+        ks (vec (map u/kw-table (range (count rvec))))
         r (zipmap ks rvec)
         ;; TODO extend-table must be done in the client.cljs
         ]
@@ -174,7 +174,7 @@
   (m-select-rows-from params data))
 
 (l/defnd m-request [p]
-  (into [] p))
+  (vec p))
 
 (def manipulator-fns {:select-rows-from            m-select-rows-from
                       :show-tables-from            m-show-tables-from
@@ -184,39 +184,39 @@
 
 (l/defnd get-params-for-fetch [xhr-data]
   (l/infod src fn-name "xhr-data" xhr-data)
-  (into []
-        (for [kw-dbase (keys (get-in xhr-data [:data]))
-              kw-table (keys (get-in xhr-data [:data kw-dbase :data]))]
-          (let [
-                ;;idx-kw-dbase idx-kw-table
-                ;;kw-dbase           (nth (keys (get-in xhr-data [:data])) idx-kw-dbase)
-                ;;idx-dbase          (subs (name kw-dbase) (count "dbase") (count (name kw-dbase)))
-                ;;kw-table           (nth (keys (get-in xhr-data [:data kw-dbase :data])) idx-kw-table)
-                ;;idx-table          (subs (name kw-table) (count "table") (count (name kw-table)))
+  (vec
+   (for [kw-dbase (keys (get-in xhr-data [:data]))
+         kw-table (keys (get-in xhr-data [:data kw-dbase :data]))]
+     (let [
+           ;;idx-kw-dbase idx-kw-table
+           ;;kw-dbase           (nth (keys (get-in xhr-data [:data])) idx-kw-dbase)
+           ;;idx-dbase          (subs (name kw-dbase) (count "dbase") (count (name kw-dbase)))
+           ;;kw-table           (nth (keys (get-in xhr-data [:data kw-dbase :data])) idx-kw-table)
+           ;;idx-table          (subs (name kw-table) (count "table") (count (name kw-table)))
 
-                get-table-name     [:data kw-dbase :data kw-table :name]
-                table-name         (get-in xhr-data get-table-name)
+           get-table-name     [:data kw-dbase :data kw-table :name]
+           table-name         (get-in xhr-data get-table-name)
 
-                get-dbase-name     [:data kw-dbase :name]
-                dbase-name         (get-in xhr-data get-dbase-name)
+           get-dbase-name     [:data kw-dbase :name]
+           dbase-name         (get-in xhr-data get-dbase-name)
 
-                get-rows-displayed [:data kw-dbase :data kw-table :data :rows-displayed]
-                rows-displayed     (get-in xhr-data get-rows-displayed)
-                r {:dbase dbase-name :table table-name :rows-displayed rows-displayed :idx kw-table}
-                ]
-            ;; (l/infod src fn-name "kw-dbase" kw-dbase)
-            ;; (l/infod src fn-name "idx-dbase" idx-dbase)
-            ;; (l/infod src fn-name "kw-table" kw-table)
-            ;; (l/infod src fn-name "idx-table" idx-table)
-            (l/infod src fn-name "r" r)
-            r)
-          )))
+           get-rows-displayed [:data kw-dbase :data kw-table :data :rows-displayed]
+           rows-displayed     (get-in xhr-data get-rows-displayed)
+           r {:dbase dbase-name :table table-name :rows-displayed rows-displayed :idx kw-table}
+           ]
+       ;; (l/infod src fn-name "kw-dbase" kw-dbase)
+       ;; (l/infod src fn-name "idx-dbase" idx-dbase)
+       ;; (l/infod src fn-name "kw-table" kw-table)
+       ;; (l/infod src fn-name "idx-table" idx-table)
+       (l/infod src fn-name "r" r)
+       r)
+     )))
 
 (l/defnd get-params-for-select
   [{:keys [dbase entities column value] :as params}]
   (let [hm (for [[i e] (map-indexed vector entities)]
             {:dbase dbase :table e :rows-displayed 2 :idx (u/kw-table i) :column column :value value})
-        r (into [] hm)]
+        r (vec hm)]
     (l/infod src fn-name "r" r)
     r))
 
@@ -225,7 +225,7 @@
   (println src fn-name "fetch-fn" fetch-fn)
   (println src fn-name "manipulator-fn" manipulator-fn)
   (println src fn-name "params" params)
-  (let [data (into [] (map fetch-fn params))]
+  (let [data (vec (map fetch-fn params))]
     (println src fn-name "data" data)
     (let [r (manipulator-fn params data)]
       (println src fn-name "r" r)
@@ -236,7 +236,7 @@
   ;; (l/infod src fn-name "fetch-fn" fetch-fn)
   ;; (l/infod src fn-name "manipulator-fn" manipulator-fn)
   (l/infod src fn-name "params" params)
-  (let [data (into [] (map fetch-fn params))]
+  (let [data (vec (map fetch-fn params))]
     (l/infod src fn-name "data" data)
     (let [r (manipulator-fn params data)]
       (l/infod src fn-name "r" r)
