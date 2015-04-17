@@ -15,7 +15,7 @@ In LightTable: start http server by evaluating:
 
 #### B) Without LightTable:
 
-Overview:
+Overview: (painting: M-x artist-mode)
 ```
 
                                                                                     Web Browser
