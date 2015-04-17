@@ -40,7 +40,7 @@
         (on-complete (reader/read-string (.getResponseText xhr)))))
     (. xhr
       (send url (http-req-methods method) (when data (pr-str data))
-        #js {"Content-Type" "application/edn"}))))
+        #js {"Content-Type" "application/edn; charset=UTF-8"}))))
 
 (defn full-ks
   [{:keys [idx-table ks-data kw-active] :as params}]

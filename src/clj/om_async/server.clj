@@ -23,7 +23,7 @@
 (defn response [data & [status]]
   ;; (l/info src "response" (str "(pr-str data): " (pr-str data)))
   {:status (or status 200) ;; Status code: 200 'OK (The request was fulfilled)'
-   :headers {"Content-Type" "application/edn"}
+   :headers {"Content-Type" "application/edn; charset=UTF-8"}
    :body (pr-str data)})
 
 (defroutes app-routes
