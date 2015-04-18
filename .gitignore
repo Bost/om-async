@@ -19,6 +19,8 @@ logger.clj
 logger.cljs
 
 .repl-*/
+.idea/
+log/
 
 # editor backup files
 *~
